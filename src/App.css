@@ -1,11 +1,12 @@
 .page {
   position: relative;
   min-height: 100vh;
-  padding: clamp(2.5rem, 5vw, 6.5rem) clamp(1.8rem, 6vw, 8.5rem) 6rem;
+  padding: clamp(2.5rem, 5vw, 6.5rem) clamp(2rem, 6vw, 4rem) 6rem;
   display: flex;
   flex-direction: column;
   gap: clamp(2.5rem, 4vw, 4rem);
-  max-width: 1180px;
+  max-width: 1440px;
+  width: 100%;
   margin: 0 auto;
   z-index: 0;
 }
@@ -1300,10 +1301,11 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(30, 35, 48, 0.6);
   padding: 1.5rem;
+  width: 100%;
 }
 
 .trades-table {
-  min-width: 1000px;
+  min-width: 1200px;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1917,6 +1919,30 @@
   }
 }
 
+/* Large Desktop Screens - Even more spacious */
+@media (min-width: 1600px) {
+  .page {
+    max-width: 1600px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  .trades-table {
+    min-width: 1400px;
+  }
+  
+  .trades-table__header,
+  .trades-table__row {
+    grid-template-columns: 200px 180px 200px 1fr;
+    gap: 2.5rem;
+    padding: 1.8rem 2.5rem;
+  }
+  
+  .section {
+    padding: 3rem;
+  }
+}
+
 @keyframes haloPulse {
   0%,
   100% {
@@ -1928,3 +1954,4 @@
     opacity: 0.55;
   }
 }
+
