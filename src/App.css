@@ -1313,7 +1313,7 @@
 
 .trades-table__header {
   display: grid;
-  grid-template-columns: 180px 160px 180px 1fr;
+  grid-template-columns: 180px 160px 140px 1fr;
   gap: 2rem;
   padding: 1.5rem 2rem;
   background: rgba(45, 50, 65, 0.9);
@@ -1327,7 +1327,7 @@
 
 .trades-table__row {
   display: grid;
-  grid-template-columns: 180px 160px 180px 1fr;
+  grid-template-columns: 180px 160px 140px 1fr;
   gap: 2rem;
   padding: 1.5rem 2rem;
   background: rgba(45, 50, 65, 0.7);
@@ -1359,7 +1359,7 @@
 }
 
 .trades-table__cell--pnl {
-  min-width: 160px;
+  min-width: 140px;
 }
 
 .trades-table__cell--reason {
@@ -1933,7 +1933,7 @@
   
   .trades-table__header,
   .trades-table__row {
-    grid-template-columns: 200px 180px 200px 1fr;
+    grid-template-columns: 200px 180px 160px 1fr;
     gap: 2.5rem;
     padding: 1.8rem 2.5rem;
   }
