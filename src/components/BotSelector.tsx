@@ -36,6 +36,7 @@ export function BotSelector() {
     // scalper_core_MOM_1DK_V9_BinanceV7_Live -> Scalper Core MOM V9 (Live)
     return botId
       .replace(/_/g, ' ')
+      .replace(/(\b[a-z])/g, (char) => char.toUpperCase())
       .trim()
   }
 
