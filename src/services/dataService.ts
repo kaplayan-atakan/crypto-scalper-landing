@@ -163,36 +163,73 @@ export const dataService = {
     }
 
     try {
+      // Önce RPC fonksiyonunu dene
       const { data, error } = await supabase!.rpc('get_distinct_bots')
       if (error) throw error
-      return { data, error: null }
+      
+      const botList = data as BotInfo[] | null
+      console.log('✅ Bot list from RPC:', botList?.length || 0, 'bots')
+      return { data: botList, error: null }
     } catch (err) {
-      console.error('Error fetching bot list:', err)
+      console.warn('⚠️ RPC get_distinct_bots failed, using fallback method:', err)
+      
       // Fallback: closed_trades_simple'dan distinct project_id'leri çek
       try {
-        const { data, error } = await supabase!
+        // Tüm distinct project_id'leri al
+        const { data: allTrades, error } = await supabase!
           .from('closed_trades_simple')
           .select('project_id, created_at')
+          .not('project_id', 'is', null)
           .order('created_at', { ascending: false })
+          .limit(10000) // Performance için limit
         
         if (error) throw error
         
-        // Distinct project_id'leri ve son işlem zamanlarını bul
+        if (!allTrades || allTrades.length === 0) {
+          console.warn('⚠️ No trades found in closed_trades_simple')
+          return { data: [], error: null }
+        }
+        
+        // Her bot için en son trade zamanını bul (Map ile distinct)
         const botMap = new Map<string, string>()
-        data?.forEach((trade: { project_id: string; created_at: string }) => {
-          if (!botMap.has(trade.project_id)) {
-            botMap.set(trade.project_id, trade.created_at)
+        
+        allTrades.forEach((trade: { project_id: string; created_at: string }) => {
+          const projectId = trade.project_id?.trim()
+          
+          // Boş veya geçersiz project_id'leri atla
+          if (!projectId || projectId === '') return
+          
+          // İlk kez görülen bot veya daha yeni bir trade
+          if (!botMap.has(projectId)) {
+            botMap.set(projectId, trade.created_at)
+          } else {
+            const existingTime = new Date(botMap.get(projectId)!)
+            const currentTime = new Date(trade.created_at)
+            
+            // Daha yeni bir trade varsa güncelle
+            if (currentTime > existingTime) {
+              botMap.set(projectId, trade.created_at)
+            }
           }
         })
         
-        const bots: BotInfo[] = Array.from(botMap.entries()).map(([project_id, last_trade_at]) => ({
-          project_id,
-          last_trade_at
-        }))
+        // Map'i array'e çevir ve sırala (en yeni trade'e göre)
+        const bots: BotInfo[] = Array.from(botMap.entries())
+          .map(([project_id, last_trade_at]) => ({
+            project_id,
+            last_trade_at
+          }))
+          .sort((a, b) => {
+            // En son işlem yapan botları üstte göster
+            return new Date(b.last_trade_at).getTime() - new Date(a.last_trade_at).getTime()
+          })
+        
+        console.log('✅ Bot list from fallback:', bots.length, 'distinct bots found')
+        console.log('📋 Bots:', bots.map(b => b.project_id).join(', '))
         
         return { data: bots, error: null }
       } catch (fallbackErr) {
-        console.error('Fallback bot list failed:', fallbackErr)
+        console.error('❌ Fallback bot list failed:', fallbackErr)
         return { data: null, error: fallbackErr as Error }
       }
     }

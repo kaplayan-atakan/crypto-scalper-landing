@@ -67,6 +67,10 @@ export interface Database {
         }
         Returns: TradeMetrics[]
       }
+      get_distinct_bots: {
+        Args: Record<string, never>
+        Returns: BotInfo[]
+      }
     }
     Enums: {
       [_ in never]: never
