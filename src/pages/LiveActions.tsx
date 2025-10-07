@@ -6,7 +6,7 @@ import { SupActionsChart } from '../components/SupActionsChart';
 import '../App.css';
 
 const LiveActions = () => {
-  const { trades, metrics, loading, error, refresh, enableRealtime, setEnableRealtime } = useActions();
+  const { trades, metrics, loading, error, refresh, enableRealtime, setEnableRealtime, limit, setLimit, timeRange, setTimeRange } = useActions();
   
   // Stats hesaplama - gerçek verilerle
   const stats = useMemo(() => {
@@ -113,19 +113,59 @@ const LiveActions = () => {
               </div>
             </div>
             
-            {/* Realtime Toggle */}
+            {/* Realtime Toggle & Controls */}
             <div className="sb-realtime-toggle">
-              <label className="sb-toggle-label">
-                <input 
-                  type="checkbox" 
-                  checked={enableRealtime} 
-                  onChange={(e) => setEnableRealtime(e.target.checked)}
-                  className="sb-toggle-input"
-                />
-                <span className="sb-toggle-text">
-                  {enableRealtime ? '🟢 Realtime Aktif' : '⚪ Realtime Pasif'}
-                </span>
-              </label>
+              <div className="sb-control-group">
+                <label className="sb-toggle-label">
+                  <input 
+                    type="checkbox" 
+                    checked={enableRealtime} 
+                    onChange={(e) => setEnableRealtime(e.target.checked)}
+                    className="sb-toggle-input"
+                  />
+                  <span className="sb-toggle-text">
+                    {enableRealtime ? '🟢 Realtime Aktif' : '⚪ Realtime Pasif'}
+                  </span>
+                </label>
+                
+                <div className="sb-limit-selector">
+                  <label htmlFor="timerange-select" className="sb-limit-label">
+                    📅 Zaman Aralığı:
+                  </label>
+                  <select 
+                    id="timerange-select"
+                    value={timeRange} 
+                    onChange={(e) => setTimeRange(Number(e.target.value))}
+                    className="sb-limit-dropdown"
+                  >
+                    <option value={1}>Son 1 Saat</option>
+                    <option value={6}>Son 6 Saat</option>
+                    <option value={24}>Son 24 Saat</option>
+                    <option value={168}>Son 7 Gün</option>
+                    <option value={720}>Son 30 Gün</option>
+                  </select>
+                </div>
+                
+                <div className="sb-limit-selector">
+                  <label htmlFor="limit-select" className="sb-limit-label">
+                    📊 Veri Limiti:
+                  </label>
+                  <select 
+                    id="limit-select"
+                    value={limit} 
+                    onChange={(e) => setLimit(Number(e.target.value))}
+                    className="sb-limit-dropdown"
+                  >
+                    <option value={10}>10 Kayıt</option>
+                    <option value={25}>25 Kayıt</option>
+                    <option value={50}>50 Kayıt</option>
+                    <option value={100}>100 Kayıt</option>
+                    <option value={200}>200 Kayıt</option>
+                    <option value={500}>500 Kayıt</option>
+                  </select>
+                </div>
+              </div>
+              
               <button onClick={refresh} className="sb-refresh-btn" title="Verileri Yenile">
                 🔄 Yenile
               </button>
@@ -140,7 +180,13 @@ const LiveActions = () => {
           {/* Performance Chart */}
           <section className="section">
             <div className="section__badge">📊 PERFORMANS</div>
-            <h2 className="section__title">24 Saatlik Canlı Performans</h2>
+            <h2 className="section__title">
+              {timeRange === 1 && 'Son 1 Saatlik Canlı Performans'}
+              {timeRange === 6 && 'Son 6 Saatlik Canlı Performans'}
+              {timeRange === 24 && 'Son 24 Saatlik Canlı Performans'}
+              {timeRange === 168 && 'Son 7 Günlük Canlı Performans'}
+              {timeRange === 720 && 'Son 30 Günlük Canlı Performans'}
+            </h2>
             <div className="chart-card">
               <SupActionsChart data={metrics} height={300} />
             </div>

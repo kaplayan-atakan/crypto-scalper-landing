@@ -10,6 +10,10 @@ interface UseActionsReturn {
   refresh: () => void
   enableRealtime: boolean
   setEnableRealtime: (value: boolean) => void
+  limit: number
+  setLimit: (value: number) => void
+  timeRange: number
+  setTimeRange: (value: number) => void
 }
 
 export function useActions(autoRefresh = true): UseActionsReturn {
@@ -18,6 +22,8 @@ export function useActions(autoRefresh = true): UseActionsReturn {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [enableRealtime, setEnableRealtime] = useState(autoRefresh)
+  const [limit, setLimit] = useState(50)
+  const [timeRange, setTimeRange] = useState(24) // hours
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -25,8 +31,8 @@ export function useActions(autoRefresh = true): UseActionsReturn {
     
     try {
       const [tradesResult, metricsResult] = await Promise.all([
-        dataService.getRecentTrades(),
-        dataService.getPerformanceMetrics()
+        dataService.getRecentTrades(limit, timeRange),
+        dataService.getPerformanceMetrics(timeRange)
       ])
       
       if (tradesResult.error) throw tradesResult.error
@@ -40,7 +46,7 @@ export function useActions(autoRefresh = true): UseActionsReturn {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [limit, timeRange])
 
   useEffect(() => {
     fetchData()
@@ -49,7 +55,7 @@ export function useActions(autoRefresh = true): UseActionsReturn {
     
     const subscription = dataService.subscribeToTrades((payload) => {
       if (payload.eventType === 'INSERT') {
-        setTrades(prev => [payload.new, ...prev].slice(0, 50))
+        setTrades(prev => [payload.new, ...prev].slice(0, limit))
       }
     })
     
@@ -65,6 +71,10 @@ export function useActions(autoRefresh = true): UseActionsReturn {
     error,
     refresh: fetchData,
     enableRealtime,
-    setEnableRealtime
+    setEnableRealtime,
+    limit,
+    setLimit,
+    timeRange,
+    setTimeRange
   }
 }

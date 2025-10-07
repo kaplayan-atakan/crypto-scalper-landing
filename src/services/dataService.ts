@@ -56,11 +56,11 @@ const generateDummyMetrics = (hours: number): TradeMetrics[] => {
 
 export const dataService = {
   // Son 24 saatlik işlemler
-  async getRecentTrades(hours = 24): Promise<{ data: ClosedTradeSimple[] | null, error: Error | null }> {
+  async getRecentTrades(limit = 50, hours = 24): Promise<{ data: ClosedTradeSimple[] | null, error: Error | null }> {
     if (!isSupabaseConfigured()) {
       console.log('Using dummy trade data')
       return { 
-        data: generateDummyTrades(50), 
+        data: generateDummyTrades(limit), 
         error: null 
       }
     }
@@ -74,7 +74,7 @@ export const dataService = {
         .eq('project_id', TARGET_PROJECT_ID)
         .gte('created_at', since)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(limit)
       
       if (error) throw error
       
