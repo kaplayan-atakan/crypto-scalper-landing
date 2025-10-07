@@ -54,6 +54,88 @@ const generateDummyMetrics = (hours: number): TradeMetrics[] => {
   return metrics
 }
 
+// closed_trades_simple verisinden metrik hesaplama
+const calculateMetricsFromTrades = (trades: ClosedTradeSimple[], intervalHours: number = 1): TradeMetrics[] => {
+  if (!trades || trades.length === 0) return []
+  
+  // İşlemleri zaman aralıklarına göre grupla
+  const now = new Date()
+  const intervals: { [key: string]: ClosedTradeSimple[] } = {}
+  
+  // Son 24 saati saat bazında böl
+  const totalHours = 24
+  for (let i = 0; i < totalHours; i += intervalHours) {
+    const intervalStart = new Date(now.getTime() - (i + intervalHours) * 60 * 60 * 1000)
+    const intervalEnd = new Date(now.getTime() - i * 60 * 60 * 1000)
+    const key = intervalStart.toISOString()
+    
+    intervals[key] = trades.filter(trade => {
+      const tradeTime = new Date(trade.created_at)
+      return tradeTime >= intervalStart && tradeTime < intervalEnd
+    })
+  }
+  
+  // Her interval için metrik hesapla
+  const metrics: TradeMetrics[] = Object.entries(intervals).map(([timestamp, intervalTrades]) => {
+    if (intervalTrades.length === 0) {
+      return {
+        total_trades: 0,
+        win_rate: 0,
+        avg_pnl: 0,
+        total_pnl: 0,
+        max_drawdown: 0,
+        sharpe_ratio: 0,
+        timestamp
+      }
+    }
+    
+    // Toplam işlem sayısı
+    const total_trades = intervalTrades.length
+    
+    // Kazanan işlem sayısı (PnL > 0)
+    const winningTrades = intervalTrades.filter(t => t.pnl > 0)
+    const win_rate = (winningTrades.length / total_trades) * 100
+    
+    // Toplam PnL
+    const total_pnl = intervalTrades.reduce((sum, t) => sum + t.pnl, 0)
+    
+    // Ortalama PnL
+    const avg_pnl = total_pnl / total_trades
+    
+    // Max Drawdown (kümülatif PnL'deki en büyük düşüş)
+    let cumulativePnl = 0
+    let maxPnl = 0
+    let maxDrawdown = 0
+    
+    intervalTrades.forEach(trade => {
+      cumulativePnl += trade.pnl
+      maxPnl = Math.max(maxPnl, cumulativePnl)
+      const drawdown = cumulativePnl - maxPnl
+      maxDrawdown = Math.min(maxDrawdown, drawdown)
+    })
+    
+    // Sharpe Ratio (basitleştirilmiş: ortalama PnL / standart sapma)
+    const pnlValues = intervalTrades.map(t => t.pnl)
+    const mean = avg_pnl
+    const variance = pnlValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / total_trades
+    const stdDev = Math.sqrt(variance)
+    const sharpe_ratio = stdDev === 0 ? 0 : (mean / stdDev) * Math.sqrt(252) // Yıllık Sharpe
+    
+    return {
+      total_trades,
+      win_rate,
+      avg_pnl,
+      total_pnl,
+      max_drawdown: maxDrawdown,
+      sharpe_ratio,
+      timestamp
+    }
+  })
+  
+  // Zamana göre sırala (eskiden yeniye)
+  return metrics.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+}
+
 export const dataService = {
   // Son 24 saatlik işlemler
   async getRecentTrades(limit = 50, hours = 24): Promise<{ data: ClosedTradeSimple[] | null, error: Error | null }> {
@@ -96,16 +178,22 @@ export const dataService = {
     }
     
     try {
-      // RPC call veya view'dan çek
-      const { data, error } = await supabase!
-        .rpc('get_trade_metrics', {
-          p_project_id: TARGET_PROJECT_ID,
-          p_interval: 'hourly'
-        } as any)
+      // closed_trades_simple'dan veriyi çek
+      const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString()
+      
+      const { data: trades, error } = await supabase!
+        .from('closed_trades_simple')
+        .select('*')
+        .eq('project_id', TARGET_PROJECT_ID)
+        .gte('created_at', since)
+        .order('created_at', { ascending: true }) // Eski -> Yeni sıralama
       
       if (error) throw error
       
-      return { data, error: null }
+      // Trades'den metrikleri hesapla
+      const metrics = calculateMetricsFromTrades(trades || [], 1) // 1 saatlik intervallerle
+      
+      return { data: metrics, error: null }
     } catch (err) {
       console.error('Error fetching metrics:', err)
       // Fallback to dummy data on error

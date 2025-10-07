@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, TooltipProps } from 'recharts'
 import type { TradeMetrics } from '../types/supabase'
 
-interface SupActionsChartProps {
+interface VolumeChartProps {
   data: TradeMetrics[]
   height?: number
   className?: string
 }
 
 // Custom Tooltip Component
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const CustomVolumeTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (!active || !payload || !payload.length) return null
 
   const data = payload[0].payload as any
@@ -17,25 +17,25 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   return (
     <div style={{
       backgroundColor: 'rgba(10, 15, 30, 0.95)',
-      border: '2px solid #00E5FF',
+      border: '2px solid #FF007A',
       borderRadius: '12px',
       padding: '16px',
-      boxShadow: '0 8px 32px rgba(0, 229, 255, 0.3)',
+      boxShadow: '0 8px 32px rgba(255, 0, 122, 0.3)',
       minWidth: '280px'
     }}>
       {/* Header */}
       <div style={{
-        borderBottom: '1px solid rgba(0, 229, 255, 0.3)',
+        borderBottom: '1px solid rgba(255, 0, 122, 0.3)',
         paddingBottom: '10px',
         marginBottom: '12px'
       }}>
         <div style={{
-          color: '#00E5FF',
+          color: '#FF007A',
           fontSize: '16px',
           fontWeight: '700',
           marginBottom: '4px'
         }}>
-          📊 Performans Detayı
+          📊 İşlem Hacmi Detayı
         </div>
         <div style={{
           color: 'rgba(255, 255, 255, 0.7)',
@@ -53,6 +53,27 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         gap: '10px',
         marginBottom: '12px'
       }}>
+        {/* Volume */}
+        <div>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '11px',
+            marginBottom: '4px',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            📊 Hacim
+          </div>
+          <div style={{
+            color: '#FFFFFF',
+            fontSize: '18px',
+            fontWeight: '700'
+          }}>
+            {data.volume.toLocaleString('tr-TR')}
+          </div>
+        </div>
+
         {/* PnL */}
         <div>
           <div style={{
@@ -66,7 +87,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
             💰 PnL
           </div>
           <div style={{
-            color: data.pnl >= 0 ? '#00E5FF' : '#FF007A',
+            color: data.pnl >= 0 ? '#00FF88' : '#FF007A',
             fontSize: '18px',
             fontWeight: '700'
           }}>
@@ -115,7 +136,16 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
             {data.winRate.toFixed(1)}%
           </div>
         </div>
+      </div>
 
+      {/* Additional Metrics */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '10px',
+        paddingTop: '10px',
+        borderTop: '1px solid rgba(255, 0, 122, 0.2)'
+      }}>
         {/* Avg PnL */}
         <div>
           <div style={{
@@ -129,23 +159,14 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
             📈 Ort. PnL
           </div>
           <div style={{
-            color: data.avgPnl >= 0 ? '#00E5FF' : '#FF007A',
-            fontSize: '18px',
+            color: data.avgPnl >= 0 ? '#00FF88' : '#FF007A',
+            fontSize: '16px',
             fontWeight: '700'
           }}>
             {data.avgPnl >= 0 ? '+' : ''}{data.avgPnl.toFixed(2)}%
           </div>
         </div>
-      </div>
 
-      {/* Additional Metrics */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '10px',
-        paddingTop: '10px',
-        borderTop: '1px solid rgba(0, 229, 255, 0.2)'
-      }}>
         {/* Max Drawdown */}
         <div>
           <div style={{
@@ -193,7 +214,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
       <div style={{
         marginTop: '12px',
         paddingTop: '10px',
-        borderTop: '1px solid rgba(0, 229, 255, 0.2)',
+        borderTop: '1px solid rgba(255, 0, 122, 0.2)',
         color: 'rgba(255, 255, 255, 0.5)',
         fontSize: '11px',
         fontWeight: '600',
@@ -205,7 +226,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   )
 }
 
-export function SupActionsChart({ data, height = 320, className = '' }: SupActionsChartProps) {
+export function VolumeChart({ data, height = 320, className = '' }: VolumeChartProps) {
   const chartData = useMemo(() => {
     const mapped = data.map((item, index) => ({
       time: new Date(item.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
@@ -216,6 +237,7 @@ export function SupActionsChart({ data, height = 320, className = '' }: SupActio
         hour: '2-digit',
         minute: '2-digit'
       }),
+      volume: item.total_trades,
       pnl: item.total_pnl,
       trades: item.total_trades,
       winRate: item.win_rate,
@@ -238,16 +260,10 @@ export function SupActionsChart({ data, height = 320, className = '' }: SupActio
   return (
     <div className={`sb-chart-container ${className}`}>
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart 
+        <BarChart 
           data={chartData}
           margin={{ top: 10, right: 30, left: 20, bottom: 20 }}
         >
-          <defs>
-            <linearGradient id="sb-gradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#00E5FF" stopOpacity={0.1}/>
-            </linearGradient>
-          </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           
           {/* X Axis - Zaman */}
@@ -267,11 +283,11 @@ export function SupActionsChart({ data, height = 320, className = '' }: SupActio
             tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
           />
           
-          {/* Y Axis - PnL */}
+          {/* Y Axis - İşlem Sayısı */}
           <YAxis 
             stroke="rgba(255,255,255,0.6)"
             label={{ 
-              value: '💰 Toplam PnL (%)', 
+              value: '🔄 İşlem Sayısı', 
               angle: -90, 
               position: 'insideLeft',
               offset: 5,
@@ -287,41 +303,43 @@ export function SupActionsChart({ data, height = 320, className = '' }: SupActio
           
           {/* Tooltip */}
           <Tooltip 
-            content={CustomTooltip}
-            cursor={{ stroke: 'rgba(0, 229, 255, 0.3)', strokeWidth: 2 }}
+            content={CustomVolumeTooltip}
+            cursor={{ fill: 'rgba(255, 0, 122, 0.1)' }}
           />
           
-          {/* Ana PnL Alanı */}
-          <Area 
-            type="monotone" 
-            dataKey="pnl" 
-            stroke="#00E5FF" 
-            strokeWidth={3}
-            fillOpacity={1} 
-            fill="url(#sb-gradient)"
-            name="PnL (%)"
-            activeDot={{ r: 8, fill: '#00E5FF', stroke: '#ffffff', strokeWidth: 2 }}
-          />
-        </AreaChart>
+          {/* Bar - PnL'e göre renklendirilmiş */}
+          <Bar 
+            dataKey="volume" 
+            name="İşlem Hacmi"
+            radius={[8, 8, 0, 0]}
+          >
+            {chartData.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.pnl >= 0 ? '#FF007A' : 'rgba(255, 0, 122, 0.4)'}
+              />
+            ))}
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
       
       {/* Chart Legend/Info */}
       <div style={{
         marginTop: '12px',
         padding: '12px',
-        background: 'rgba(0, 229, 255, 0.05)',
+        background: 'rgba(255, 0, 122, 0.05)',
         borderRadius: '8px',
-        border: '1px solid rgba(0, 229, 255, 0.2)',
+        border: '1px solid rgba(255, 0, 122, 0.2)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         fontSize: '13px'
       }}>
         <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
-          📊 Toplam Veri Noktası:
+          📊 Toplam İşlem:
         </span>
-        <span style={{ color: '#00E5FF', fontWeight: 700 }}>
-          {chartData.length} adet
+        <span style={{ color: '#FF007A', fontWeight: 700 }}>
+          {chartData.reduce((sum, item) => sum + item.volume, 0).toLocaleString('tr-TR')} adet
         </span>
       </div>
     </div>

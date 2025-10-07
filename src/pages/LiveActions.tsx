@@ -3,10 +3,102 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Link } from 'react-router-dom';
 import { useActions } from '../hooks/useActions';
 import { SupActionsChart } from '../components/SupActionsChart';
+import { VolumeChart } from '../components/VolumeChart';
 import '../App.css';
 
-// Reason parser with pipe separator support
+// Enhanced reason parser with detailed field extraction
 interface ParsedReason {
+  type: string;
+  icon: string;
+  label: string;
+  exitType: string;        // BREADTH_WINNER, STALL_EXIT, etc.
+  policy: string;          // POL=BREAKOUT
+  volume: string;          // VOL=NORMAL
+  breadth: string;         // BRD=ON
+  mfe: string;             // MFE=1.07
+  mae: string;             // MAE=-0.27
+  pnl: string;             // R=+0.178
+  tags: string;            // [BREAKOUT] [VOL NORMAL]...
+  indicators: string;      // ema_align=+ adx=40.1...
+  rawReason: string;
+}
+
+const parseReasonDetailed = (reason: string): ParsedReason => {
+  const lower = reason.toLowerCase();
+  
+  // Split by double pipe ||
+  const mainParts = reason.split('||').map(p => p.trim());
+  
+  // Part 1: Exit type and parameters (BREADTH_WINNER |POL=BREAKOUT|VOL=NORMAL|...)
+  const part1 = mainParts[0] || '';
+  const part1Split = part1.split('|').map(s => s.trim());
+  const exitType = part1Split[0] || '-';
+  
+  // Extract key-value pairs from part1
+  const extractValue = (key: string) => {
+    const item = part1Split.find(s => s.startsWith(key + '='));
+    return item ? item.split('=')[1] : '-';
+  };
+  
+  const policy = extractValue('POL');
+  const volume = extractValue('VOL');
+  const breadth = extractValue('BRD');
+  const mfe = extractValue('MFE');
+  const mae = extractValue('MAE');
+  const pnl = extractValue('R');
+  
+  // Part 2: Tags ([BREAKOUT] [VOL NORMAL]...)
+  const tags = mainParts[1] || '-';
+  
+  // Part 3: Indicators (ema_align=+ adx=40.1...)
+  const indicators = mainParts[2] || '-';
+  
+  // Determine type and icon based on exit type
+  let type = 'other';
+  let icon = '📋';
+  let label = 'Diğer';
+  
+  if (lower.includes('winner') || lower.includes('tp') || lower.includes('take profit')) {
+    type = 'tp';
+    icon = '🎯';
+    label = 'Winner';
+  } else if (lower.includes('stall') || lower.includes('exit')) {
+    type = 'timeout';
+    icon = '⏱️';
+    label = 'Stall Exit';
+  } else if (lower.includes('sl') || lower.includes('stop loss') || lower.includes('loser')) {
+    type = 'sl';
+    icon = '🛑';
+    label = 'Stop Loss';
+  } else if (lower.includes('trail')) {
+    type = 'trail';
+    icon = '📉';
+    label = 'Trailing';
+  } else if (lower.includes('manual')) {
+    type = 'manual';
+    icon = '👤';
+    label = 'Manuel';
+  }
+  
+  return {
+    type,
+    icon,
+    label,
+    exitType,
+    policy,
+    volume,
+    breadth,
+    mfe,
+    mae,
+    pnl: pnl,
+    tags,
+    indicators,
+    rawReason: reason
+  };
+};
+
+// Old parser for backward compatibility
+interface ParsedReasonSimple {
   type: string;
   icon: string;
   label: string;
@@ -14,7 +106,7 @@ interface ParsedReason {
   rawReason: string;
 }
 
-const parseReasonWithColumns = (reason: string): ParsedReason => {
+const parseReasonWithColumns = (reason: string): ParsedReasonSimple => {
   const lower = reason.toLowerCase();
   
   // Split by pipe separator
@@ -282,47 +374,10 @@ const LiveActions = () => {
                     {enableRealtime ? '🟢 Realtime Aktif' : '⚪ Realtime Pasif'}
                   </span>
                 </label>
-                
-                <div className="sb-limit-selector">
-                  <label htmlFor="timerange-select" className="sb-limit-label">
-                    📅 Zaman Aralığı:
-                  </label>
-                  <select 
-                    id="timerange-select"
-                    value={timeRange} 
-                    onChange={(e) => setTimeRange(Number(e.target.value))}
-                    className="sb-limit-dropdown"
-                  >
-                    <option value={1}>Son 1 Saat</option>
-                    <option value={6}>Son 6 Saat</option>
-                    <option value={24}>Son 24 Saat</option>
-                    <option value={168}>Son 7 Gün</option>
-                    <option value={720}>Son 30 Gün</option>
-                  </select>
-                </div>
-                
-                <div className="sb-limit-selector">
-                  <label htmlFor="limit-select" className="sb-limit-label">
-                    📊 Veri Limiti:
-                  </label>
-                  <select 
-                    id="limit-select"
-                    value={limit} 
-                    onChange={(e) => setLimit(Number(e.target.value))}
-                    className="sb-limit-dropdown"
-                  >
-                    <option value={10}>10 Kayıt</option>
-                    <option value={25}>25 Kayıt</option>
-                    <option value={50}>50 Kayıt</option>
-                    <option value={100}>100 Kayıt</option>
-                    <option value={200}>200 Kayıt</option>
-                    <option value={500}>500 Kayıt</option>
-                  </select>
-                </div>
               </div>
               
               <button onClick={refresh} className="sb-refresh-btn" title="Verileri Yenile">
-                🔄 Yenile
+                � Yenile
               </button>
             </div>
           </div>
@@ -332,18 +387,79 @@ const LiveActions = () => {
       {/* Main Content */}
       <main className="page__main">
         <div className="page__container">
-          {/* Performance Chart */}
+          {/* Charts Section - Yan Yana */}
           <section className="section">
-            <div className="section__badge">📊 PERFORMANS</div>
-            <h2 className="section__title">
-              {timeRange === 1 && 'Son 1 Saatlik Canlı Performans'}
-              {timeRange === 6 && 'Son 6 Saatlik Canlı Performans'}
-              {timeRange === 24 && 'Son 24 Saatlik Canlı Performans'}
-              {timeRange === 168 && 'Son 7 Günlük Canlı Performans'}
-              {timeRange === 720 && 'Son 30 Günlük Canlı Performans'}
-            </h2>
-            <div className="chart-card">
-              <SupActionsChart data={metrics} height={300} />
+            <div className="section__header">
+              <div className="section__header-left">
+                <div className="section__badge">📊 ANALİTİK</div>
+                <h2 className="section__title">
+                  {timeRange === 1 && 'Son 1 Saatlik Canlı Performans'}
+                  {timeRange === 6 && 'Son 6 Saatlik Canlı Performans'}
+                  {timeRange === 24 && 'Son 24 Saatlik Canlı Performans'}
+                  {timeRange === 168 && 'Son 7 Günlük Canlı Performans'}
+                  {timeRange === 720 && 'Son 30 Günlük Canlı Performans'}
+                </h2>
+              </div>
+
+              {/* Chart Filters */}
+              <div className="chart-filters">
+                <div className="chart-filter-item">
+                  <label htmlFor="chart-timerange" className="chart-filter-label">
+                    � Zaman Aralığı
+                  </label>
+                  <select 
+                    id="chart-timerange"
+                    value={timeRange} 
+                    onChange={(e) => setTimeRange(Number(e.target.value))}
+                    className="chart-filter-select"
+                  >
+                    <option value={1}>Son 1 Saat</option>
+                    <option value={6}>Son 6 Saat</option>
+                    <option value={24}>Son 24 Saat</option>
+                    <option value={168}>Son 7 Gün</option>
+                    <option value={720}>Son 30 Gün</option>
+                  </select>
+                </div>
+                
+                <div className="chart-filter-item">
+                  <label htmlFor="chart-limit" className="chart-filter-label">
+                    � Veri Noktası
+                  </label>
+                  <select 
+                    id="chart-limit"
+                    value={limit} 
+                    onChange={(e) => setLimit(Number(e.target.value))}
+                    className="chart-filter-select"
+                  >
+                    <option value={10}>10 Nokta</option>
+                    <option value={25}>25 Nokta</option>
+                    <option value={50}>50 Nokta</option>
+                    <option value={100}>100 Nokta</option>
+                    <option value={200}>200 Nokta</option>
+                    <option value={500}>500 Nokta</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="charts-grid">
+              {/* Performance Chart */}
+              <div className="chart-card chart-card--half">
+                <div className="chart-card__header">
+                  <h3 className="chart-card__title">💰 Kümülatif Performans</h3>
+                  <p className="chart-card__subtitle">Zamana göre toplam kar/zarar trendi</p>
+                </div>
+                <SupActionsChart data={metrics} height={320} />
+              </div>
+
+              {/* Volume Chart */}
+              <div className="chart-card chart-card--half">
+                <div className="chart-card__header">
+                  <h3 className="chart-card__title">📊 İşlem Hacmi</h3>
+                  <p className="chart-card__subtitle">Zaman dilimlerine göre trade sayısı</p>
+                </div>
+                <VolumeChart data={metrics} height={320} />
+              </div>
             </div>
           </section>
 
@@ -356,24 +472,28 @@ const LiveActions = () => {
             </p>
             
             <div className="trades-container">
-              <div className="trades-table trades-table--dynamic">
+              <div className="trades-table trades-table--detailed">
                 <div className="trades-table__header">
-                  <div className="trades-table__cell trades-table__cell--time">⏰ Zaman</div>
-                  <div className="trades-table__cell trades-table__cell--symbol">💱 Sembol</div>
-                  <div className="trades-table__cell trades-table__cell--pnl">💰 PnL</div>
-                  <div className="trades-table__cell trades-table__cell--reason-icon">🏷️ Tip</div>
-                  <div className="trades-table__cell trades-table__cell--reason-col1">📝 Neden</div>
-                  <div className="trades-table__cell trades-table__cell--reason-col2">ℹ️ Detay 1</div>
-                  <div className="trades-table__cell trades-table__cell--reason-col3">ℹ️ Detay 2</div>
-                  <div className="trades-table__cell trades-table__cell--reason-col4">ℹ️ Detay 3</div>
+                  <div className="trades-table__cell">⏰ Zaman</div>
+                  <div className="trades-table__cell">💱 Sembol</div>
+                  <div className="trades-table__cell">💰 PnL</div>
+                  <div className="trades-table__cell">🏷️ Exit Type</div>
+                  <div className="trades-table__cell">📋 Policy</div>
+                  <div className="trades-table__cell">📊 Volume</div>
+                  <div className="trades-table__cell">🌐 Breadth</div>
+                  <div className="trades-table__cell">� MFE</div>
+                  <div className="trades-table__cell">📉 MAE</div>
+                  <div className="trades-table__cell">💵 R</div>
+                  <div className="trades-table__cell trades-table__cell--wide">🏷️ Tags</div>
+                  <div className="trades-table__cell trades-table__cell--wide">📊 Indicators</div>
                 </div>
                 
                 {trades.map((trade) => {
-                  const reasonData = parseReasonWithColumns(trade.reason);
+                  const reasonData = parseReasonDetailed(trade.reason);
                   
                   return (
                     <div key={trade.id} className="trades-table__row">
-                      <div className="trades-table__cell trades-table__cell--time">
+                      <div className="trades-table__cell">
                         <div className="trade-time">
                           <span className="trade-time__date">
                             {new Date(trade.created_at).toLocaleDateString('tr-TR', { 
@@ -391,47 +511,71 @@ const LiveActions = () => {
                         </div>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--symbol">
+                      <div className="trades-table__cell">
                         <span className="trade-symbol">{trade.symbol}</span>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--pnl">
+                      <div className="trades-table__cell">
                         <div className="trade-pnl-wrapper">
                           <span className={`trade-pnl ${trade.pnl >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
                             {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}%
                           </span>
-                          <span className="trade-pnl-score">Score: {trade.score.toFixed(1)}</span>
+                          <span className="trade-pnl-score">S: {trade.score.toFixed(1)}</span>
                         </div>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--reason-icon">
-                        <div className={`trade-reason-badge trade-reason-badge--${reasonData.type}`}>
-                          <span className="trade-reason-badge__icon">{reasonData.icon}</span>
-                          <span className="trade-reason-badge__label">{reasonData.label}</span>
+                      <div className="trades-table__cell">
+                        <div className={`trade-exit-badge trade-exit-badge--${reasonData.type}`}>
+                          <span className="trade-exit-badge__icon">{reasonData.icon}</span>
+                          <span className="trade-exit-badge__text">{reasonData.exitType}</span>
                         </div>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--reason-col1">
-                        <span className="reason-column" title={reasonData.columns[0] || '-'}>
-                          {reasonData.columns[0] || '-'}
+                      <div className="trades-table__cell">
+                        <span className="trade-field trade-field--policy" title={reasonData.policy}>
+                          {reasonData.policy}
                         </span>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--reason-col2">
-                        <span className="reason-column" title={reasonData.columns[1] || '-'}>
-                          {reasonData.columns[1] || '-'}
+                      <div className="trades-table__cell">
+                        <span className="trade-field trade-field--volume" title={reasonData.volume}>
+                          {reasonData.volume}
                         </span>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--reason-col3">
-                        <span className="reason-column" title={reasonData.columns[2] || '-'}>
-                          {reasonData.columns[2] || '-'}
+                      <div className="trades-table__cell">
+                        <span className={`trade-field trade-field--breadth ${reasonData.breadth === 'ON' ? 'trade-field--on' : 'trade-field--off'}`}>
+                          {reasonData.breadth}
                         </span>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--reason-col4">
-                        <span className="reason-column" title={reasonData.columns[3] || '-'}>
-                          {reasonData.columns[3] || '-'}
+                      <div className="trades-table__cell">
+                        <span className={`trade-field trade-field--mfe ${parseFloat(reasonData.mfe) > 0 ? 'trade-field--positive' : ''}`}>
+                          {reasonData.mfe}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell">
+                        <span className={`trade-field trade-field--mae ${parseFloat(reasonData.mae) < 0 ? 'trade-field--negative' : ''}`}>
+                          {reasonData.mae}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell">
+                        <span className={`trade-field trade-field--r ${parseFloat(reasonData.pnl) >= 0 ? 'trade-field--positive' : 'trade-field--negative'}`}>
+                          {reasonData.pnl}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--wide">
+                        <span className="trade-field trade-field--tags" title={reasonData.tags}>
+                          {reasonData.tags}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--wide">
+                        <span className="trade-field trade-field--indicators" title={reasonData.indicators}>
+                          {reasonData.indicators}
                         </span>
                       </div>
                     </div>
