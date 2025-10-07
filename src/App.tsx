@@ -1,4 +1,5 @@
 import "./App.css";
+import { Link } from "react-router-dom";
 import {
   AreaChart,
   Area,
@@ -107,6 +108,13 @@ function App() {
             <span className="stat__value">100%</span>
             <span className="stat__label">Şeffaf Loglar</span>
           </div>
+        </div>
+        <div className="header__actions">
+          <Link to="/live-actions" className="btn-live-actions">
+            <span className="btn-live-actions__icon">⚡</span>
+            <span className="btn-live-actions__text">Live Actions</span>
+            <span className="btn-live-actions__arrow">→</span>
+          </Link>
         </div>
       </header>
       <main className="page__content">
