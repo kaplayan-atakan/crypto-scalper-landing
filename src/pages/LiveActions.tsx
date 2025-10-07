@@ -340,23 +340,48 @@ const LiveActions = () => {
               <p className="page__subtitle">Gerçek zamanlı işlem takibi ve performans metrikleri</p>
             </div>
             
-            {/* Live Stats Row */}
-            <div className="stats-row">
-              <div className="stat-item">
-                <div className="stat-value">{stats.activePositions}</div>
-                <div className="stat-label">Aktif Pozisyon</div>
+            {/* Live Stats Row - Enhanced */}
+            <div className="sb-stats-grid">
+              <div className="sb-stat-card">
+                <div className="sb-stat-card__icon">📊</div>
+                <div className="sb-stat-card__content">
+                  <div className="sb-stat-card__value">{stats.activePositions}</div>
+                  <div className="sb-stat-card__label">Toplam İşlem</div>
+                </div>
+                <div className="sb-stat-card__decoration"></div>
               </div>
-              <div className="stat-item stat-item--success">
-                <div className="stat-value">{stats.totalPnL}%</div>
-                <div className="stat-label">Toplam PnL</div>
+              
+              <div className={`sb-stat-card ${parseFloat(stats.totalPnL) >= 0 ? 'sb-stat-card--success' : 'sb-stat-card--danger'}`}>
+                <div className="sb-stat-card__icon">
+                  {parseFloat(stats.totalPnL) >= 0 ? '💰' : '📉'}
+                </div>
+                <div className="sb-stat-card__content">
+                  <div className="sb-stat-card__value">
+                    {parseFloat(stats.totalPnL) >= 0 ? '+' : ''}{stats.totalPnL}%
+                  </div>
+                  <div className="sb-stat-card__label">Toplam PnL</div>
+                </div>
+                <div className="sb-stat-card__decoration"></div>
               </div>
-              <div className="stat-item">
-                <div className="stat-value">{stats.winRate}%</div>
-                <div className="stat-label">Kazanç Oranı</div>
+              
+              <div className={`sb-stat-card ${parseFloat(stats.winRate) >= 50 ? 'sb-stat-card--success' : 'sb-stat-card--warning'}`}>
+                <div className="sb-stat-card__icon">🎯</div>
+                <div className="sb-stat-card__content">
+                  <div className="sb-stat-card__value">{stats.winRate}%</div>
+                  <div className="sb-stat-card__label">Kazanma Oranı</div>
+                </div>
+                <div className="sb-stat-card__decoration"></div>
               </div>
-              <div className="stat-item">
-                <div className="stat-value">{stats.avgPnL}%</div>
-                <div className="stat-label">Ortalama PnL</div>
+              
+              <div className={`sb-stat-card ${parseFloat(stats.avgPnL) >= 0 ? 'sb-stat-card--success' : 'sb-stat-card--danger'}`}>
+                <div className="sb-stat-card__icon">📈</div>
+                <div className="sb-stat-card__content">
+                  <div className="sb-stat-card__value">
+                    {parseFloat(stats.avgPnL) >= 0 ? '+' : ''}{stats.avgPnL}%
+                  </div>
+                  <div className="sb-stat-card__label">Ortalama PnL</div>
+                </div>
+                <div className="sb-stat-card__decoration"></div>
               </div>
             </div>
             
