@@ -1311,13 +1311,13 @@
 
 .trades-table__header {
   display: grid;
-  grid-template-columns: 80px 120px 120px 80px 100px 100px 80px 100px 90px 80px;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  grid-template-columns: 140px 140px 140px 1fr;
+  gap: 1.5rem;
+  padding: 1.2rem 1.8rem;
   background: rgba(45, 50, 65, 0.9);
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--neon-cyan);
@@ -1325,9 +1325,9 @@
 
 .trades-table__row {
   display: grid;
-  grid-template-columns: 80px 120px 120px 80px 100px 100px 80px 100px 90px 80px;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  grid-template-columns: 140px 140px 140px 1fr;
+  gap: 1.5rem;
+  padding: 1.2rem 1.8rem;
   background: rgba(45, 50, 65, 0.7);
   border-radius: 12px;
   transition: all 0.3s ease;
@@ -1353,20 +1353,29 @@
 }
 
 .trades-table__cell--symbol {
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .trades-table__cell--pnl {
-  min-width: 90px;
-}
-
-.trades-table__cell--score {
-  min-width: 80px;
+  min-width: 120px;
 }
 
 .trades-table__cell--reason {
-  min-width: 250px;
+  min-width: 300px;
   flex: 1;
+}
+
+/* PnL Wrapper with Score */
+.trade-pnl-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.trade-pnl-score {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* Time display */
@@ -1844,8 +1853,15 @@
     min-width: 200px;
   }
   
+  .trades-table__header,
+  .trades-table__row {
+    grid-template-columns: 120px 120px 120px 1fr;
+    gap: 1.2rem;
+    padding: 1rem 1.5rem;
+  }
+  
   .trades-table__cell--reason {
-    min-width: 200px;
+    min-width: 250px;
   }
   
   .trade-reason__details {
@@ -1862,7 +1878,10 @@
   
   .trades-table__header,
   .trades-table__row {
-    min-width: 800px;
+    min-width: 700px;
+    grid-template-columns: 130px 120px 120px 1fr;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
   }
   
   .trade-reason {
@@ -1879,6 +1898,14 @@
   
   .trade-reason__details {
     font-size: 0.65rem;
+  }
+  
+  .trade-pnl-wrapper {
+    gap: 0.2rem;
+  }
+  
+  .trade-pnl-score {
+    font-size: 0.7rem;
   }
 }
 

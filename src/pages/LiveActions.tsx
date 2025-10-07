@@ -294,16 +294,11 @@ const LiveActions = () => {
             </p>
             
             <div className="trades-container">
-              <div className="trades-table trades-table--enhanced">
+              <div className="trades-table trades-table--minimal">
                 <div className="trades-table__header">
                   <div className="trades-table__cell trades-table__cell--time">⏰ Zaman</div>
                   <div className="trades-table__cell trades-table__cell--symbol">💱 Sembol</div>
                   <div className="trades-table__cell trades-table__cell--pnl">💰 PnL</div>
-                  <div className="trades-table__cell trades-table__cell--score">⭐ Score</div>
-                  <div className="trades-table__cell">R1M</div>
-                  <div className="trades-table__cell">ATR5M</div>
-                  <div className="trades-table__cell">Z1M</div>
-                  <div className="trades-table__cell">VShock</div>
                   <div className="trades-table__cell trades-table__cell--reason">📝 Kapanış Nedeni</div>
                 </div>
                 
@@ -335,35 +330,12 @@ const LiveActions = () => {
                       </div>
                       
                       <div className="trades-table__cell trades-table__cell--pnl">
-                        <span className={`trade-pnl ${trade.pnl >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
-                          {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}%
-                        </span>
-                      </div>
-                      
-                      <div className="trades-table__cell trades-table__cell--score">
-                        <span className="trade-score">{trade.score.toFixed(1)}</span>
-                      </div>
-                      
-                      <div className="trades-table__cell">
-                        <span className={trade.r1m >= 0 ? 'indicator-positive' : 'indicator-negative'}>
-                          {trade.r1m >= 0 ? '+' : ''}{trade.r1m.toFixed(2)}
-                        </span>
-                      </div>
-                      
-                      <div className="trades-table__cell">
-                        <span className="indicator-neutral">{trade.atr5m.toFixed(2)}</span>
-                      </div>
-                      
-                      <div className="trades-table__cell">
-                        <span className={Math.abs(trade.z1m) > 2 ? 'indicator-warning' : 'indicator-neutral'}>
-                          {trade.z1m.toFixed(2)}
-                        </span>
-                      </div>
-                      
-                      <div className="trades-table__cell">
-                        <span className={trade.vshock > 1.5 ? 'indicator-warning' : 'indicator-neutral'}>
-                          {trade.vshock.toFixed(2)}
-                        </span>
+                        <div className="trade-pnl-wrapper">
+                          <span className={`trade-pnl ${trade.pnl >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
+                            {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}%
+                          </span>
+                          <span className="trade-pnl-score">Score: {trade.score.toFixed(1)}</span>
+                        </div>
                       </div>
                       
                       <div className="trades-table__cell trades-table__cell--reason">
@@ -372,8 +344,8 @@ const LiveActions = () => {
                           <div className="trade-reason__content">
                             <span className="trade-reason__label">{reasonData.label}</span>
                             <span className="trade-reason__details" title={reasonData.details}>
-                              {reasonData.details.length > 40 
-                                ? reasonData.details.substring(0, 40) + '...' 
+                              {reasonData.details.length > 60 
+                                ? reasonData.details.substring(0, 60) + '...' 
                                 : reasonData.details}
                             </span>
                           </div>
