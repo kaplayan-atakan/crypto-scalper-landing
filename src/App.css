@@ -1347,6 +1347,197 @@
   color: var(--text-muted);
 }
 
+/* Enhanced table cells */
+.trades-table__cell--time {
+  min-width: 120px;
+}
+
+.trades-table__cell--symbol {
+  min-width: 100px;
+}
+
+.trades-table__cell--pnl {
+  min-width: 90px;
+}
+
+.trades-table__cell--score {
+  min-width: 80px;
+}
+
+.trades-table__cell--reason {
+  min-width: 250px;
+  flex: 1;
+}
+
+/* Time display */
+.trade-time {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.trade-time__date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.trade-time__clock {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+
+/* Reason display - Enhanced */
+.trade-reason {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.trade-reason__icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.trade-reason__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.trade-reason__label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trade-reason__details {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Reason type colors */
+.trade-reason--tp {
+  background: rgba(0, 200, 100, 0.15);
+  border-color: rgba(0, 200, 100, 0.3);
+}
+
+.trade-reason--tp .trade-reason__label {
+  color: #00c864;
+}
+
+.trade-reason--sl {
+  background: rgba(255, 100, 100, 0.15);
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+.trade-reason--sl .trade-reason__label {
+  color: #ff6464;
+}
+
+.trade-reason--trail {
+  background: rgba(255, 180, 0, 0.15);
+  border-color: rgba(255, 180, 0, 0.3);
+}
+
+.trade-reason--trail .trade-reason__label {
+  color: #ffb400;
+}
+
+.trade-reason--timeout {
+  background: rgba(150, 150, 200, 0.15);
+  border-color: rgba(150, 150, 200, 0.3);
+}
+
+.trade-reason--timeout .trade-reason__label {
+  color: #9696c8;
+}
+
+.trade-reason--score {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+.trade-reason--score .trade-reason__label {
+  color: var(--neon-cyan);
+}
+
+.trade-reason--volume {
+  background: rgba(255, 0, 122, 0.15);
+  border-color: rgba(255, 0, 122, 0.3);
+}
+
+.trade-reason--volume .trade-reason__label {
+  color: var(--magenta);
+}
+
+.trade-reason--manual {
+  background: rgba(200, 150, 255, 0.15);
+  border-color: rgba(200, 150, 255, 0.3);
+}
+
+.trade-reason--manual .trade-reason__label {
+  color: #c896ff;
+}
+
+.trade-reason--risk {
+  background: rgba(255, 150, 0, 0.15);
+  border-color: rgba(255, 150, 0, 0.3);
+}
+
+.trade-reason--risk .trade-reason__label {
+  color: #ff9600;
+}
+
+.trade-reason--other {
+  background: rgba(100, 100, 100, 0.15);
+  border-color: rgba(100, 100, 100, 0.3);
+}
+
+.trade-reason--other .trade-reason__label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.trade-reason:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Indicator values */
+.indicator-positive {
+  color: #00c864;
+  font-weight: 600;
+}
+
+.indicator-negative {
+  color: #ff6464;
+  font-weight: 600;
+}
+
+.indicator-neutral {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.indicator-warning {
+  color: #ffb400;
+  font-weight: 600;
+}
+
 .trade-id {
   font-family: 'Courier New', monospace;
   color: var(--text-light);
@@ -1651,6 +1842,43 @@
   
   .sb-limit-selector {
     min-width: 200px;
+  }
+  
+  .trades-table__cell--reason {
+    min-width: 200px;
+  }
+  
+  .trade-reason__details {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .trades-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .trades-table__header,
+  .trades-table__row {
+    min-width: 800px;
+  }
+  
+  .trade-reason {
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .trade-reason__icon {
+    font-size: 1.1rem;
+  }
+  
+  .trade-reason__label {
+    font-size: 0.75rem;
+  }
+  
+  .trade-reason__details {
+    font-size: 0.65rem;
   }
 }
 

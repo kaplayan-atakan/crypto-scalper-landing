@@ -5,6 +5,99 @@ import { useActions } from '../hooks/useActions';
 import { SupActionsChart } from '../components/SupActionsChart';
 import '../App.css';
 
+// Reason parser - closes nedenlerini parse et
+const parseReason = (reason: string): { type: string; icon: string; label: string; details: string } => {
+  const lower = reason.toLowerCase();
+  
+  // TP (Take Profit) - Kar Al
+  if (lower.includes('tp') || lower.includes('take profit') || lower.includes('target')) {
+    return {
+      type: 'tp',
+      icon: '🎯',
+      label: 'Take Profit',
+      details: reason
+    };
+  }
+  
+  // SL (Stop Loss) - Zarar Durdur
+  if (lower.includes('sl') || lower.includes('stop loss') || lower.includes('stoploss')) {
+    return {
+      type: 'sl',
+      icon: '🛑',
+      label: 'Stop Loss',
+      details: reason
+    };
+  }
+  
+  // Trailing Stop
+  if (lower.includes('trail')) {
+    return {
+      type: 'trail',
+      icon: '📉',
+      label: 'Trailing Stop',
+      details: reason
+    };
+  }
+  
+  // Timeout - Zaman Aşımı
+  if (lower.includes('timeout') || lower.includes('time') || lower.includes('duration')) {
+    return {
+      type: 'timeout',
+      icon: '⏱️',
+      label: 'Zaman Aşımı',
+      details: reason
+    };
+  }
+  
+  // Score/Signal değişimi
+  if (lower.includes('score') || lower.includes('signal') || lower.includes('indicator')) {
+    return {
+      type: 'score',
+      icon: '📊',
+      label: 'Sinyal Değişimi',
+      details: reason
+    };
+  }
+  
+  // Volume - Hacim
+  if (lower.includes('volume') || lower.includes('vol')) {
+    return {
+      type: 'volume',
+      icon: '📈',
+      label: 'Hacim Değişimi',
+      details: reason
+    };
+  }
+  
+  // Manual Close - Manuel Kapatma
+  if (lower.includes('manual') || lower.includes('user')) {
+    return {
+      type: 'manual',
+      icon: '👤',
+      label: 'Manuel Kapatma',
+      details: reason
+    };
+  }
+  
+  // Risk Management
+  if (lower.includes('risk') || lower.includes('exposure')) {
+    return {
+      type: 'risk',
+      icon: '⚠️',
+      label: 'Risk Yönetimi',
+      details: reason
+    };
+  }
+  
+  // Default - Diğer
+  return {
+    type: 'other',
+    icon: '📋',
+    label: 'Diğer',
+    details: reason
+  };
+};
+
 const LiveActions = () => {
   const { trades, metrics, loading, error, refresh, enableRealtime, setEnableRealtime, limit, setLimit, timeRange, setTimeRange } = useActions();
   
@@ -201,50 +294,94 @@ const LiveActions = () => {
             </p>
             
             <div className="trades-container">
-              <div className="trades-table">
+              <div className="trades-table trades-table--enhanced">
                 <div className="trades-table__header">
-                  <div className="trades-table__cell">ID</div>
-                  <div className="trades-table__cell">Sembol</div>
-                  <div className="trades-table__cell">PnL</div>
-                  <div className="trades-table__cell">Score</div>
+                  <div className="trades-table__cell trades-table__cell--time">⏰ Zaman</div>
+                  <div className="trades-table__cell trades-table__cell--symbol">💱 Sembol</div>
+                  <div className="trades-table__cell trades-table__cell--pnl">💰 PnL</div>
+                  <div className="trades-table__cell trades-table__cell--score">⭐ Score</div>
                   <div className="trades-table__cell">R1M</div>
                   <div className="trades-table__cell">ATR5M</div>
                   <div className="trades-table__cell">Z1M</div>
                   <div className="trades-table__cell">VShock</div>
-                  <div className="trades-table__cell">Reason</div>
-                  <div className="trades-table__cell">Zaman</div>
+                  <div className="trades-table__cell trades-table__cell--reason">📝 Kapanış Nedeni</div>
                 </div>
                 
-                {trades.map((trade) => (
-                  <div key={trade.id} className="trades-table__row">
-                    <div className="trades-table__cell">
-                      <span className="trade-id">{trade.id.substring(0, 8)}...</span>
+                {trades.map((trade) => {
+                  const reasonData = parseReason(trade.reason);
+                  
+                  return (
+                    <div key={trade.id} className="trades-table__row">
+                      <div className="trades-table__cell trades-table__cell--time">
+                        <div className="trade-time">
+                          <span className="trade-time__date">
+                            {new Date(trade.created_at).toLocaleDateString('tr-TR', { 
+                              day: '2-digit', 
+                              month: 'short' 
+                            })}
+                          </span>
+                          <span className="trade-time__clock">
+                            {new Date(trade.created_at).toLocaleTimeString('tr-TR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--symbol">
+                        <span className="trade-symbol">{trade.symbol}</span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--pnl">
+                        <span className={`trade-pnl ${trade.pnl >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
+                          {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}%
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--score">
+                        <span className="trade-score">{trade.score.toFixed(1)}</span>
+                      </div>
+                      
+                      <div className="trades-table__cell">
+                        <span className={trade.r1m >= 0 ? 'indicator-positive' : 'indicator-negative'}>
+                          {trade.r1m >= 0 ? '+' : ''}{trade.r1m.toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell">
+                        <span className="indicator-neutral">{trade.atr5m.toFixed(2)}</span>
+                      </div>
+                      
+                      <div className="trades-table__cell">
+                        <span className={Math.abs(trade.z1m) > 2 ? 'indicator-warning' : 'indicator-neutral'}>
+                          {trade.z1m.toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell">
+                        <span className={trade.vshock > 1.5 ? 'indicator-warning' : 'indicator-neutral'}>
+                          {trade.vshock.toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--reason">
+                        <div className={`trade-reason trade-reason--${reasonData.type}`}>
+                          <span className="trade-reason__icon">{reasonData.icon}</span>
+                          <div className="trade-reason__content">
+                            <span className="trade-reason__label">{reasonData.label}</span>
+                            <span className="trade-reason__details" title={reasonData.details}>
+                              {reasonData.details.length > 40 
+                                ? reasonData.details.substring(0, 40) + '...' 
+                                : reasonData.details}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="trades-table__cell">
-                      <span className="trade-symbol">{trade.symbol}</span>
-                    </div>
-                    <div className="trades-table__cell">
-                      <span className={`trade-pnl ${trade.pnl >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
-                        {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="trades-table__cell">
-                      <span className="trade-score">{trade.score.toFixed(1)}</span>
-                    </div>
-                    <div className="trades-table__cell">{trade.r1m.toFixed(2)}</div>
-                    <div className="trades-table__cell">{trade.atr5m.toFixed(2)}</div>
-                    <div className="trades-table__cell">{trade.z1m.toFixed(2)}</div>
-                    <div className="trades-table__cell">{trade.vshock.toFixed(2)}</div>
-                    <div className="trades-table__cell">
-                      <span className={`trade-status trade-status--closed`} title={trade.reason}>
-                        {trade.reason.substring(0, 20)}{trade.reason.length > 20 ? '...' : ''}
-                      </span>
-                    </div>
-                    <div className="trades-table__cell">
-                      {new Date(trade.created_at).toLocaleTimeString('tr-TR')}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </section>
