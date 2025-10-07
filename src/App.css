@@ -1305,7 +1305,7 @@
 }
 
 .trades-table {
-  min-width: 1200px;
+  min-width: 1400px;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1313,13 +1313,13 @@
 
 .trades-table__header {
   display: grid;
-  grid-template-columns: 180px 160px 140px 1fr;
-  gap: 2rem;
+  grid-template-columns: 180px 160px 140px 150px 1fr 1fr 1fr 1fr;
+  gap: 1rem;
   padding: 1.5rem 2rem;
   background: rgba(45, 50, 65, 0.9);
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--neon-cyan);
@@ -1327,8 +1327,8 @@
 
 .trades-table__row {
   display: grid;
-  grid-template-columns: 180px 160px 140px 1fr;
-  gap: 2rem;
+  grid-template-columns: 180px 160px 140px 150px 1fr 1fr 1fr 1fr;
+  gap: 1rem;
   padding: 1.5rem 2rem;
   background: rgba(45, 50, 65, 0.7);
   border-radius: 12px;
@@ -1362,9 +1362,126 @@
   min-width: 140px;
 }
 
-.trades-table__cell--reason {
-  min-width: 350px;
+.trades-table__cell--reason-icon {
+  min-width: 150px;
+}
+
+.trades-table__cell--reason-col1,
+.trades-table__cell--reason-col2,
+.trades-table__cell--reason-col3,
+.trades-table__cell--reason-col4 {
+  min-width: 150px;
   flex: 1;
+}
+
+/* Reason Badge - Compact Type Indicator */
+.trade-reason-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  width: fit-content;
+}
+
+.trade-reason-badge__icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.trade-reason-badge__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Badge colors by type */
+.trade-reason-badge--tp {
+  background: rgba(0, 200, 100, 0.15);
+  border-color: rgba(0, 200, 100, 0.3);
+}
+.trade-reason-badge--tp .trade-reason-badge__label {
+  color: #00c864;
+}
+
+.trade-reason-badge--sl {
+  background: rgba(255, 100, 100, 0.15);
+  border-color: rgba(255, 100, 100, 0.3);
+}
+.trade-reason-badge--sl .trade-reason-badge__label {
+  color: #ff6464;
+}
+
+.trade-reason-badge--trail {
+  background: rgba(255, 180, 0, 0.15);
+  border-color: rgba(255, 180, 0, 0.3);
+}
+.trade-reason-badge--trail .trade-reason-badge__label {
+  color: #ffb400;
+}
+
+.trade-reason-badge--timeout {
+  background: rgba(150, 150, 200, 0.15);
+  border-color: rgba(150, 150, 200, 0.3);
+}
+.trade-reason-badge--timeout .trade-reason-badge__label {
+  color: #9696c8;
+}
+
+.trade-reason-badge--score {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+.trade-reason-badge--score .trade-reason-badge__label {
+  color: var(--neon-cyan);
+}
+
+.trade-reason-badge--volume {
+  background: rgba(255, 0, 122, 0.15);
+  border-color: rgba(255, 0, 122, 0.3);
+}
+.trade-reason-badge--volume .trade-reason-badge__label {
+  color: var(--magenta);
+}
+
+.trade-reason-badge--manual {
+  background: rgba(200, 150, 255, 0.15);
+  border-color: rgba(200, 150, 255, 0.3);
+}
+.trade-reason-badge--manual .trade-reason-badge__label {
+  color: #c896ff;
+}
+
+.trade-reason-badge--risk {
+  background: rgba(255, 150, 0, 0.15);
+  border-color: rgba(255, 150, 0, 0.3);
+}
+.trade-reason-badge--risk .trade-reason-badge__label {
+  color: #ff9600;
+}
+
+.trade-reason-badge--other {
+  background: rgba(100, 100, 100, 0.15);
+  border-color: rgba(100, 100, 100, 0.3);
+}
+.trade-reason-badge--other .trade-reason-badge__label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Reason Column Values */
+.reason-column {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 /* PnL Wrapper with Score */
@@ -1863,19 +1980,20 @@
     min-width: 200px;
   }
   
+  .trades-table {
+    min-width: 1400px;
+  }
+  
   .trades-table__header,
   .trades-table__row {
-    grid-template-columns: 120px 120px 120px 1fr;
-    gap: 1.2rem;
-    padding: 1rem 1.5rem;
+    grid-template-columns: 160px 140px 130px 140px 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.2rem 1.5rem;
+    font-size: 0.85rem;
   }
   
-  .trades-table__cell--reason {
-    min-width: 250px;
-  }
-  
-  .trade-reason__details {
-    font-size: 0.7rem;
+  .reason-column {
+    font-size: 0.8rem;
   }
 }
 
@@ -1888,26 +2006,27 @@
   
   .trades-table__header,
   .trades-table__row {
-    min-width: 700px;
-    grid-template-columns: 130px 120px 120px 1fr;
-    gap: 1rem;
+    min-width: 1200px;
+    grid-template-columns: 120px 110px 110px 130px 150px 150px 150px 150px;
+    gap: 0.8rem;
     padding: 1rem 1.2rem;
+    font-size: 0.8rem;
   }
   
-  .trade-reason {
-    padding: 0.4rem 0.6rem;
+  .trade-reason-badge {
+    padding: 0.3rem 0.5rem;
   }
   
-  .trade-reason__icon {
-    font-size: 1.1rem;
+  .trade-reason-badge__icon {
+    font-size: 1rem;
   }
   
-  .trade-reason__label {
+  .trade-reason-badge__label {
+    font-size: 0.7rem;
+  }
+  
+  .reason-column {
     font-size: 0.75rem;
-  }
-  
-  .trade-reason__details {
-    font-size: 0.65rem;
   }
   
   .trade-pnl-wrapper {
@@ -1933,8 +2052,8 @@
   
   .trades-table__header,
   .trades-table__row {
-    grid-template-columns: 200px 180px 160px 1fr;
-    gap: 2.5rem;
+    grid-template-columns: 200px 180px 160px 170px 1fr 1fr 1fr 1fr;
+    gap: 1.2rem;
     padding: 1.8rem 2.5rem;
   }
   

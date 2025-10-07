@@ -5,7 +5,69 @@ import { useActions } from '../hooks/useActions';
 import { SupActionsChart } from '../components/SupActionsChart';
 import '../App.css';
 
-// Reason parser - closes nedenlerini parse et
+// Reason parser with pipe separator support
+interface ParsedReason {
+  type: string;
+  icon: string;
+  label: string;
+  columns: string[];
+  rawReason: string;
+}
+
+const parseReasonWithColumns = (reason: string): ParsedReason => {
+  const lower = reason.toLowerCase();
+  
+  // Split by pipe separator
+  const columns = reason.split('|').map(col => col.trim()).filter(col => col.length > 0);
+  
+  // Determine type and icon based on first column or full text
+  let type = 'other';
+  let icon = '📋';
+  let label = 'Diğer';
+  
+  if (lower.includes('tp') || lower.includes('take profit') || lower.includes('target')) {
+    type = 'tp';
+    icon = '🎯';
+    label = 'Take Profit';
+  } else if (lower.includes('sl') || lower.includes('stop loss') || lower.includes('stoploss')) {
+    type = 'sl';
+    icon = '🛑';
+    label = 'Stop Loss';
+  } else if (lower.includes('trail')) {
+    type = 'trail';
+    icon = '📉';
+    label = 'Trailing Stop';
+  } else if (lower.includes('timeout') || lower.includes('time') || lower.includes('duration')) {
+    type = 'timeout';
+    icon = '⏱️';
+    label = 'Zaman Aşımı';
+  } else if (lower.includes('score') || lower.includes('signal') || lower.includes('indicator')) {
+    type = 'score';
+    icon = '📊';
+    label = 'Sinyal Değişimi';
+  } else if (lower.includes('volume') || lower.includes('vol')) {
+    type = 'volume';
+    icon = '📈';
+    label = 'Hacim Değişimi';
+  } else if (lower.includes('manual') || lower.includes('user')) {
+    type = 'manual';
+    icon = '👤';
+    label = 'Manuel Kapatma';
+  } else if (lower.includes('risk') || lower.includes('exposure')) {
+    type = 'risk';
+    icon = '⚠️';
+    label = 'Risk Yönetimi';
+  }
+  
+  return {
+    type,
+    icon,
+    label,
+    columns: columns.length > 0 ? columns : [reason],
+    rawReason: reason
+  };
+};
+
 const parseReason = (reason: string): { type: string; icon: string; label: string; details: string } => {
   const lower = reason.toLowerCase();
   
@@ -294,16 +356,20 @@ const LiveActions = () => {
             </p>
             
             <div className="trades-container">
-              <div className="trades-table trades-table--minimal">
+              <div className="trades-table trades-table--dynamic">
                 <div className="trades-table__header">
                   <div className="trades-table__cell trades-table__cell--time">⏰ Zaman</div>
                   <div className="trades-table__cell trades-table__cell--symbol">💱 Sembol</div>
                   <div className="trades-table__cell trades-table__cell--pnl">💰 PnL</div>
-                  <div className="trades-table__cell trades-table__cell--reason">📝 Kapanış Nedeni</div>
+                  <div className="trades-table__cell trades-table__cell--reason-icon">🏷️ Tip</div>
+                  <div className="trades-table__cell trades-table__cell--reason-col1">📝 Neden</div>
+                  <div className="trades-table__cell trades-table__cell--reason-col2">ℹ️ Detay 1</div>
+                  <div className="trades-table__cell trades-table__cell--reason-col3">ℹ️ Detay 2</div>
+                  <div className="trades-table__cell trades-table__cell--reason-col4">ℹ️ Detay 3</div>
                 </div>
                 
                 {trades.map((trade) => {
-                  const reasonData = parseReason(trade.reason);
+                  const reasonData = parseReasonWithColumns(trade.reason);
                   
                   return (
                     <div key={trade.id} className="trades-table__row">
@@ -338,18 +404,35 @@ const LiveActions = () => {
                         </div>
                       </div>
                       
-                      <div className="trades-table__cell trades-table__cell--reason">
-                        <div className={`trade-reason trade-reason--${reasonData.type}`}>
-                          <span className="trade-reason__icon">{reasonData.icon}</span>
-                          <div className="trade-reason__content">
-                            <span className="trade-reason__label">{reasonData.label}</span>
-                            <span className="trade-reason__details" title={reasonData.details}>
-                              {reasonData.details.length > 80 
-                                ? reasonData.details.substring(0, 80) + '...' 
-                                : reasonData.details}
-                            </span>
-                          </div>
+                      <div className="trades-table__cell trades-table__cell--reason-icon">
+                        <div className={`trade-reason-badge trade-reason-badge--${reasonData.type}`}>
+                          <span className="trade-reason-badge__icon">{reasonData.icon}</span>
+                          <span className="trade-reason-badge__label">{reasonData.label}</span>
                         </div>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--reason-col1">
+                        <span className="reason-column" title={reasonData.columns[0] || '-'}>
+                          {reasonData.columns[0] || '-'}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--reason-col2">
+                        <span className="reason-column" title={reasonData.columns[1] || '-'}>
+                          {reasonData.columns[1] || '-'}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--reason-col3">
+                        <span className="reason-column" title={reasonData.columns[2] || '-'}>
+                          {reasonData.columns[2] || '-'}
+                        </span>
+                      </div>
+                      
+                      <div className="trades-table__cell trades-table__cell--reason-col4">
+                        <span className="reason-column" title={reasonData.columns[3] || '-'}>
+                          {reasonData.columns[3] || '-'}
+                        </span>
                       </div>
                     </div>
                   );
