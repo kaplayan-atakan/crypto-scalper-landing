@@ -344,8 +344,8 @@ const LiveActions = () => {
                           <div className="trade-reason__content">
                             <span className="trade-reason__label">{reasonData.label}</span>
                             <span className="trade-reason__details" title={reasonData.details}>
-                              {reasonData.details.length > 60 
-                                ? reasonData.details.substring(0, 60) + '...' 
+                              {reasonData.details.length > 80 
+                                ? reasonData.details.substring(0, 80) + '...' 
                                 : reasonData.details}
                             </span>
                           </div>
