@@ -1,59 +1,77 @@
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Link } from 'react-router-dom';
+import { useActions } from '../hooks/useActions';
+import { SupActionsChart } from '../components/SupActionsChart';
 import '../App.css';
 
-// Dummy live trade data
-const generateLiveTrades = () => {
-  const trades = [];
-  const symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'AVAX/USDT', 'MATIC/USDT'];
-  const strategies = ['Momentum', 'Mean Reversion', 'Breakout', 'Scalp'];
-  const statuses = ['OPEN', 'CLOSED', 'PENDING'];
-  
-  for (let i = 0; i < 15; i++) {
-    const entryPrice = 45000 + Math.random() * 10000;
-    const currentPrice = entryPrice * (1 + (Math.random() - 0.5) * 0.03);
-    const pnl = ((currentPrice - entryPrice) / entryPrice) * 100;
-    
-    trades.push({
-      id: `TRD${1000 + i}`,
-      symbol: symbols[Math.floor(Math.random() * symbols.length)],
-      strategy: strategies[Math.floor(Math.random() * strategies.length)],
-      side: Math.random() > 0.5 ? 'LONG' : 'SHORT',
-      entryPrice: entryPrice.toFixed(2),
-      currentPrice: currentPrice.toFixed(2),
-      size: (Math.random() * 0.5 + 0.1).toFixed(3),
-      pnl: pnl.toFixed(2),
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      time: new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString(),
-    });
-  }
-  return trades.sort((a, b) => parseFloat(b.pnl) - parseFloat(a.pnl));
-};
-
-// Real-time performance data
-const generatePerformanceData = () => {
-  const data = [];
-  for (let i = 0; i < 24; i++) {
-    data.push({
-      time: `${i}:00`,
-      pnl: Math.random() * 500 - 100,
-      volume: Math.random() * 10000,
-      trades: Math.floor(Math.random() * 50),
-    });
-  }
-  return data;
-};
-
 const LiveActions = () => {
-  const liveTrades = generateLiveTrades();
-  const performanceData = generatePerformanceData();
+  const { trades, metrics, loading, error, refresh, enableRealtime, setEnableRealtime } = useActions();
   
-  const stats = {
-    activePositions: liveTrades.filter(t => t.status === 'OPEN').length,
-    totalPnL: liveTrades.reduce((sum, t) => sum + parseFloat(t.pnl), 0).toFixed(2),
-    winRate: ((liveTrades.filter(t => parseFloat(t.pnl) > 0).length / liveTrades.length) * 100).toFixed(1),
-    avgPnL: (liveTrades.reduce((sum, t) => sum + parseFloat(t.pnl), 0) / liveTrades.length).toFixed(2),
-  };
+  // Stats hesaplama - gerçek verilerle
+  const stats = useMemo(() => {
+    if (!trades || trades.length === 0) {
+      return {
+        activePositions: 0,
+        totalPnL: '0.00',
+        winRate: '0.0',
+        avgPnL: '0.00',
+      };
+    }
+    
+    const closedTrades = trades.filter(t => t.exit_reason);
+    const winningTrades = closedTrades.filter(t => t.pnl_percentage > 0);
+    const totalPnL = closedTrades.reduce((sum, t) => sum + t.pnl_percentage, 0);
+    
+    return {
+      activePositions: closedTrades.length,
+      totalPnL: totalPnL.toFixed(2),
+      winRate: closedTrades.length > 0 ? ((winningTrades.length / closedTrades.length) * 100).toFixed(1) : '0.0',
+      avgPnL: closedTrades.length > 0 ? (totalPnL / closedTrades.length).toFixed(2) : '0.00',
+    };
+  }, [trades]);
+
+  // Volume chart data - metriklerden hesapla
+  const volumeData = useMemo(() => {
+    return metrics.map(m => ({
+      time: new Date(m.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      volume: m.total_pnl * 1000, // Approximate volume
+      trades: m.total_trades
+    }));
+  }, [metrics]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="page__container" style={{ padding: '4rem', textAlign: 'center' }}>
+          <div className="sb-loading">
+            <div className="sb-loading-spinner"></div>
+            <h2>Veriler yükleniyor...</h2>
+            <p>Supabase'den canlı veriler çekiliyor</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="page">
+        <div className="page__container" style={{ padding: '4rem', textAlign: 'center' }}>
+          <div className="sb-error">
+            <h2>⚠️ Veri Yükleme Hatası</h2>
+            <p>{error.message}</p>
+            <button onClick={refresh} className="btn-live-actions" style={{ marginTop: '2rem' }}>
+              <span className="btn-live-actions__icon">🔄</span>
+              <span className="btn-live-actions__text">Tekrar Dene</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -95,6 +113,24 @@ const LiveActions = () => {
                 <div className="stat-label">Ortalama PnL</div>
               </div>
             </div>
+            
+            {/* Realtime Toggle */}
+            <div className="sb-realtime-toggle">
+              <label className="sb-toggle-label">
+                <input 
+                  type="checkbox" 
+                  checked={enableRealtime} 
+                  onChange={(e) => setEnableRealtime(e.target.checked)}
+                  className="sb-toggle-input"
+                />
+                <span className="sb-toggle-text">
+                  {enableRealtime ? '🟢 Realtime Aktif' : '⚪ Realtime Pasif'}
+                </span>
+              </label>
+              <button onClick={refresh} className="sb-refresh-btn" title="Verileri Yenile">
+                🔄 Yenile
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -107,35 +143,7 @@ const LiveActions = () => {
             <div className="section__badge">📊 PERFORMANS</div>
             <h2 className="section__title">24 Saatlik Canlı Performans</h2>
             <div className="chart-card">
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={performanceData}>
-                  <defs>
-                    <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#00E5FF" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="time" stroke="rgba(255,255,255,0.6)" />
-                  <YAxis stroke="rgba(255,255,255,0.6)" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: 'rgba(20, 25, 35, 0.95)', 
-                      border: '1px solid rgba(0, 229, 255, 0.3)',
-                      borderRadius: '12px',
-                      padding: '12px'
-                    }} 
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="pnl" 
-                    stroke="#00E5FF" 
-                    fillOpacity={1} 
-                    fill="url(#colorPnl)" 
-                    name="PnL ($)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <SupActionsChart data={metrics} height={300} />
             </div>
           </section>
 
@@ -155,14 +163,14 @@ const LiveActions = () => {
                   <div className="trades-table__cell">Strateji</div>
                   <div className="trades-table__cell">Yön</div>
                   <div className="trades-table__cell">Giriş</div>
-                  <div className="trades-table__cell">Güncel</div>
+                  <div className="trades-table__cell">Çıkış</div>
                   <div className="trades-table__cell">Miktar</div>
                   <div className="trades-table__cell">PnL %</div>
-                  <div className="trades-table__cell">Durum</div>
+                  <div className="trades-table__cell">Çıkış Nedeni</div>
                   <div className="trades-table__cell">Zaman</div>
                 </div>
                 
-                {liveTrades.map((trade) => (
+                {trades.map((trade) => (
                   <div key={trade.id} className="trades-table__row">
                     <div className="trades-table__cell">
                       <span className="trade-id">{trade.id}</span>
@@ -174,24 +182,26 @@ const LiveActions = () => {
                       <span className="trade-strategy">{trade.strategy}</span>
                     </div>
                     <div className="trades-table__cell">
-                      <span className={`trade-side trade-side--${trade.side.toLowerCase()}`}>
-                        {trade.side}
+                      <span className={`trade-side trade-side--long`}>
+                        LONG
                       </span>
                     </div>
-                    <div className="trades-table__cell">${trade.entryPrice}</div>
-                    <div className="trades-table__cell">${trade.currentPrice}</div>
-                    <div className="trades-table__cell">{trade.size}</div>
+                    <div className="trades-table__cell">${trade.entry_price.toFixed(2)}</div>
+                    <div className="trades-table__cell">${trade.exit_price.toFixed(2)}</div>
+                    <div className="trades-table__cell">{trade.position_size.toFixed(3)}</div>
                     <div className="trades-table__cell">
-                      <span className={`trade-pnl ${parseFloat(trade.pnl) >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
-                        {parseFloat(trade.pnl) >= 0 ? '+' : ''}{trade.pnl}%
+                      <span className={`trade-pnl ${trade.pnl_percentage >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
+                        {trade.pnl_percentage >= 0 ? '+' : ''}{trade.pnl_percentage.toFixed(2)}%
                       </span>
                     </div>
                     <div className="trades-table__cell">
-                      <span className={`trade-status trade-status--${trade.status.toLowerCase()}`}>
-                        {trade.status}
+                      <span className={`trade-status trade-status--closed`}>
+                        {trade.exit_reason}
                       </span>
                     </div>
-                    <div className="trades-table__cell">{trade.time}</div>
+                    <div className="trades-table__cell">
+                      {new Date(trade.exit_time).toLocaleTimeString('tr-TR')}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -204,7 +214,7 @@ const LiveActions = () => {
             <h2 className="section__title">İşlem Hacmi</h2>
             <div className="chart-card">
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={performanceData}>
+                <LineChart data={volumeData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis dataKey="time" stroke="rgba(255,255,255,0.6)" />
                   <YAxis stroke="rgba(255,255,255,0.6)" />
