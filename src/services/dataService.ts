@@ -1,41 +1,37 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import type { ClosedTradeSimple, TradeMetrics, RealtimePayload } from '../types/supabase'
 
-const TARGET_BOT_ID = 'scalper_core_MOM_1DK_V9_BinanceV7_Live'
+const TARGET_PROJECT_ID = 'scalper_core_MOM_1DK_V9_BinanceV7_Live'
 
 // Dummy data fallback
 const generateDummyTrades = (count: number): ClosedTradeSimple[] => {
-  const symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'AVAX/USDT', 'MATIC/USDT']
-  const strategies = ['Momentum', 'Mean Reversion', 'Breakout', 'Scalp']
-  const exitReasons = ['TP', 'SL', 'Manual', 'Timeout']
+  const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'AVAXUSDT', 'MATICUSDT', 'PUMPBTCUSDT']
+  const reasons = ['TP Hit', 'SL Triggered', 'Manual Close', 'Timeout', 'Score Improved', 'Volume Spike']
   
   return Array.from({ length: count }, (_, i) => {
-    const entryPrice = 45000 + Math.random() * 10000
-    const exitPrice = entryPrice * (1 + (Math.random() - 0.48) * 0.05)
-    const pnlPercentage = ((exitPrice - entryPrice) / entryPrice) * 100
-    const positionSize = Math.random() * 0.5 + 0.1
+    const pnl = (Math.random() - 0.45) * 200 // -90 to +110 range
+    const score = Math.random() * 100
     
     const now = new Date()
-    const exitTime = new Date(now.getTime() - Math.random() * 24 * 60 * 60 * 1000)
-    const entryTime = new Date(exitTime.getTime() - Math.random() * 60 * 60 * 1000)
+    const createdAt = new Date(now.getTime() - Math.random() * 24 * 60 * 60 * 1000)
     
     return {
-      id: `TRD${1000 + i}`,
-      bot_id: TARGET_BOT_ID,
+      id: `${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
+      project_id: TARGET_PROJECT_ID,
       symbol: symbols[Math.floor(Math.random() * symbols.length)],
-      strategy: strategies[Math.floor(Math.random() * strategies.length)],
-      entry_time: entryTime.toISOString(),
-      exit_time: exitTime.toISOString(),
-      entry_price: entryPrice,
-      exit_price: exitPrice,
-      position_size: positionSize,
-      pnl_percentage: pnlPercentage,
-      pnl_amount: pnlPercentage * positionSize * entryPrice / 100,
-      exit_reason: exitReasons[Math.floor(Math.random() * exitReasons.length)],
-      created_at: entryTime.toISOString(),
-      updated_at: exitTime.toISOString()
+      pnl: parseFloat(pnl.toFixed(2)),
+      reason: reasons[Math.floor(Math.random() * reasons.length)],
+      score: parseFloat(score.toFixed(2)),
+      r1m: (Math.random() - 0.5) * 10,
+      atr5m: Math.random() * 5,
+      z1m: (Math.random() - 0.5) * 4,
+      vshock: Math.random() * 3,
+      upt: Math.random() * 2,
+      trend: (Math.random() - 0.5) * 2,
+      volr: Math.random() * 1.5,
+      created_at: createdAt.toISOString()
     }
-  }).sort((a, b) => new Date(b.exit_time).getTime() - new Date(a.exit_time).getTime())
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 }
 
 const generateDummyMetrics = (hours: number): TradeMetrics[] => {
@@ -75,9 +71,9 @@ export const dataService = {
       const { data, error } = await supabase!
         .from('closed_trades_simple')
         .select('*')
-        .eq('bot_id', TARGET_BOT_ID)
-        .gte('exit_time', since)
-        .order('exit_time', { ascending: false })
+        .eq('project_id', TARGET_PROJECT_ID)
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
         .limit(50)
       
       if (error) throw error
@@ -103,7 +99,7 @@ export const dataService = {
       // RPC call veya view'dan çek
       const { data, error } = await supabase!
         .rpc('get_trade_metrics', {
-          p_bot_id: TARGET_BOT_ID,
+          p_project_id: TARGET_PROJECT_ID,
           p_interval: 'hourly'
         } as any)
       
@@ -138,7 +134,7 @@ export const dataService = {
           event: '*',
           schema: 'public',
           table: 'closed_trades_simple',
-          filter: `bot_id=eq.${TARGET_BOT_ID}`
+          filter: `project_id=eq.${TARGET_PROJECT_ID}`
         },
         (payload: any) => {
           callback({

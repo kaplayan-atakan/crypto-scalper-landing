@@ -1,18 +1,18 @@
 export interface ClosedTradeSimple {
   id: string
-  bot_id: string
+  project_id: string // Bot ID (was bot_id)
   symbol: string
-  strategy: string
-  entry_time: string
-  exit_time: string
-  entry_price: number
-  exit_price: number
-  position_size: number
-  pnl_percentage: number
-  pnl_amount: number
-  exit_reason: string
-  created_at: string
-  updated_at: string
+  pnl: number // Kar/Zarar miktarı
+  reason: string // Trade açılma/kapanma nedeni
+  score: number // Trade skor değeri
+  r1m: number // 1 dakika momentum
+  atr5m: number // 5 dakika ATR (volatilite)
+  z1m: number // Z-score 1 dakika
+  vshock: number // Volume şok göstergesi
+  upt: number // Upturn göstergesi
+  trend: number // Trend yönü
+  volr: number // Volume oranı
+  created_at: string // Kayıt oluşturma zamanı
 }
 
 export interface TradeMetrics {
@@ -37,8 +37,8 @@ export interface Database {
     Tables: {
       closed_trades_simple: {
         Row: ClosedTradeSimple
-        Insert: Omit<ClosedTradeSimple, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<ClosedTradeSimple, 'id' | 'created_at' | 'updated_at'>>
+        Insert: Omit<ClosedTradeSimple, 'id' | 'created_at'>
+        Update: Partial<Omit<ClosedTradeSimple, 'id' | 'created_at'>>
       }
     }
     Views: {
@@ -47,7 +47,7 @@ export interface Database {
     Functions: {
       get_trade_metrics: {
         Args: {
-          p_bot_id: string
+          p_project_id: string
           p_interval: string
         }
         Returns: TradeMetrics[]

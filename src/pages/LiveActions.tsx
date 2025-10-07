@@ -19,15 +19,14 @@ const LiveActions = () => {
       };
     }
     
-    const closedTrades = trades.filter(t => t.exit_reason);
-    const winningTrades = closedTrades.filter(t => t.pnl_percentage > 0);
-    const totalPnL = closedTrades.reduce((sum, t) => sum + t.pnl_percentage, 0);
+    const winningTrades = trades.filter(t => t.pnl > 0);
+    const totalPnL = trades.reduce((sum, t) => sum + t.pnl, 0);
     
     return {
-      activePositions: closedTrades.length,
+      activePositions: trades.length,
       totalPnL: totalPnL.toFixed(2),
-      winRate: closedTrades.length > 0 ? ((winningTrades.length / closedTrades.length) * 100).toFixed(1) : '0.0',
-      avgPnL: closedTrades.length > 0 ? (totalPnL / closedTrades.length).toFixed(2) : '0.00',
+      winRate: trades.length > 0 ? ((winningTrades.length / trades.length) * 100).toFixed(1) : '0.0',
+      avgPnL: trades.length > 0 ? (totalPnL / trades.length).toFixed(2) : '0.00',
     };
   }, [trades]);
 
@@ -160,47 +159,43 @@ const LiveActions = () => {
                 <div className="trades-table__header">
                   <div className="trades-table__cell">ID</div>
                   <div className="trades-table__cell">Sembol</div>
-                  <div className="trades-table__cell">Strateji</div>
-                  <div className="trades-table__cell">Yön</div>
-                  <div className="trades-table__cell">Giriş</div>
-                  <div className="trades-table__cell">Çıkış</div>
-                  <div className="trades-table__cell">Miktar</div>
-                  <div className="trades-table__cell">PnL %</div>
-                  <div className="trades-table__cell">Çıkış Nedeni</div>
+                  <div className="trades-table__cell">PnL</div>
+                  <div className="trades-table__cell">Score</div>
+                  <div className="trades-table__cell">R1M</div>
+                  <div className="trades-table__cell">ATR5M</div>
+                  <div className="trades-table__cell">Z1M</div>
+                  <div className="trades-table__cell">VShock</div>
+                  <div className="trades-table__cell">Reason</div>
                   <div className="trades-table__cell">Zaman</div>
                 </div>
                 
                 {trades.map((trade) => (
                   <div key={trade.id} className="trades-table__row">
                     <div className="trades-table__cell">
-                      <span className="trade-id">{trade.id}</span>
+                      <span className="trade-id">{trade.id.substring(0, 8)}...</span>
                     </div>
                     <div className="trades-table__cell">
                       <span className="trade-symbol">{trade.symbol}</span>
                     </div>
                     <div className="trades-table__cell">
-                      <span className="trade-strategy">{trade.strategy}</span>
-                    </div>
-                    <div className="trades-table__cell">
-                      <span className={`trade-side trade-side--long`}>
-                        LONG
-                      </span>
-                    </div>
-                    <div className="trades-table__cell">${trade.entry_price.toFixed(2)}</div>
-                    <div className="trades-table__cell">${trade.exit_price.toFixed(2)}</div>
-                    <div className="trades-table__cell">{trade.position_size.toFixed(3)}</div>
-                    <div className="trades-table__cell">
-                      <span className={`trade-pnl ${trade.pnl_percentage >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
-                        {trade.pnl_percentage >= 0 ? '+' : ''}{trade.pnl_percentage.toFixed(2)}%
+                      <span className={`trade-pnl ${trade.pnl >= 0 ? 'trade-pnl--positive' : 'trade-pnl--negative'}`}>
+                        {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}
                       </span>
                     </div>
                     <div className="trades-table__cell">
-                      <span className={`trade-status trade-status--closed`}>
-                        {trade.exit_reason}
+                      <span className="trade-score">{trade.score.toFixed(1)}</span>
+                    </div>
+                    <div className="trades-table__cell">{trade.r1m.toFixed(2)}</div>
+                    <div className="trades-table__cell">{trade.atr5m.toFixed(2)}</div>
+                    <div className="trades-table__cell">{trade.z1m.toFixed(2)}</div>
+                    <div className="trades-table__cell">{trade.vshock.toFixed(2)}</div>
+                    <div className="trades-table__cell">
+                      <span className={`trade-status trade-status--closed`} title={trade.reason}>
+                        {trade.reason.substring(0, 20)}{trade.reason.length > 20 ? '...' : ''}
                       </span>
                     </div>
                     <div className="trades-table__cell">
-                      {new Date(trade.exit_time).toLocaleTimeString('tr-TR')}
+                      {new Date(trade.created_at).toLocaleTimeString('tr-TR')}
                     </div>
                   </div>
                 ))}

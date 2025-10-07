@@ -21,27 +21,29 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 Supabase SQL Editor'de aşağıdaki tabloyu oluştur:
 
 ```sql
--- Trades tablosu
+-- Trades tablosu (Gerçek tablo yapısı)
 CREATE TABLE closed_trades_simple (
   id TEXT PRIMARY KEY,
-  bot_id TEXT NOT NULL,
+  project_id TEXT NOT NULL,
   symbol TEXT NOT NULL,
-  strategy TEXT NOT NULL,
-  entry_time TIMESTAMPTZ NOT NULL,
-  exit_time TIMESTAMPTZ NOT NULL,
-  entry_price NUMERIC NOT NULL,
-  exit_price NUMERIC NOT NULL,
-  position_size NUMERIC NOT NULL,
-  pnl_percentage NUMERIC NOT NULL,
-  pnl_amount NUMERIC NOT NULL,
-  exit_reason TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  pnl DOUBLE PRECISION NOT NULL,
+  reason TEXT NOT NULL,
+  score DOUBLE PRECISION NOT NULL,
+  r1m DOUBLE PRECISION NOT NULL,
+  atr5m DOUBLE PRECISION NOT NULL,
+  z1m DOUBLE PRECISION NOT NULL,
+  vshock DOUBLE PRECISION NOT NULL,
+  upt DOUBLE PRECISION NOT NULL,
+  trend DOUBLE PRECISION NOT NULL,
+  volr DOUBLE PRECISION NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Index'ler
-CREATE INDEX idx_trades_bot_id ON closed_trades_simple(bot_id);
-CREATE INDEX idx_trades_exit_time ON closed_trades_simple(exit_time DESC);
+CREATE INDEX idx_trades_project_id ON closed_trades_simple(project_id);
+CREATE INDEX idx_trades_created_at ON closed_trades_simple(created_at DESC);
+CREATE INDEX idx_trades_symbol ON closed_trades_simple(symbol);
+CREATE INDEX idx_trades_pnl ON closed_trades_simple(pnl DESC);
 
 -- RLS (Row Level Security) politikaları
 ALTER TABLE closed_trades_simple ENABLE ROW LEVEL SECURITY;
@@ -56,7 +58,7 @@ Performans metrikleri için bir RPC function oluştur:
 
 ```sql
 CREATE OR REPLACE FUNCTION get_trade_metrics(
-  p_bot_id TEXT,
+  p_project_id TEXT,
   p_interval TEXT DEFAULT 'hourly'
 )
 RETURNS TABLE (
@@ -72,20 +74,20 @@ BEGIN
   RETURN QUERY
   SELECT 
     COUNT(*)::INT as total_trades,
-    (COUNT(*) FILTER (WHERE pnl_percentage > 0)::NUMERIC / NULLIF(COUNT(*), 0) * 100) as win_rate,
-    AVG(pnl_percentage) as avg_pnl,
-    SUM(pnl_amount) as total_pnl,
-    MIN(pnl_percentage) as max_drawdown,
+    (COUNT(*) FILTER (WHERE pnl > 0)::NUMERIC / NULLIF(COUNT(*), 0) * 100) as win_rate,
+    AVG(pnl) as avg_pnl,
+    SUM(pnl) as total_pnl,
+    MIN(pnl) as max_drawdown,
     CASE 
-      WHEN STDDEV(pnl_percentage) > 0 
-      THEN AVG(pnl_percentage) / STDDEV(pnl_percentage)
+      WHEN STDDEV(pnl) > 0 
+      THEN AVG(pnl) / STDDEV(pnl)
       ELSE 0 
     END as sharpe_ratio,
-    DATE_TRUNC(p_interval::TEXT, exit_time) as timestamp
+    DATE_TRUNC(p_interval::TEXT, created_at) as timestamp
   FROM closed_trades_simple
-  WHERE bot_id = p_bot_id
-    AND exit_time >= NOW() - INTERVAL '24 hours'
-  GROUP BY DATE_TRUNC(p_interval::TEXT, exit_time)
+  WHERE project_id = p_project_id
+    AND created_at >= NOW() - INTERVAL '24 hours'
+  GROUP BY DATE_TRUNC(p_interval::TEXT, created_at)
   ORDER BY timestamp DESC;
 END;
 $$ LANGUAGE plpgsql;
@@ -142,10 +144,31 @@ src/
     └── LiveActions.tsx      # Main page
 ```
 
-## 🎯 Target Bot ID
-Default bot ID: `scalper_core_MOM_1DK_V9_BinanceV7_Live`
+## 🎯 Target Project ID
+Default project ID: `scalper_core_MOM_1DK_V9_BinanceV7_Live`
 
-Farklı bir bot için `src/services/dataService.ts` içindeki `TARGET_BOT_ID` değişkenini değiştir.
+Farklı bir bot için `src/services/dataService.ts` içindeki `TARGET_PROJECT_ID` değişkenini değiştir.
+
+## 📊 Tablo Yapısı
+
+| # | Kolon | Tip | Açıklama |
+|---|-------|-----|----------|
+| 1 | id | String (UUID) | Trade benzersiz kimliği |
+| 2 | project_id | String | Bot ID (örn: scalper_core_MOM_1DK_V3) |
+| 3 | symbol | String | Trading çifti (örn: PUMPBTCUSDT) |
+| 4 | pnl | Double | Kar/Zarar miktarı |
+| 5 | reason | String | Trade açılma/kapanma nedeni |
+| 6 | score | Double | Trade skor değeri |
+| 7 | r1m | Double | 1 dakika momentum |
+| 8 | atr5m | Double | 5 dakika ATR (volatilite) |
+| 9 | z1m | Double | Z-score 1 dakika |
+| 10 | vshock | Double | Volume şok göstergesi |
+| 11 | upt | Double | Upturn göstergesi |
+| 12 | trend | Double | Trend yönü |
+| 13 | volr | Double | Volume oranı |
+| 14 | created_at | DateTime | Kayıt oluşturma zamanı |
+
+**Not:** Tabloda `bot_id` kolonu yok, sadece `project_id` var. Botları grouplarken `project_id` kullanılıyor! 🎯
 
 ## 🐛 Troubleshooting
 

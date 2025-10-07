@@ -1351,11 +1351,21 @@
   font-family: 'Courier New', monospace;
   color: var(--text-light);
   font-weight: 500;
+  font-size: 0.85rem;
 }
 
 .trade-symbol {
   font-weight: 600;
   color: var(--text-light);
+}
+
+.trade-score {
+  padding: 0.25rem 0.75rem;
+  background: rgba(0, 229, 255, 0.15);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--neon-cyan);
+  font-weight: 600;
 }
 
 .trade-strategy {
