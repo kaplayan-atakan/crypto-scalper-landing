@@ -1,7 +1,8 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
-import type { ClosedTradeSimple, TradeMetrics, RealtimePayload } from '../types/supabase'
+import type { ClosedTradeSimple, TradeMetrics, RealtimePayload, BotInfo } from '../types/supabase'
 
-const TARGET_PROJECT_ID = 'scalper_core_MOM_1DK_V9_BinanceV7_Live'
+// Dinamik bot ID - localStorage'dan yükle veya default kullan
+let CURRENT_BOT_ID = localStorage.getItem('selectedBotId') || 'scalper_core_MOM_1DK_V9_BinanceV7_Live'
 
 // Dummy data fallback
 const generateDummyTrades = (count: number): ClosedTradeSimple[] => {
@@ -17,7 +18,7 @@ const generateDummyTrades = (count: number): ClosedTradeSimple[] => {
     
     return {
       id: `${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
-      project_id: TARGET_PROJECT_ID,
+      project_id: CURRENT_BOT_ID,
       symbol: symbols[Math.floor(Math.random() * symbols.length)],
       pnl: parseFloat(pnl.toFixed(2)),
       reason: reasons[Math.floor(Math.random() * reasons.length)],
@@ -137,6 +138,66 @@ const calculateMetricsFromTrades = (trades: ClosedTradeSimple[], intervalHours: 
 }
 
 export const dataService = {
+  // Bot yönetimi
+  setCurrentBot(botId: string) {
+    CURRENT_BOT_ID = botId
+    localStorage.setItem('selectedBotId', botId)
+  },
+
+  getCurrentBot(): string {
+    return CURRENT_BOT_ID
+  },
+
+  // Bot listesini getir
+  async getAvailableBots(): Promise<{ data: BotInfo[] | null, error: Error | null }> {
+    if (!isSupabaseConfigured()) {
+      console.log('Using dummy bot list')
+      return {
+        data: [
+          { project_id: 'scalper_core_MOM_1DK_V9_BinanceV7_Live', last_trade_at: new Date().toISOString() },
+          { project_id: 'scalper_test_bot_v1', last_trade_at: new Date(Date.now() - 3600000).toISOString() },
+          { project_id: 'momentum_trader_v2', last_trade_at: new Date(Date.now() - 7200000).toISOString() }
+        ],
+        error: null
+      }
+    }
+
+    try {
+      const { data, error } = await supabase!.rpc('get_distinct_bots')
+      if (error) throw error
+      return { data, error: null }
+    } catch (err) {
+      console.error('Error fetching bot list:', err)
+      // Fallback: closed_trades_simple'dan distinct project_id'leri çek
+      try {
+        const { data, error } = await supabase!
+          .from('closed_trades_simple')
+          .select('project_id, created_at')
+          .order('created_at', { ascending: false })
+        
+        if (error) throw error
+        
+        // Distinct project_id'leri ve son işlem zamanlarını bul
+        const botMap = new Map<string, string>()
+        data?.forEach((trade: { project_id: string; created_at: string }) => {
+          if (!botMap.has(trade.project_id)) {
+            botMap.set(trade.project_id, trade.created_at)
+          }
+        })
+        
+        const bots: BotInfo[] = Array.from(botMap.entries()).map(([project_id, last_trade_at]) => ({
+          project_id,
+          last_trade_at
+        }))
+        
+        return { data: bots, error: null }
+      } catch (fallbackErr) {
+        console.error('Fallback bot list failed:', fallbackErr)
+        return { data: null, error: fallbackErr as Error }
+      }
+    }
+  },
+
   // Son 24 saatlik işlemler
   async getRecentTrades(limit = 50, hours = 24): Promise<{ data: ClosedTradeSimple[] | null, error: Error | null }> {
     if (!isSupabaseConfigured()) {
@@ -153,7 +214,7 @@ export const dataService = {
       const { data, error } = await supabase!
         .from('closed_trades_simple')
         .select('*')
-        .eq('project_id', TARGET_PROJECT_ID)
+        .eq('project_id', CURRENT_BOT_ID)
         .gte('created_at', since)
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -184,7 +245,7 @@ export const dataService = {
       const { data: trades, error } = await supabase!
         .from('closed_trades_simple')
         .select('*')
-        .eq('project_id', TARGET_PROJECT_ID)
+        .eq('project_id', CURRENT_BOT_ID)
         .gte('created_at', since)
         .order('created_at', { ascending: true }) // Eski -> Yeni sıralama
       
@@ -222,7 +283,7 @@ export const dataService = {
           event: '*',
           schema: 'public',
           table: 'closed_trades_simple',
-          filter: `project_id=eq.${TARGET_PROJECT_ID}`
+          filter: `project_id=eq.${CURRENT_BOT_ID}`
         },
         (payload: any) => {
           callback({

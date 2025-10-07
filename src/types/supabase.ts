@@ -31,6 +31,21 @@ export interface RealtimePayload<T> {
   old: T
 }
 
+export interface BotInfo {
+  project_id: string
+  last_trade_at: string
+  // İsteğe bağlı: bot metadataları
+  display_name?: string
+  trade_count?: number
+}
+
+export interface BotSelectorState {
+  selectedBot: string
+  availableBots: BotInfo[]
+  isLoading: boolean
+  error: Error | null
+}
+
 // Supabase Database Types
 export interface Database {
   public: {

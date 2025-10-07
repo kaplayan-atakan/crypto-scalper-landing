@@ -24,6 +24,7 @@ export function useActions(autoRefresh = true): UseActionsReturn {
   const [enableRealtime, setEnableRealtime] = useState(autoRefresh)
   const [limit, setLimit] = useState(50)
   const [timeRange, setTimeRange] = useState(24) // hours
+  const [subscriptionKey, setSubscriptionKey] = useState(Date.now()) // Bot değişiminde yeniden subscribe için
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -48,6 +49,17 @@ export function useActions(autoRefresh = true): UseActionsReturn {
     }
   }, [limit, timeRange])
 
+  // Bot değişikliğinde verileri yenile
+  useEffect(() => {
+    const handleBotChange = () => {
+      setSubscriptionKey(Date.now()) // Force re-subscribe
+      fetchData() // Yeni bot verilerini çek
+    }
+    
+    window.addEventListener('botChanged', handleBotChange)
+    return () => window.removeEventListener('botChanged', handleBotChange)
+  }, [fetchData])
+
   useEffect(() => {
     fetchData()
     
@@ -62,7 +74,7 @@ export function useActions(autoRefresh = true): UseActionsReturn {
     return () => {
       subscription.unsubscribe()
     }
-  }, [fetchData, enableRealtime])
+  }, [fetchData, enableRealtime, limit, subscriptionKey]) // subscriptionKey ekledik
 
   return {
     trades,

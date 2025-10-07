@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useActions } from '../hooks/useActions';
 import { SupActionsChart } from '../components/SupActionsChart';
 import { VolumeChart } from '../components/VolumeChart';
+import { BotSelector } from '../components/BotSelector';
 import '../App.css';
 
 // Enhanced reason parser with detailed field extraction
@@ -339,6 +340,9 @@ const LiveActions = () => {
               </h1>
               <p className="page__subtitle">Gerçek zamanlı işlem takibi ve performans metrikleri</p>
             </div>
+            
+            {/* Bot Selector - Stats'tan önce */}
+            <BotSelector />
             
             {/* Live Stats Row - Enhanced */}
             <div className="sb-stats-grid">
