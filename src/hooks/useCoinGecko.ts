@@ -108,7 +108,7 @@ function filterDataForWindow(
   
   // Filter for window
   const filtered = data.filter(candle => {
-    const candleTime = candle.timestamp / 1000 // ms to seconds
+    const candleTime = candle.timestamp // Already in SECONDS
     return candleTime >= fromTs && candleTime <= toTs
   })
   
@@ -209,14 +209,23 @@ export function useCoinGecko(
       
       console.log('✅ API response:', result?.length || 0, 'candles')
       
-      // Convert to OHLCPoint[]
+      // Convert to OHLCPoint[] - IMPORTANT: Convert timestamp from MS to SECONDS
       const rawOHLC: OHLCPoint[] = result.map((point: number[]) => ({
-        timestamp: point[0],
+        timestamp: Math.floor(point[0] / 1000), // Convert MS to SECONDS
         open: point[1],
         high: point[2],
         low: point[3],
         close: point[4]
       }))
+      
+      console.log('🔄 Timestamp conversion: MS → SECONDS')
+      if (rawOHLC.length > 0) {
+        console.log('   First candle timestamp:', {
+          original_ms: result[0][0],
+          converted_sec: rawOHLC[0].timestamp,
+          date: new Date(rawOHLC[0].timestamp * 1000).toISOString()
+        })
+      }
       
       // 4. Pre-aggregate data for all timeframes
       const aggregated15m = aggregateTo15Min(rawOHLC)
