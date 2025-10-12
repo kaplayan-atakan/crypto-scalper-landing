@@ -1448,6 +1448,29 @@
   transform: translateX(4px);
 }
 
+.trades-table__row--clickable {
+  cursor: pointer;
+  transition: all 0.3s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.trades-table__row--clickable:hover {
+  background: rgba(60, 65, 85, 0.95);
+  border-color: rgba(0, 229, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.2);
+  transform: translateX(8px) scale(1.01);
+}
+
+.trades-table__row--clickable:active {
+  transform: translateX(6px) scale(0.99);
+}
+
+/* Child elementlerin tıklamaları engellemesini önle */
+.trades-table__row--clickable .trades-table__cell,
+.trades-table__row--clickable .trades-table__cell * {
+  pointer-events: none;
+}
+
 .trades-table__cell {
   display: flex;
   align-items: center;

@@ -1,0 +1,575 @@
+import type { ChartDataResponse, OHLCDataResponse } from '../types/coingecko'
+
+const API_ROOT = import.meta.env.VITE_COINGECKO_ROOT || 'https://api.coingecko.com/api/v3'
+const API_KEY = import.meta.env.VITE_COINGECKO_API_KEY || ''
+
+// Symbol'den CoinGecko ID'ye dönüşüm mapping - GENİŞLETİLMİŞ
+const SYMBOL_TO_COINGECKO_ID: Record<string, string> = {
+  // ===== MAJOR COINS (Top Market Cap) =====
+  'BTCUSDT': 'bitcoin',
+  'ETHUSDT': 'ethereum',
+  'BNBUSDT': 'binancecoin',
+  'SOLUSDT': 'solana',
+  'XRPUSDT': 'ripple',
+  'ADAUSDT': 'cardano',
+  'AVAXUSDT': 'avalanche-2',
+  'DOTUSDT': 'polkadot',
+  'TRXUSDT': 'tron',
+  'LINKUSDT': 'chainlink',
+  'MATICUSDT': 'matic-network',
+  'TONUSDT': 'the-open-network',
+  'ICPUSDT': 'internet-computer',
+  'NEARUSDT': 'near',
+  'UNIUSDT': 'uniswap',
+  'APTUSDT': 'aptos',
+  'ATOMUSDT': 'cosmos',
+  'LTCUSDT': 'litecoin',
+  'FILUSDT': 'filecoin',
+  'ETCUSDT': 'ethereum-classic',
+  
+  // ===== LAYER 1 BLOCKCHAINS =====
+  'ALGOUSDT': 'algorand',
+  'EOSUSDT': 'eos',
+  'XLMUSDT': 'stellar',
+  'VETUSDT': 'vechain',
+  'HBARUSDT': 'hedera-hashgraph',
+  'EGLDUSDT': 'elrond-erd-2',
+  'FLOWUSDT': 'flow',
+  'FTMUSDT': 'fantom',
+  'ONEUSDT': 'harmony',
+  'ZILUSDT': 'zilliqa',
+  'KLAYUSDT': 'klay-token',
+  'WAVESUSDT': 'waves',
+  'QTUMUSDT': 'qtum',
+  'ICXUSDT': 'icon',
+  'IOTAUSDT': 'iota',
+  'NEOUSDT': 'neo',
+  'ONTUSDT': 'ontology',
+  'KASUSDT': 'kaspa',
+  'INJUSDT': 'injective-protocol',
+  'SUIUSDT': 'sui',
+  'SEIUSDT': 'sei-network',
+  'ROSEUSDT': 'oasis-network',
+  'CFXUSDT': 'conflux-token',
+  'MINAUSDT': 'mina-protocol',
+  'COREUSDT': 'coredao',
+  'ASTRAUSDT': 'astar',
+  'CKBUSDT': 'nervos-network',
+  'IOSTUSDT': 'iostoken',
+  
+  // ===== LAYER 2 SOLUTIONS =====
+  'ARBUSDT': 'arbitrum',
+  'OPUSDT': 'optimism',
+  'IMXUSDT': 'immutable-x',
+  'LRCUSDT': 'loopring',
+  'METISUSDT': 'metis-token',
+  'STRKUSDT': 'starknet',
+  'MANTAUSDT': 'manta-network',
+  'BLASTUSDT': 'blast',
+  'SCROLLUSDT': 'scroll',
+  'ZKUSDT': 'zkspace',
+  'LINEAUSDT': 'linea',
+  
+  // ===== DEFI PROTOCOLS =====
+  'AAVEUSDT': 'aave',
+  'MKRUSDT': 'maker',
+  'SNXUSDT': 'havven',
+  'COMPUSDT': 'compound-governance-token',
+  'CRVUSDT': 'curve-dao-token',
+  'SUSHIUSDT': 'sushi',
+  'YFIUSDT': 'yearn-finance',
+  'BALUSDT': 'balancer',
+  '1INCHUSDT': '1inch',
+  'RUNEUSDT': 'thorchain',
+  'PERPUSDT': 'perpetual-protocol',
+  'GMXUSDT': 'gmx',
+  'DYDXUSDT': 'dydx',
+  'CAKEUSDT': 'pancakeswap-token',
+  'JOEUSDT': 'joe',
+  'PENDLEUSDT': 'pendle',
+  'RDNTUSDT': 'radiant-capital',
+  'RPLUSDT': 'rocket-pool',
+  'LDOUSDT': 'lido-dao',
+  'MAVUSDT': 'maverick-protocol',
+  'VELOUSDT': 'velodrome-finance',
+  'FRAXUSDT': 'frax',
+  'CVXUSDT': 'convex-finance',
+  'FXSUSDT': 'frax-share',
+  'STETHUSDT': 'staked-ether',
+  'RETHUSDT': 'rocket-pool-eth',
+  
+  // ===== ORACLES & INFRASTRUCTURE =====
+  'BANDUSDT': 'band-protocol',
+  'APIUSDT': 'api3',
+  'TRBUSDT': 'tellor',
+  'DAIUSDT': 'dai',
+  'GRTUSDT': 'the-graph',
+  'MASKUSDT': 'mask-network',
+  'ACHUSDT': 'alchemy-pay',
+  'ANKRUSDT': 'ankr',
+  'STORJUSDT': 'storj',
+  'RNDRUSDT': 'render-token',
+  'ARUSDT': 'arweave',
+  'OCEANUSDT': 'ocean-protocol',
+  'FETUSDT': 'fetch-ai',
+  'AGIXUSDT': 'singularitynet',
+  
+  // ===== GAMING & METAVERSE =====
+  'AXSUSDT': 'axie-infinity',
+  'SANDUSDT': 'the-sandbox',
+  'MANAUSDT': 'decentraland',
+  'GALAUSDT': 'gala',
+  'ENJUSDT': 'enjincoin',
+  'THETAUSDT': 'theta-token',
+  'IMXUSDT': 'immutable-x',
+  'CHZUSDT': 'chiliz',
+  'FLOWUSDT': 'flow',
+  'APECUSDT': 'apecoin',
+  'GMTUSDT': 'stepn',
+  'MAGICUSDT': 'magic',
+  'ILVSDT': 'illuvium',
+  'YGGUSDT': 'yield-guild-games',
+  'SLPUSDT': 'smooth-love-potion',
+  'ALICEUSDT': 'my-neighbor-alice',
+  'TLMUSDT': 'alien-worlds',
+  'RAREUSDT': 'superrare',
+  'XUSDT': 'x',
+  'MOVRUSDT': 'movr',
+  'WAXPUSDT': 'wax',
+  'MCUSDT': 'merit-circle',
+  'PIXELUSDT': 'pixels',
+  'PRIMEUSDT': 'echelon-prime',
+  'NFTUSDT': 'apenft',
+  'BEAMXUSDT': 'beam',
+  
+  // ===== MEMECOINS =====
+  'DOGEUSDT': 'dogecoin',
+  'SHIBUSDT': 'shiba-inu',
+  'PEPEUSDT': 'pepe',
+  'FLOKIUSDT': 'floki',
+  'WIFUSDT': 'dogwifhat',
+  'BONKUSDT': 'bonk',
+  'BABYDOGEUSDT': 'baby-doge-coin',
+  'ELOMUSDT': 'dogelon-mars',
+  'SATSUSDT': '1000sats',
+  'RATSUSDT': 'rats',
+  'MYRIAUSDT': 'myria',
+  'SMILEYUSDT': 'smiley',
+  'MEMESUSDT': 'meme',
+  'MOGUSDT': 'mog-coin',
+  'TIAUSDT': 'celestia',
+  'BOMEUSDT': 'book-of-meme',
+  'PEOPLEUSDT': 'constitutiondao',
+  'MEMEUSDT': 'memecoin',
+  'NEIROUSDT': 'neiro',
+  'TURBOUSDT': 'turbo',
+  
+  'CAKEUSDT': 'pancakeswap-token',
+  'GTUSDT': 'gatechain-token',
+  'KCSUSDT': 'kucoin-shares',
+  'HTUSDT': 'huobi-token',
+  'CETSUSDT': 'coinex-token',
+  'FTTUSDT': 'ftx-token',
+  'OKBUSDT': 'okb',
+  'BTTUSDT': 'bittorrent',
+  'MEXCUSDT': 'mexc-token',
+  'WOOAUSDT': 'woo-network',
+  
+  // ===== STABLECOINS =====
+  'USDTUSDT': 'tether',
+  'USDCUSDT': 'usd-coin',
+  'BUSDUSDT': 'binance-usd',
+  'DAIUSDT': 'dai',
+  'TUSDUSDT': 'true-usd',
+  'USDPUSDT': 'paxos-standard',
+  'GUSDUSDT': 'gemini-dollar',
+  'FRAXUSDT': 'frax',
+  'LUSDUSDT': 'liquity-usd',
+  'SUSDUSDT': 'nusd',
+  'USTCUSDT': 'terrausd',
+  'FDUSDUSDT': 'first-digital-usd',
+  'PYUSDUSTUSDT': 'paypal-usd',
+  
+  // ===== WRAPPED TOKENS =====
+  'WBTCUSDT': 'wrapped-bitcoin',
+  'WETHUSDT': 'weth',
+  'WUSDT': 'wormhole',
+  'WLDUSDT': 'worldcoin-wld',
+  
+  // ===== AI & DATA =====
+  'FETUSDT': 'fetch-ai',
+  'AGIXUSDT': 'singularitynet',
+  'OCEANUSDT': 'ocean-protocol',
+  'RNDRUSDT': 'render-token',
+  'GRTUSDT': 'the-graph',
+  'NMRUSDT': 'numeraire',
+  'PHBUSDT': 'phoenix-global',
+  'CTXCUSDT': 'cortex',
+  'IQUSDT': 'everipedia',
+  'ARKMUSDT': 'arkham',
+  'AIUSDT': 'sleepless-ai',
+  'AGLDUSDT': 'adventure-gold',
+  'TAOUSDT': 'bittensor',
+  
+  // ===== PRIVACY COINS =====
+  'XMRUSDT': 'monero',
+  'ZECUSDT': 'zcash',
+  'DASHUSDT': 'dash',
+  'SCRTUSDT': 'secret',
+  'XVGUSDT': 'verge',
+  'BEAMUSDT': 'beam',
+  'GRINUSDT': 'grin',
+  
+  // ===== INTEROPERABILITY =====
+  'QNTUSDT': 'quant-network',
+  'AXLUSDT': 'axelar',
+  'CTSIUSDT': 'cartesi',
+  'CELRUSDT': 'celer-network',
+  'POLYXUSDT': 'polymesh',
+  'WANUSDT': 'wanchain',
+  'FUSIONUSDT': 'fsn',
+  
+  // ===== WEB3 & SOCIAL =====
+  'ILVUSDT': 'illuvium',
+  'ENSUSDT': 'ethereum-name-service',
+  'IDUSDT': 'space-id',
+  'ARUSDT': 'arweave',
+  'MASKUSDT': 'mask-network',
+  'CYBERUSDT': 'cyberconnect',
+  'WLDUSDT': 'worldcoin-wld',
+  'BAKEUSDT': 'bakerytoken',
+  'BARUSDT': 'titanswap',
+  'PSGUSDT': 'paris-saint-germain-fan-token',
+  'JUVUSDT': 'juventus-fan-token',
+  'ACMUSDT': 'ac-milan-fan-token',
+  'ATMUSDT': 'atletico-madrid',
+  'ASRUSDT': 'as-roma-fan-token',
+  'OGUSDT': 'organo-gold',
+  'ALPINEUSDT': 'alpine-f1-team-fan-token',
+  'SANTOSUSDT': 'santos-fc-fan-token',
+  
+  // ===== REAL WORLD ASSETS (RWA) =====
+  'ONDOUSDT': 'ondo-finance',
+  'POLYXUSDT': 'polymesh',
+  'RIOUSDT': 'realio-network',
+  'MPLUSDT': 'maple',
+  'CFGUSDT': 'centrifuge',
+  'CREDUSDT': 'credefi',
+  'GOLDUSDT': 'gold-coin',
+  
+  // ===== LIQUID STAKING =====
+  'LDOUSDT': 'lido-dao',
+  'RPLUSDT': 'rocket-pool',
+  'STETHUSDT': 'staked-ether',
+  'RETHUSDT': 'rocket-pool-eth',
+  'SSWPUSDT': 'swell-swapped-eth',
+  'FXSUSDT': 'frax-share',
+  'ANKRUSDT': 'ankr',
+  'SDUSDT': 'stader',
+  
+  // ===== ADDITIONAL POPULAR TOKENS =====
+  'BCHUSDT': 'bitcoin-cash',
+  'BSVUSDT': 'bitcoin-sv',
+  'XTZUSDT': 'tezos',
+  'XEMUSDT': 'nem',
+  'DCRUSDT': 'decred',
+  'BTGUSDT': 'bitcoin-gold',
+  'ZRXUSDT': '0x',
+  'BATUSDT': 'basic-attention-token',
+  'OMGUSDT': 'omisego',
+  'IOTXUSDT': 'iotex',
+  'LSKUSDT': 'lisk',
+  'KAVAUSDT': 'kava',
+  'HNTUSDT': 'helium',
+  'RVNUSDT': 'ravencoin',
+  'SCUSDT': 'siacoin',
+  'ZENUSDT': 'horizen',
+  'SXPUSDT': 'swipe',
+  'CKBUSDT': 'nervos-network',
+  'COTIUSDT': 'coti',
+  'CHRUSDT': 'chromia',
+  'STPTUSDT': 'stp-network',
+  'PONDUSDT': 'marlin',
+  'DEGOUSDT': 'dego-finance',
+  'ALCXUSDT': 'alchemix',
+  'CLVUSDT': 'clover-finance',
+  'FORTHUSDT': 'ampleforth-governance-token',
+  'TRIBEUSDT': 'tribe',
+  'TORNUSDT': 'tornado-cash',
+  'FIDAUSDT': 'bonfida',
+  'SFPUSDT': 'safepal',
+  'LITUSDT': 'litentry',
+  'EPXUSDT': 'ellipsis',
+  'C98USDT': 'coin98',
+  'CLOUSDT': 'clore-ai',
+  
+  // ===== BITCOIN ECOSYSTEM =====
+  'ORDIUSDT': 'ordinals',
+  'SATSUSDT': '1000sats',
+  'RATSUSDT': 'rats',
+  'STXUSDT': 'blockstack',
+  'RVSUSDT': 'revert-finance',
+  'TURTUSDT': 'turtle-coin',
+  
+  // ===== SOLANA ECOSYSTEM =====
+  'JITOUSDT': 'jito-governance-token',
+  'JUPUSDT': 'jupiter-exchange-solana',
+  'PYTHUSDT': 'pyth-network',
+  'BONKUSDT': 'bonk',
+  'JITOSOLUSDT': 'jito-staked-sol',
+  'MSOLUSDT': 'msol',
+  'MNDEUSDT': 'marinade',
+  'RAYUSDT': 'raydium',
+  'SRMUSDT': 'serum',
+  'ORCAUSDT': 'orca',
+  'SABERUSDT': 'saber',
+  'PORTUSDT': 'port-finance',
+  'COPEUSDT': 'cope',
+  'MEDIAUSDT': 'media-network',
+  'STEPUSDT': 'step-finance',
+  
+  // ===== ARBITRUM ECOSYSTEM =====
+  'GMXUSDT': 'gmx',
+  'RDNTUSDT': 'radiant-capital',
+  'MAGICUSDT': 'magic',
+  'PENDLEUSDT': 'pendle',
+  'GNSUSDT': 'gains-network',
+  'JONESUSDT': 'jones-dao',
+  'PLSUSDT': 'plutus-dao',
+  'DPXUSDT': 'dopex',
+  'SPAUSDT': 'spartadex',
+  
+  // ===== BASE & OPTIMISM ECOSYSTEM =====
+  'VELOUSDT': 'velodrome-finance',
+  'THALESUSDT': 'thales',
+  'KWENTAUSDT': 'kwenta',
+  
+  // ===== AVALANCHE ECOSYSTEM =====
+  'JOEUSDT': 'joe',
+  'PNGUSDT': 'pangolin',
+  'QIUSDT': 'benqi',
+  'YYUSDT': 'yield-yak',
+  'TIMEUSDT': 'wonderland',
+  'SPELLUSDT': 'spell-token',
+  'MIMUSDT': 'magic-internet-money',
+  
+  // ===== POLYGON ECOSYSTEM =====
+  'QUICKUSDT': 'quick',
+  'GHSTUSDT': 'aavegotchi',
+  'DQUICKUSDT': 'dragon-quick',
+  
+  // ===== PUMP.FUN & TRENDING =====
+  'PUMPUSDT': 'pumpdotfun',
+  'PUMPBTCUSDT': 'pumpbtc',
+  'ACTUSDT': 'achain',
+  'PNUTUSDT': 'peanut',
+  'GOATUSDT': 'goatseus-maximus',
+  'MOOUSDT': 'moo-deng',
+  'MOTHERUSDT': 'mother-iggy',
+  'GIGAUSDT': 'giga',
+  'PONKEUSDT': 'ponke',
+  'POPUSDT': 'popcat',
+  'CATUSDT': 'simon-s-cat',
+  'MEWUSDT': 'cat-in-a-dogs-world',
+  
+  // ===== NEW LAUNCHES & TRENDING 2024-2025 =====
+  'TIAUSDT': 'celestia',
+  'DYMUSDT': 'dymension',
+  'ALTUSDT': 'altlayer',
+  'STRKUSDT': 'starknet',
+  'MANTAUSDT': 'manta-network',
+  'METISUSDT': 'metis-token',
+  'ACEUSDT': 'fusionist',
+  'NFPUSDT': 'nfprompt',
+  'AIUSDT': 'sleepless-ai',
+  'XAIUSDT': 'xai-blockchain',
+  'MAVUSDT': 'maverick-protocol',
+  'ARKMUSDT': 'arkham',
+  'CYBERUSDT': 'cyberconnect',
+  'IDUSDT': 'space-id',
+  'HOOKUSDT': 'hooked-protocol',
+  'GLMRUSDT': 'golem',
+  
+  // ===== CROSS-CHAIN & BRIDGES =====
+  'WUSDT': 'wormhole',
+  'MULTUSDT': 'multichain',
+  'SYNUSDT': 'synapse-2',
+  'ANYUSDT': 'anyswap',
+  'XDAIUSDT': 'xdai',
+  'HBTCUSDT': 'huobi-btc',
+  'RENUSDT': 'republic-protocol',
+  'KEEPUSDT': 'keep-network',
+  'NUUSDT': 'nucypher',
+  'BADGERUSDT': 'badger-dao',
+  
+  // ===== YIELD FARMING & AGGREGATORS =====
+  'YFIUSDT': 'yearn-finance',
+  'CVXUSDT': 'convex-finance',
+  'AURAUSDT': 'aura-finance',
+  'ALCXUSDT': 'alchemix',
+  'ICUSDT': 'inflation-coin',
+  
+  // ===== NFT PLATFORMS =====
+  'BLURUSDT': 'blur',
+  'LOOKSUSDT': 'looksrare',
+  'X2Y2USDT': 'x2y2',
+  'RAREUSDT': 'superrare',
+  'NFTXUSDT': 'nftx',
+  'BENDUSDT': 'benddao',
+}
+
+export function symbolToCoinGeckoId(symbol: string): string | null {
+  // USDT suffix'ini kaldır ve uppercase yap
+  const cleanSymbol = symbol.toUpperCase().trim()
+  
+  console.log('🔍 Parsing symbol:', { original: symbol, clean: cleanSymbol })
+  
+  // Direct match
+  if (SYMBOL_TO_COINGECKO_ID[cleanSymbol]) {
+    console.log('✅ Direct match found:', SYMBOL_TO_COINGECKO_ID[cleanSymbol])
+    return SYMBOL_TO_COINGECKO_ID[cleanSymbol]
+  }
+  
+  // Try without USDT suffix
+  if (cleanSymbol.endsWith('USDT')) {
+    const withoutUSDT = cleanSymbol.slice(0, -4)
+    console.log('🔄 Trying without USDT suffix:', withoutUSDT)
+    
+    // Special case for single letter + USDT (like WUSDT)
+    if (withoutUSDT === 'W') {
+      console.log('✅ Special case W → wormhole')
+      return 'wormhole'
+    }
+    
+    // Try to find partial match
+    for (const [key, value] of Object.entries(SYMBOL_TO_COINGECKO_ID)) {
+      if (key.startsWith(withoutUSDT + 'USDT')) {
+        console.log('✅ Partial match found:', { key, value })
+        return value
+      }
+    }
+  }
+  
+  // Fallback - try to guess based on symbol
+  const guessMapping: Record<string, string> = {
+    'W': 'wormhole',
+    'PUMP': 'pump-fun',
+    'PUMPBTC': 'pump-fun'
+  }
+  
+  const symbolWithoutUSDT = cleanSymbol.replace('USDT', '')
+  if (guessMapping[symbolWithoutUSDT]) {
+    console.log('✅ Guess match found:', guessMapping[symbolWithoutUSDT])
+    return guessMapping[symbolWithoutUSDT]
+  }
+  
+  console.warn(`❌ Unmapped symbol: ${symbol}`)
+  return null
+}
+
+// API Headers - DÜZELTME
+function getHeaders(): HeadersInit {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  }
+  
+  if (API_KEY) {
+    // CoinGecko Demo API key header
+    headers['x-cg-demo-api-key'] = API_KEY
+    console.log('🔑 API Key added to headers:', API_KEY.substring(0, 10) + '...')
+  } else {
+    console.warn('⚠️ No API key found in environment variables')
+  }
+  
+  return headers
+}
+
+// Market Chart - Line Chart için
+export async function fetchMarketChart(
+  coinId: string, 
+  vs: string = 'usd', 
+  days: number = 1
+): Promise<ChartDataResponse> {
+  const url = `${API_ROOT}/coins/${coinId}/market_chart?vs_currency=${vs}&days=${days}`
+  
+  console.log('🌐 Fetching Market Chart from:', url)
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+  
+  console.log('📡 Response status:', response.status)
+  
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('❌ API Error Response:', errorText)
+    throw new Error(`CoinGecko API Error: ${response.status} ${response.statusText}`)
+  }
+  
+  const data = await response.json()
+  console.log('✅ API Response data points:', data.prices?.length || 0)
+  return data
+}
+
+// Market Chart Range - Belirli zaman aralığı için
+export async function fetchMarketChartRange(
+  coinId: string,
+  vs: string = 'usd',
+  fromTs: number,
+  toTs: number
+): Promise<ChartDataResponse> {
+  const url = `${API_ROOT}/coins/${coinId}/market_chart/range?vs_currency=${vs}&from=${fromTs}&to=${toTs}`
+  
+  console.log('🌐 Fetching Market Chart Range from:', url)
+  console.log('📅 Time range:', {
+    from: new Date(fromTs * 1000).toISOString(),
+    to: new Date(toTs * 1000).toISOString()
+  })
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+  
+  console.log('📡 Response status:', response.status)
+  
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('❌ API Error Response:', errorText)
+    throw new Error(`CoinGecko API Error: ${response.status} ${response.statusText}`)
+  }
+  
+  const data = await response.json()
+  console.log('✅ API Response data points:', data.prices?.length || 0)
+  return data
+}
+
+// OHLC Data - Candlestick Chart için
+export async function fetchOHLC(
+  coinId: string,
+  vs: string = 'usd',
+  days: number = 1
+): Promise<number[][]> {
+  const url = `${API_ROOT}/coins/${coinId}/ohlc?vs_currency=${vs}&days=${days}`
+  
+  console.log('🌐 Fetching OHLC from:', url)
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+  
+  console.log('📡 Response status:', response.status)
+  
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('❌ API Error Response:', errorText)
+    throw new Error(`CoinGecko API Error: ${response.status} ${response.statusText}`)
+  }
+  
+  const data = await response.json()
+  console.log('✅ API Response OHLC points:', data.length || 0)
+  return data
+}

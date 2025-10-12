@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Link } from 'react-router-dom';
 import { useActions } from '../hooks/useActions';
 import { SupActionsChart } from '../components/SupActionsChart';
 import { VolumeChart } from '../components/VolumeChart';
 import { BotSelector } from '../components/BotSelector';
+import { TradeDetailPopup } from '../components/TradeDetailPopup';
+import { MultiCoinChartSection } from '../components/MultiCoinChartSection';
+import type { ClosedTradeSimple } from '../types/supabase';
 import '../App.css';
 
 // Enhanced reason parser with detailed field extraction
@@ -256,6 +259,9 @@ const parseReason = (reason: string): { type: string; icon: string; label: strin
 const LiveActions = () => {
   const { trades, metrics, loading, error, refresh, enableRealtime, setEnableRealtime, limit, setLimit, timeRange, setTimeRange } = useActions();
   
+  // CoinGecko popup state
+  const [selectedTrade, setSelectedTrade] = useState<ClosedTradeSimple | null>(null);
+  
   // Stats hesaplama - gerçek verilerle
   const stats = useMemo(() => {
     if (!trades || trades.length === 0) {
@@ -416,6 +422,13 @@ const LiveActions = () => {
       {/* Main Content */}
       <main className="page__main">
         <div className="page__container">
+          {/* NEW: Multi-Coin Comparison Chart Section */}
+          <MultiCoinChartSection
+            trades={trades}
+            isLoading={loading}
+            onTradeClick={(trade) => setSelectedTrade(trade)}
+          />
+
           {/* Charts Section - Yan Yana */}
           <section className="section">
             <div className="section__header">
@@ -521,7 +534,12 @@ const LiveActions = () => {
                   const reasonData = parseReasonDetailed(trade.reason);
                   
                   return (
-                    <div key={trade.id} className="trades-table__row">
+                    <div 
+                      key={trade.id} 
+                      className="trades-table__row trades-table__row--clickable"
+                      onClick={() => setSelectedTrade(trade)}
+                      title="Click to view CoinGecko chart"
+                    >
                       <div className="trades-table__cell">
                         <div className="trade-time">
                           <span className="trade-time__date">
@@ -656,6 +674,14 @@ const LiveActions = () => {
 
         </div>
       </main>
+      
+      {/* CoinGecko Chart Popup */}
+      {selectedTrade && (
+        <TradeDetailPopup 
+          trade={selectedTrade} 
+          onClose={() => setSelectedTrade(null)} 
+        />
+      )}
     </div>
   );
 };

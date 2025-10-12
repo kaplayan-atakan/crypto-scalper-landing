@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoinGecko API Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .test-section h2 {
+      margin-top: 0;
+      font-size: 1.2em;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin: 5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .result {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .info { color: #3b82f6; }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🦎 CoinGecko API Integration Test</h1>
+    
+    <div class="test-section">
+      <h2>📋 Symbol Mapping Test</h2>
+      <button onclick="testSymbolMapping()">Test Symbol Mappings</button>
+      <div id="mapping-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>📡 API Fetch Test (4-hour range)</h2>
+      <button onclick="testBTC()">Test BTC</button>
+      <button onclick="testETH()">Test ETH</button>
+      <button onclick="testWUSDT()">Test WUSDT</button>
+      <button onclick="testJUP()">Test JUP</button>
+      <button onclick="testAll()">Test All</button>
+      <div id="api-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🔍 Live Console Output</h2>
+      <div id="console-output" class="result"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { symbolToCoinGeckoId, fetchMarketChartRange } from './src/lib/coingecko.ts'
+
+    // Intercept console.log for display
+    const consoleOutput = document.getElementById('console-output')
+    const originalLog = console.log
+    const originalError = console.error
+    const originalWarn = console.warn
+    
+    function appendToConsole(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString()
+      const line = `[${timestamp}] ${message}\n`
+      consoleOutput.textContent += line
+      consoleOutput.scrollTop = consoleOutput.scrollHeight
+    }
+    
+    console.log = (...args) => {
+      originalLog(...args)
+      appendToConsole(args.join(' '), 'info')
+    }
+    
+    console.error = (...args) => {
+      originalError(...args)
+      appendToConsole('❌ ' + args.join(' '), 'error')
+    }
+    
+    console.warn = (...args) => {
+      originalWarn(...args)
+      appendToConsole('⚠️ ' + args.join(' '), 'warn')
+    }
+
+    window.testSymbolMapping = function() {
+      const result = document.getElementById('mapping-result')
+      result.textContent = 'Testing symbol mappings...\n\n'
+      
+      const testSymbols = ['WUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'GMXUSDT', 'PENDLEUSDT', 'JUPUSDT', 'PYTHUSDT']
+      
+      for (const symbol of testSymbols) {
+        const coinId = symbolToCoinGeckoId(symbol)
+        const status = coinId ? '✅' : '❌'
+        result.textContent += `${status} ${symbol} → ${coinId || 'NOT FOUND'}\n`
+      }
+    }
+
+    async function testCoin(symbol, resultElement) {
+      try {
+        resultElement.textContent += `\n🔄 Testing ${symbol}...\n`
+        
+        const coinId = symbolToCoinGeckoId(symbol)
+        if (!coinId) {
+          throw new Error(`Symbol ${symbol} not found in mapping`)
+        }
+        
+        resultElement.textContent += `   Mapped to: ${coinId}\n`
+        
+        const nowSec = Math.floor(Date.now() / 1000)
+        const fourHoursSec = 4 * 3600
+        const from = nowSec - fourHoursSec
+        const to = nowSec
+        
+        const data = await fetchMarketChartRange(coinId, 'usd', from, to)
+        
+        if (data.prices && data.prices.length > 0) {
+          const firstPoint = data.prices[0]
+          const lastPoint = data.prices[data.prices.length - 1]
+          resultElement.textContent += `   ✅ Success: ${data.prices.length} data points\n`
+          resultElement.textContent += `      First: ${new Date(firstPoint[0]).toISOString()} - $${firstPoint[1].toFixed(2)}\n`
+          resultElement.textContent += `      Last:  ${new Date(lastPoint[0]).toISOString()} - $${lastPoint[1].toFixed(2)}\n`
+          
+          if (data.market_caps && data.market_caps.length > 0) {
+            resultElement.textContent += `      Market Cap points: ${data.market_caps.length}\n`
+          }
+          if (data.total_volumes && data.total_volumes.length > 0) {
+            resultElement.textContent += `      Volume points: ${data.total_volumes.length}\n`
+          }
+        } else {
+          resultElement.textContent += `   ⚠️ No price data received\n`
+        }
+        
+      } catch (error) {
+        resultElement.textContent += `   ❌ Error: ${error.message}\n`
+      }
+    }
+
+    window.testBTC = async function() {
+      const result = document.getElementById('api-result')
+      result.textContent = ''
+      await testCoin('BTCUSDT', result)
+    }
+
+    window.testETH = async function() {
+      const result = document.getElementById('api-result')
+      result.textContent = ''
+      await testCoin('ETHUSDT', result)
+    }
+
+    window.testWUSDT = async function() {
+      const result = document.getElementById('api-result')
+      result.textContent = ''
+      await testCoin('WUSDT', result)
+    }
+
+    window.testJUP = async function() {
+      const result = document.getElementById('api-result')
+      result.textContent = ''
+      await testCoin('JUPUSDT', result)
+    }
+
+    window.testAll = async function() {
+      const result = document.getElementById('api-result')
+      result.textContent = 'Running all tests...\n'
+      
+      const symbols = ['BTCUSDT', 'ETHUSDT', 'WUSDT', 'JUPUSDT']
+      
+      for (const symbol of symbols) {
+        await testCoin(symbol, result)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Rate limiting
+      }
+      
+      result.textContent += '\n✅ All tests complete!\n'
+    }
+
+    // Auto-run mapping test on load
+    window.addEventListener('load', () => {
+      console.log('🚀 Test page loaded!')
+      console.log('API Key configured:', import.meta.env.VITE_COINGECKO_API_KEY ? 'Yes ✅' : 'No ❌')
+      console.log('Ready for testing!')
+    })
+  </script>
+</body>
+</html>
