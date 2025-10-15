@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { SimpleCandlestickChart } from '../SimpleCandlestickChart'
+import { BinanceStyleChart } from '../BinanceStyleChart'
 import type { OHLCPoint } from '../../types/coingecko'
 import { 
   fetchCoinGeckoMarketData, 
@@ -191,18 +191,17 @@ export default function LiveMarketChart({ symbol, coinId, color }: LiveMarketCha
       {/* Chart */}
       <div className="mini-trade-card__chart">
         {candles.length > 0 ? (
-          <SimpleCandlestickChart
+          <BinanceStyleChart
             data={candles}
-            height={200}
-            showCurrentPriceLine={true}
-            currentPrice={marketData?.current_price}
+            height={220}
+            showVolume={false}
           />
         ) : (
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            minHeight: '200px'
+            minHeight: '220px'
           }}>
             <p style={{ color: 'var(--text-muted)' }}>No chart data available</p>
           </div>

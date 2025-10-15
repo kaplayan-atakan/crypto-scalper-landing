@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { CoinGeckoChart } from '../CoinGeckoChart'
+import { BinanceStyleChart } from '../BinanceStyleChart'
 import { useCoinGecko } from '../../hooks/useCoinGecko'
 import { CacheTTL, ChartTimeframe } from '../../types/coingecko'
 import { formatPrice, formatPriceWithCurrency } from '../../utils/priceFormatter'
 import type { ClosedTradeSimple } from '../../types/supabase'
+import type { OHLCPoint } from '../../types/coingecko'
 import './TradeDetailPopup.css'
 
 interface TradeDetailPopupProps {
@@ -12,15 +13,14 @@ interface TradeDetailPopupProps {
 }
 
 export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
-  const [chartMode, setChartMode] = useState<'ohlc' | 'line'>('ohlc')
   const [timeframe, setTimeframe] = useState<ChartTimeframe>(ChartTimeframe.FIVE_MIN)
   
   // Memoize config to prevent unnecessary re-renders
   const coinGeckoConfig = useMemo(() => ({
-    mode: chartMode,
+    mode: 'ohlc' as const,  // Always use OHLC for Binance-style chart
     timeframe: timeframe,
     cacheTtl: CacheTTL.LONG  // 2 days cache for popup
-  }), [chartMode, timeframe])
+  }), [timeframe])
   
   const { data, loading, error, refresh } = useCoinGecko(
     trade.symbol,
@@ -28,10 +28,15 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
     coinGeckoConfig
   )
   
+  // Type guard to check if data is OHLC
+  const isOHLCData = (d: typeof data): d is OHLCPoint[] => {
+    return d !== null && d.length > 0 && 'open' in d[0]
+  }
+  
   // Log popup açılışı - SADECE BİR KEZ (component mount'ta)
   useEffect(() => {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-    console.log('🎯 TradeDetailPopup OPENED')
+    console.log('🎯 TradeDetailPopup OPENED - Binance Style')
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('📊 Trade Details:', {
       symbol: trade.symbol,
@@ -40,8 +45,7 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
       created_at: trade.created_at,
       reason: trade.reason.substring(0, 50) + '...'
     })
-    console.log('🎨 Initial Chart Mode:', chartMode)
-    console.log('⏱️ Initial Timeframe:', timeframe, '(1 hour before trade)')
+    console.log('⏱️ Initial Timeframe:', timeframe, '(trade-centered window)')
     console.log('💾 Cache TTL:', CacheTTL.LONG, 'ms (2 days)')
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
   }, []) // Empty dependency array = runs only once on mount
@@ -58,14 +62,9 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
     return () => window.removeEventListener('keydown', handleEsc)
   }, [onClose])
   
-  // Log chart mode changes
-  useEffect(() => {
-    console.log('🎨 Chart mode changed to:', chartMode)
-  }, [chartMode])
-  
   // Log timeframe changes
   useEffect(() => {
-    console.log('⏱️ Timeframe changed to:', timeframe, `(${timeframe === ChartTimeframe.FIVE_MIN ? '12 x 5min candles' : '4 x 15min candles'})`)
+    console.log('⏱️ Timeframe changed to:', timeframe)
   }, [timeframe])
   
   // Log data/loading/error state changes
@@ -142,21 +141,6 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
         
         {/* Chart Controls */}
         <div className="cg-popup-controls">
-          <div className="cg-mode-toggle">
-            <button
-              className={`cg-mode-btn ${chartMode === 'ohlc' ? 'active' : ''}`}
-              onClick={() => setChartMode('ohlc')}
-            >
-              📊 Candlestick
-            </button>
-            <button
-              className={`cg-mode-btn ${chartMode === 'line' ? 'active' : ''}`}
-              onClick={() => setChartMode('line')}
-            >
-              📈 Line Chart
-            </button>
-          </div>
-          
           <div className="cg-timeframe-toggle">
             <button
               className={`cg-timeframe-btn ${timeframe === ChartTimeframe.ONE_MIN ? 'active' : ''}`}
@@ -229,13 +213,20 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
             </div>
           )}
           
-          {!loading && !error && data && (
-            <CoinGeckoChart
+          {!loading && !error && data && isOHLCData(data) && (
+            <BinanceStyleChart
               data={data}
-              mode={chartMode}
+              height={450}
+              showVolume={false}
               tradeTimestamp={trade.created_at}
-              symbol={trade.symbol}
             />
+          )}
+          
+          {!loading && !error && data && !isOHLCData(data) && (
+            <div className="cg-chart-error">
+              <p className="cg-error-icon">⚠️</p>
+              <p className="cg-error-message">Invalid chart data format</p>
+            </div>
           )}
         </div>
         

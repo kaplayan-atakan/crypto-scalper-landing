@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { SimpleCandlestickChart } from '../SimpleCandlestickChart';
+import { BinanceStyleChart } from '../BinanceStyleChart';
 import { useCoinGecko } from '../../hooks/useCoinGecko';
 import { formatPrice } from '../../utils/priceFormatter';
 import { getCoinDisplayName, getShortReason, formatRelativeTime } from '../../utils/tradeFilters';
@@ -111,12 +111,11 @@ export function MiniTradeChart({ trade, title, color, onDetailClick }: MiniTrade
             <div className="mini-trade-card__chart-text">Chart unavailable</div>
           </div>
         ) : data && isOHLCData(data) ? (
-          <SimpleCandlestickChart
+          <BinanceStyleChart
             data={data}
             height={192}
-            accentColor={color}
-            tradeExecutionTime={new Date(trade.created_at)}
-            compactMode={true}
+            showVolume={false}
+            tradeTimestamp={trade.created_at}
           />
         ) : (
           <div className="mini-trade-card__chart-empty">

@@ -1,11 +1,16 @@
 import type { ChartDataResponse, OHLCDataResponse } from '../types/coingecko'
+import { fetchWithRetry } from '../utils/fetchWithRetry'
 
-const API_ROOT = 'https://api.coingecko.com/api/v3'
+// Use proxy in development to avoid CORS issues
+const API_ROOT = import.meta.env.DEV 
+  ? '/api/coingecko'  // Development: use Vite proxy
+  : 'https://api.coingecko.com/api/v3'  // Production: direct API
+
 const API_KEY = 'CG-cQBLyHVdbqvq6Jc9TJnDnycL'
 
 // Symbol'den CoinGecko ID'ye dönüşüm mapping - GENİŞLETİLMİŞ
-const SYMBOL_TO_COINGECKO_ID: Record<string, string> = {
-  // ===== CLEANED MAPPING (313 unique symbols) =====
+export const SYMBOL_TO_COINGECKO_ID: Record<string, string> = {
+  // ===== CLEANED MAPPING (314 unique symbols) =====
   'BTCUSDT': 'bitcoin',
   'ETHUSDT': 'ethereum',
   'BNBUSDT': 'binancecoin',
@@ -66,6 +71,7 @@ const SYMBOL_TO_COINGECKO_ID: Record<string, string> = {
   'SCROLLUSDT': 'scroll',
   'ZKUSDT': 'zkspace',
   'LINEAUSDT': 'linea',
+  'VFYUSDT': 'zkverify', // ZKVerify - auto-discovered and persisted
   'AAVEUSDT': 'aave',
   'MKRUSDT': 'maker',
   'SNXUSDT': 'havven',
@@ -553,7 +559,7 @@ export async function fetchMarketChart(
   return data
 }
 
-// Market Chart Range - Belirli zaman aralığı için
+// Market Chart Range - Belirli zaman aralığı için (with retry)
 export async function fetchMarketChartRange(
   coinId: string,
   vs: string = 'usd',
@@ -573,35 +579,47 @@ export async function fetchMarketChartRange(
     duration: `${Math.round((toTs - fromTs) / 60)} minutes`
   })
   
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: getHeaders(),
-  })
-  
-  console.log('📡 Response status:', response.status, response.statusText)
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('❌ API Error Response:', errorText)
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
-    throw new Error(`CoinGecko API Error: ${response.status} ${response.statusText}`)
-  }
-  
-  const data = await response.json()
-  console.log('✅ API Response received!')
-  console.log('📊 Data summary:', {
-    prices: data.prices?.length || 0,
-    market_caps: data.market_caps?.length || 0,
-    total_volumes: data.total_volumes?.length || 0
-  })
-  if (data.prices && data.prices.length > 0) {
-    console.log('📈 Price range:', {
-      first: `$${data.prices[0][1].toFixed(2)}`,
-      last: `$${data.prices[data.prices.length - 1][1].toFixed(2)}`
+  try {
+    // Try with retry logic (3 attempts with exponential backoff)
+    const response = await fetchWithRetry(url, {
+      method: 'GET',
+      headers: getHeaders(),
+      retries: 3,
+      backoffBaseMs: 300,
+      onRetry: (attempt, error) => {
+        console.log(`🔄 Retry attempt ${attempt}/3 for ${coinId}:`, error.message)
+      }
     })
+    
+    console.log('📡 Response status:', response.status, response.statusText)
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ API Error Response:', errorText)
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+      throw new Error(`CoinGecko API Error: ${response.status} ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    console.log('✅ API Response received!')
+    console.log('📊 Data summary:', {
+      prices: data.prices?.length || 0,
+      market_caps: data.market_caps?.length || 0,
+      total_volumes: data.total_volumes?.length || 0
+    })
+    if (data.prices && data.prices.length > 0) {
+      console.log('📈 Price range:', {
+        first: `$${data.prices[0][1].toFixed(2)}`,
+        last: `$${data.prices[data.prices.length - 1][1].toFixed(2)}`
+      })
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+    return data
+  } catch (error: any) {
+    console.error('❌ fetchMarketChartRange failed:', error)
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+    throw error
   }
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
-  return data
 }
 
 // OHLC Data - Candlestick Chart için
