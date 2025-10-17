@@ -44,21 +44,44 @@ export function TradeDetailPopup({ trade, onClose, initialTimezone = 3 }: TradeD
     // useCoinGecko will automatically re-run with new timeframe
   }
 
-  // Apply timezone offset to data
+  // Apply timezone offset to chart data
+  // NOTE: Supabase data comes in UTC+3 (Turkey time)
   const adjustedData = useMemo(() => {
     if (!data || !Array.isArray(data)) return data
     
-    // Adjust timestamps for timezone
+    // If user selected UTC+3 (Turkey), no adjustment needed
+    if (timezoneOffset === 3) {
+      return data // Data is already in UTC+3
+    }
+    
+    // Otherwise, adjust for timezone difference
+    const tzDifference = timezoneOffset - 3 // Difference from UTC+3
     return data.map((point: any) => ({
       ...point,
-      timestamp: point.timestamp + (timezoneOffset * 3600), // Add hours in seconds
+      timestamp: point.timestamp + (tzDifference * 3600), // Adjust by difference in seconds
     }))
   }, [data, timezoneOffset])
 
   // Format trade time with timezone
+  // NOTE: Supabase timestamps come in UTC+3 (Turkey time)
   const formatTradeTime = (timestamp: string) => {
-    const date = new Date(timestamp)  // Use original timestamp
-    const offsetMs = timezoneOffset * 60 * 60 * 1000
+    const date = new Date(timestamp)  // This is UTC+3 timestamp from Supabase
+    
+    // If user selected UTC+3, no adjustment needed
+    if (timezoneOffset === 3) {
+      return date.toLocaleString('tr-TR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })
+    }
+    
+    // Otherwise, adjust for timezone difference
+    const tzDifference = timezoneOffset - 3 // Difference from UTC+3
+    const offsetMs = tzDifference * 60 * 60 * 1000
     const localDate = new Date(date.getTime() + offsetMs)
     
     return localDate.toLocaleString('tr-TR', {
@@ -267,21 +290,35 @@ export function TradeDetailPopup({ trade, onClose, initialTimezone = 3 }: TradeD
             </div>
           )}
           
-          {!loading && !error && adjustedData && Array.isArray(adjustedData) && adjustedData.length > 0 && (
-            <>
-              <BinanceStyleChart
-                data={adjustedData}
-                height={450}
-                showVolume={false}
-                tradeTimestamp={trade.created_at}  // Use original timestamp
-              />
-              <div className="cg-chart-info">
-                📍 Trade-centered window: {adjustedData.length} × {timeframe} candles
-                <br />
-                🕐 Timezone: UTC{timezoneOffset > 0 ? '+' : ''}{timezoneOffset}
-              </div>
-            </>
-          )}
+          {!loading && !error && adjustedData && Array.isArray(adjustedData) && adjustedData.length > 0 && (() => {
+            // Calculate timezone-adjusted trade timestamp for chart marker
+            // Supabase data is UTC+3, adjust if user selected different timezone
+            const getAdjustedTradeTimestamp = () => {
+              if (timezoneOffset === 3) {
+                return trade.created_at // No adjustment needed
+              }
+              const date = new Date(trade.created_at)
+              const tzDifference = timezoneOffset - 3
+              const adjustedDate = new Date(date.getTime() + (tzDifference * 60 * 60 * 1000))
+              return adjustedDate.toISOString()
+            }
+            
+            return (
+              <>
+                <BinanceStyleChart
+                  data={adjustedData}
+                  height={450}
+                  showVolume={false}
+                  tradeTimestamp={getAdjustedTradeTimestamp()}
+                />
+                <div className="cg-chart-info">
+                  📍 Trade-centered window: {adjustedData.length} × {timeframe} candles
+                  <br />
+                  🕐 Timezone: UTC{timezoneOffset > 0 ? '+' : ''}{timezoneOffset}
+                </div>
+              </>
+            )
+          })()}
           
           {!loading && !error && (!adjustedData || !Array.isArray(adjustedData) || adjustedData.length === 0) && (
             <div className="cg-chart-error">
