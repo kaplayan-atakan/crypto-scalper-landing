@@ -54,8 +54,9 @@
 /* Header */
 .cg-popup-header {
   display: flex;
-  justify-content: space-between;
+  justify-items: center;
   align-items: center;
+  gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(0, 255, 255, 0.2);
@@ -65,6 +66,66 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 0 0 auto;
+}
+
+/* Timezone Selector */
+.popup-timezone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.popup-timezone__label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.popup-timezone__select {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: var(--neon-cyan);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 140px;
+}
+
+.popup-timezone__select:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(0, 255, 255, 0.4);
+}
+
+.popup-timezone__select:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Timezone Display (Read-only in popup) */
+.popup-timezone-display {
+  margin-left: auto;
+  padding: 6px 16px;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 6px;
+  color: var(--neon-cyan);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.popup-info-tz {
+  font-size: 11px;
+  color: rgba(0, 255, 255, 0.5);
+  margin-left: 4px;
+  font-weight: 400;
 }
 
 .cg-popup-symbol {
@@ -252,6 +313,19 @@
 .cg-popup-chart {
   min-height: 400px;
   position: relative;
+}
+
+/* Chart Info */
+.cg-chart-info {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 12px;
+  color: rgba(0, 255, 255, 0.7);
+  line-height: 1.6;
+  text-align: center;
 }
 
 .cg-chart-loading,

@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { BinanceStyleChart } from '../BinanceStyleChart'
 import type { OHLCPoint } from '../../types/coingecko'
 import { 
-  fetchCoinGeckoMarketData, 
-  fetchMarketChartRange, 
-  convertPricesToCandles,
+  fetchOHLC,
   SYMBOL_TO_COINGECKO_ID 
 } from '../../lib/coingecko'
 
@@ -39,30 +37,54 @@ export default function LiveMarketChart({ symbol, coinId, color }: LiveMarketCha
       setLoading(true)
       setError(null)
 
-      // Fetch current market data
-      const market = await fetchCoinGeckoMarketData(coinId)
-      setMarketData(market)
-
-      // Fetch last 4 hours of price data
+      // Fetch OHLC data for last 1 day (returns hourly candles)
+      // This gives us real candlesticks with proper open/high/low/close values
+      const ohlcData = await fetchOHLC(coinId, 'usd', 1)
+      
+      // Convert OHLC array format to OHLCPoint objects
+      const candleData: OHLCPoint[] = ohlcData.map((point: number[]) => ({
+        timestamp: Math.floor(point[0] / 1000), // Convert ms to seconds
+        open: point[1],
+        high: point[2],
+        low: point[3],
+        close: point[4]
+      }))
+      
+      // Filter to last 4 hours only
       const now = Math.floor(Date.now() / 1000)
       const fourHoursAgo = now - (4 * 60 * 60)
+      const recentCandles = candleData.filter(c => c.timestamp >= fourHoursAgo)
       
-      const priceData = await fetchMarketChartRange(
-        coinId,
-        'usd',
-        fourHoursAgo,
-        now
-      )
-
-      // Convert to candlestick format (5-minute candles)
-      const candleData = convertPricesToCandles(priceData.prices, 5)
-      setCandles(candleData)
+      console.log(`📊 ${symbol}: Loaded ${recentCandles.length} candles (last 4h)`)
+      
+      setCandles(recentCandles)
+      
+      // Calculate market data from candles
+      if (recentCandles.length > 0) {
+        const latestCandle = recentCandles[recentCandles.length - 1]
+        const firstCandle = recentCandles[0]
+        const priceChange = latestCandle.close - firstCandle.open
+        const priceChangePercent = (priceChange / firstCandle.open) * 100
+        
+        const high24h = Math.max(...recentCandles.map(c => c.high))
+        const low24h = Math.min(...recentCandles.map(c => c.low))
+        
+        setMarketData({
+          current_price: latestCandle.close,
+          price_change_24h: priceChange,
+          price_change_percentage_24h: priceChangePercent,
+          market_cap: 0, // Not available from OHLC
+          total_volume: 0, // Not available from OHLC
+          high_24h: high24h,
+          low_24h: low24h
+        })
+      }
 
       setLastUpdate(new Date())
       setLoading(false)
     } catch (err) {
       console.error('❌ LiveMarketChart fetch error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch market data')
+      setError(err instanceof Error ? err.message : 'Failed to fetch OHLC data')
       setLoading(false)
     }
   }

@@ -45,11 +45,21 @@ export function BinanceStyleChart({
     // Dynamic import to avoid SSR/HMR issues with lightweight-charts
     ;(async () => {
       try {
-        // Import lightweight-charts module (entire module for constructor access)
-        const LWC = await import('lightweight-charts')
+        // Import lightweight-charts dynamically (client-only)
+        const mod = await import('lightweight-charts')
+        const createChartFn = (mod as any).createChart ?? (window as any)?.LightweightCharts?.createChart
         
-        if (typeof LWC.createChart !== 'function') {
-          console.error('❌ BinanceStyleChart: createChart function not found')
+        // API method names for fallback support
+        const addSeriesName = 'addSeries'
+        const addCandleName = 'addCandlestickSeries'
+        const addHistoName = 'addHistogramSeries'
+
+        // Diagnostics - introspect module and API
+        console.log('📦 LWC module keys:', Object.keys(mod))
+        console.log('🧪 typeof createChart:', typeof createChartFn)
+
+        if (typeof createChartFn !== 'function') {
+          console.error('❌ BinanceStyleChart: createChart function not found in module or global')
           return
         }
 
@@ -59,7 +69,7 @@ export function BinanceStyleChart({
         }
 
         // Create chart with Binance styling
-        const chart = LWC.createChart(container, {
+        const chart = createChartFn(container, {
           width: container.clientWidth,
           height,
 
@@ -116,8 +126,8 @@ export function BinanceStyleChart({
             timeVisible: true,
             secondsVisible: false,
             rightOffset: 5,
-            barSpacing: 12, // Increase from 8 to make candles wider
-            minBarSpacing: 6, // Increase from 3 to ensure visible candles
+            barSpacing: 8,
+            minBarSpacing: 3,
             fixLeftEdge: false,
             fixRightEdge: false,
             lockVisibleTimeRangeOnResize: true,
@@ -137,13 +147,31 @@ export function BinanceStyleChart({
           },
         })
 
+        // Introspect chart API for debugging
+        const hasAddCandles = typeof (chart as any)?.[addCandleName] === 'function'
+        const hasAddSeries = typeof (chart as any)?.[addSeriesName] === 'function'
+        const hasAddHistogram = typeof (chart as any)?.[addHistoName] === 'function'
+
+        console.log('🔎 Chart API introspection:', {
+          hasAddCandlestickSeries: hasAddCandles,
+          hasAddSeries: hasAddSeries,
+          hasAddHistogramSeries: hasAddHistogram,
+          prototypeKeys: Object.getOwnPropertyNames(Object.getPrototypeOf(chart) || {}),
+        })
+
+        if (!hasAddCandles && !hasAddSeries) {
+          console.error('❌ BinanceStyleChart: No series factory available on chart instance')
+          console.error('Available methods:', Object.keys(chart))
+          return
+        }
+
         chartRef.current = chart
         didInitRef.current = true
 
         console.log('✅ BinanceStyleChart: Chart instance created successfully')
 
-        // Add candlestick series using CONSTRUCTOR (not string type)
-        // This is the correct API for lightweight-charts v4.x
+        // Add candlestick series with Binance colors
+        // Try classic API first, fallback to unified API
         const candleOptions = {
           upColor: '#0ecb81', // Binance green
           downColor: '#f6465d', // Binance red
@@ -155,23 +183,22 @@ export function BinanceStyleChart({
           wickVisible: true,
           priceLineVisible: true,
           lastValueVisible: true,
-          // Add explicit widths to ensure candles are visible
-          thinBars: false, // Important: ensure thick bars
           priceFormat: {
-            type: 'price' as const,
+            type: 'price',
             precision: 2,
             minMove: 0.01,
           },
         }
 
-        // Use constructor-based API: addSeries(SeriesConstructor, options)
-        const candleSeries = chart.addSeries(LWC.CandlestickSeries, candleOptions)
+        const candleSeries = hasAddCandles
+          ? (chart as any)[addCandleName](candleOptions)
+          : (chart as any)[addSeriesName]({ type: 'Candlestick', ...candleOptions })
 
         seriesRef.current = candleSeries
 
-        // Convert OHLCPoint[] to candlestick data (time must be UTCTimestamp)
+        // Convert OHLCPoint[] to candlestick data
         const candlestickData = data.map((candle) => ({
-          time: candle.timestamp as any, // lightweight-charts expects UTCTimestamp
+          time: candle.timestamp,
           open: candle.open,
           high: candle.high,
           low: candle.low,
@@ -182,12 +209,13 @@ export function BinanceStyleChart({
 
         console.log('✅ Candlestick data loaded:', candlestickData.length, 'candles')
 
-        // Add volume histogram if data available (using constructor API)
+        // Add volume histogram if data available
+        // Try classic API first, fallback to unified API
         if (showVolume && volumeData.length > 0) {
           const volumeOptions = {
             color: '#26a69a',
             priceFormat: {
-              type: 'volume' as const,
+              type: 'volume',
             },
             priceScaleId: '', // Separate scale for volume
             scaleMargins: {
@@ -196,8 +224,9 @@ export function BinanceStyleChart({
             },
           }
 
-          // Use constructor-based API: addSeries(HistogramSeries, options)
-          const volSeries = chart.addSeries(LWC.HistogramSeries, volumeOptions)
+          const volSeries = hasAddHistogram
+            ? (chart as any)[addHistoName](volumeOptions)
+            : (chart as any)[addSeriesName]({ type: 'Histogram', ...volumeOptions })
 
           volumeSeriesRef.current = volSeries
 
@@ -205,7 +234,7 @@ export function BinanceStyleChart({
           const coloredVolumeData = volumeData.map((vol, idx) => {
             const isUp = idx === 0 || data[idx].close >= data[idx].open
             return {
-              time: vol.time as any, // lightweight-charts expects UTCTimestamp
+              time: vol.time,
               value: vol.value,
               color: isUp ? 'rgba(14, 203, 129, 0.5)' : 'rgba(246, 70, 93, 0.5)',
             }
@@ -230,27 +259,20 @@ export function BinanceStyleChart({
         }
 
         // Trade execution marker (optional)
-        // Note: v4.x doesn't support setMarkers, we'll add a price line instead
-        if (tradeTimestamp) {
+        if (tradeTimestamp && typeof candleSeries.setMarkers === 'function') {
           const tradeTime = Math.floor(new Date(tradeTimestamp).getTime() / 1000)
           console.log('🎯 Trade marker at:', new Date(tradeTime * 1000).toISOString())
-          
-          // Add a vertical line marker using price line at trade time
-          try {
-            const tradeCandle = data.find(c => Math.abs(c.timestamp - tradeTime) < 300) // ±5min
-            if (tradeCandle) {
-              candleSeries.createPriceLine({
-                price: tradeCandle.close,
-                color: '#ff0066',
-                lineWidth: 2,
-                lineStyle: 2, // Dashed
-                axisLabelVisible: true,
-                title: 'Trade',
-              })
-            }
-          } catch (err) {
-            console.warn('Could not add trade marker:', err)
-          }
+
+          const markers = [
+            {
+              time: tradeTime,
+              position: 'inBar' as const,
+              color: '#ff0066',
+              shape: 'arrowUp' as const,
+              text: 'Trade',
+            },
+          ]
+          candleSeries.setMarkers(markers)
         }
 
         // Fit content

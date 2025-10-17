@@ -2847,4 +2847,127 @@
   }
 }
 
+/* ============================================
+   GLOBAL TIMEZONE SELECTOR (Live Actions Page)
+   ============================================ */
+
+.global-timezone-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto;
+  padding: 16px 24px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  max-width: 400px;
+  transition: all 0.3s;
+}
+
+.global-timezone-selector:hover {
+  background: rgba(0, 255, 255, 0.08);
+  border-color: rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+.global-timezone-selector__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neon-cyan);
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.global-timezone-selector__select {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: var(--neon-cyan);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.global-timezone-selector__select:hover {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.global-timezone-selector__select:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.global-timezone-selector__select option {
+  background: rgba(10, 10, 25, 0.95);
+  color: var(--neon-cyan);
+  padding: 8px;
+}
+
+
+/* Global Timezone Selector (Live Actions Page) */
+.global-timezone-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto;
+  padding: 16px 24px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  max-width: 400px;
+  transition: all 0.3s;
+}
+
+.global-timezone-selector:hover {
+  background: rgba(0, 255, 255, 0.08);
+  border-color: rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+.global-timezone-selector__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neon-cyan);
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.global-timezone-selector__select {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: var(--neon-cyan);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.global-timezone-selector__select:hover {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.global-timezone-selector__select:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.global-timezone-selector__select option {
+  background: rgba(10, 10, 25, 0.95);
+  color: var(--neon-cyan);
+  padding: 8px;
+}
 

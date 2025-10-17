@@ -156,23 +156,14 @@ function calculateTradeWindow(tradeTime: number, timeframe: ChartTimeframe) {
   let fromTs = Math.floor(tradeTime - halfWindow)
   let toTs = Math.floor(tradeTime + halfWindow)
   
-  // If window extends into future, shift it back
+  // If trade is very recent, extend to current time
   if (toTs > now) {
-    const overflow = toTs - now
     toTs = now
-    fromTs = fromTs - overflow // Shift window back by same amount
+    fromTs = now - (windowMinutes * 60)
   }
   
   // Add ±5min tolerance to guarantee >=1 candle
   const TOL_SECONDS = 5 * 60
-  
-  console.log('📅 Trade window calculation:', {
-    tradeDate: new Date(tradeTime * 1000).toISOString(),
-    fromDate: new Date(fromTs * 1000).toISOString(),
-    toDate: new Date(toTs * 1000).toISOString(),
-    windowMinutes,
-    timeframe
-  })
   
   return {
     fromTs: fromTs - TOL_SECONDS,
@@ -192,43 +183,16 @@ function filterDataForWindow(
 ): OHLCPoint[] {
   const { fromTs, toTs } = calculateTradeWindow(tradeTime, timeframe)
   
-  console.log('� Cache data range:', {
-    cacheStart: new Date(coinCache.rawOHLC[0]?.timestamp * 1000).toISOString(),
-    cacheEnd: new Date(coinCache.rawOHLC[coinCache.rawOHLC.length - 1]?.timestamp * 1000).toISOString(),
-    totalCandles: coinCache.rawOHLC.length
-  })
-  
-  console.log('� Filtering for window:', {
-    from: new Date(fromTs * 1000).toISOString(),
-    to: new Date(toTs * 1000).toISOString(),
-    timeframe
-  })
+  console.log(`🔍 Filtering for window: ${new Date(fromTs * 1000).toISOString()} → ${new Date(toTs * 1000).toISOString()}`)
+  console.log(`📊 Target timeframe: ${timeframe}`)
   
   // First resample to target timeframe
   const resampled = resampleToTimeframe(coinCache.rawOHLC, timeframe)
   
   // Then filter for time window
-  const filtered = resampled.filter(c => {
-    const inWindow = c.timestamp >= fromTs && c.timestamp <= toTs
-    return inWindow
-  })
+  const filtered = resampled.filter(c => c.timestamp >= fromTs && c.timestamp <= toTs)
   
   console.log(`🎯 Window filter: ${resampled.length} → ${filtered.length} candles`)
-  
-  // If no data in window, try to get closest data
-  if (filtered.length === 0 && resampled.length > 0) {
-    console.warn('⚠️ No data in exact window, trying wider range...')
-    
-    // Get 50 candles around trade time
-    const targetIndex = resampled.findIndex(c => c.timestamp >= tradeTime)
-    const startIdx = Math.max(0, targetIndex - 25)
-    const endIdx = Math.min(resampled.length, startIdx + 50)
-    
-    const fallbackData = resampled.slice(startIdx, endIdx)
-    console.log(`📊 Using fallback data: ${fallbackData.length} candles around trade time`)
-    return fallbackData
-  }
-  
   return filtered
 }
 
@@ -320,62 +284,67 @@ export function useCoinGecko(
         windowMinutes
       })
       
-      // Fetch price range data
-      const range = await rateLimiter.add(() =>
-        fetchMarketChartRange(coinId, 'usd', fromTs, toTs)
+      // Fetch OHLC data (1 day = real candlesticks with open/high/low/close)
+      const ohlcData = await rateLimiter.add(() =>
+        fetchOHLC(coinId, 'usd', 1)
       )
       
-      const prices = range.prices || []
-      const baseCandles: OHLCPoint[] = []
-      
-      // Create synthetic 5-minute candles from price points
-      const fiveMinutes = 300
-      for (let i = 0; i < prices.length - 1; i++) {
-        const [timestamp, price] = prices[i]
-        const [nextTimestamp, nextPrice] = prices[i + 1]
-        
-        // Generate 5-minute candles between these price points
-        const timeDiff = (nextTimestamp - timestamp) / 1000
-        const candleCount = Math.max(1, Math.floor(timeDiff / fiveMinutes))
-        const priceStep = (nextPrice - price) / candleCount
-        
-        for (let j = 0; j < candleCount; j++) {
-          const candleTime = Math.floor(timestamp / 1000) + (j * fiveMinutes)
-          const candleOpen = price + (priceStep * j)
-          const candleClose = price + (priceStep * (j + 1))
-          
-          baseCandles.push({
-            timestamp: candleTime,
-            open: candleOpen,
-            high: Math.max(candleOpen, candleClose) * 1.001,
-            low: Math.min(candleOpen, candleClose) * 0.999,
-            close: candleClose
-          })
-        }
+      if (!ohlcData || ohlcData.length === 0) {
+        throw new Error('No OHLC data received from CoinGecko')
       }
-
-      console.log(`📊 Generated ${baseCandles.length} base 5m candles from ${prices.length} price points`)
       
-      const newCoinCache: CoinCacheData = {
+      // Convert OHLC array format to OHLCPoint objects
+      const allOHLC: OHLCPoint[] = ohlcData.map((point: number[]) => ({
+        timestamp: Math.floor(point[0] / 1000),
+        open: point[1],
+        high: point[2],
+        low: point[3],
+        close: point[4]
+      }))
+      
+      console.log('Fetched:', allOHLC.length, 'OHLC candles from API')
+      
+      // Filter to relevant time window
+      const rawOHLC = allOHLC.filter(c => c.timestamp >= fromTs && c.timestamp <= toTs)
+      console.log('Filtered to:', rawOHLC.length, 'candles for trade window')
+      
+      // 4. Pre-aggregate data for all timeframes
+      const aggregated15m = aggregateTo15Min(rawOHLC)
+      
+      // 5. Create unified coin cache object
+      coinCache = {
         coinId,
         symbol,
-        rawOHLC: baseCandles,
+        rawOHLC,
         fetchedAt: Date.now(),
         ttl: cacheTtl,
         dataRange: { from: fromTs, to: toTs },
-        aggregated: {}
+        aggregated: {
+          '5m': rawOHLC,           // Native 5m from API
+          '15m': aggregated15m,    // Pre-aggregated 15m
+          '1m': rawOHLC,           // Fallback to 5m (API limitation)
+          '3m': rawOHLC            // Fallback to 5m (API limitation)
+        }
       }
       
-      CacheManager.setCoinCache(newCoinCache)
-      console.log('✅ Coin cache SAVED with 5m base candles')
+      // 6. Save to cache (SINGLE WRITE)
+      CacheManager.setCoinCache(coinCache)
       
-      // Return filtered data for current view
+      console.log('✅ Coin cache SAVED')
+      console.log('   ├─ Total candles:', rawOHLC.length)
+      console.log('   ├─ Aggregated 15m:', aggregated15m.length)
+      console.log('   └─ All timeframes ready for instant switching!')
+      
+      // 7. Return filtered data for current view
       if (mode === 'ohlc') {
-        const filtered = filterDataForWindow(newCoinCache, tradeTime, timeframe)
-        setData(filtered)
+        const filteredData = filterDataForWindow(coinCache, tradeTime, timeframe)
+        setData(filteredData)
       } else {
-        const resampled = resampleToTimeframe(baseCandles, timeframe)
-        setData(resampled.map(c => ({ timestamp: c.timestamp, price: c.close })))
+        const priceData: MarketChartPoint[] = rawOHLC.map(candle => ({
+          timestamp: candle.timestamp,
+          price: candle.close
+        }))
+        setData(priceData)
       }
       
     } catch (err) {

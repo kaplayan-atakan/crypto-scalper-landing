@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Link } from 'react-router-dom';
 import { useActions } from '../hooks/useActions';
@@ -9,6 +9,21 @@ import { TradeDetailPopup } from '../components/TradeDetailPopup';
 import { MultiCoinChartSection } from '../components/MultiCoinChartSection';
 import type { ClosedTradeSimple } from '../types/supabase';
 import '../App.css';
+
+// Timezone options - shared with TradeDetailPopup
+const TIMEZONE_OPTIONS = [
+  { label: 'UTC', offset: 0 },
+  { label: 'UTC+1', offset: 1 },
+  { label: 'UTC+2', offset: 2 },
+  { label: 'UTC+3 (Turkey)', offset: 3 },
+  { label: 'UTC+4', offset: 4 },
+  { label: 'UTC+5', offset: 5 },
+  { label: 'UTC+6', offset: 6 },
+  { label: 'UTC+7', offset: 7 },
+  { label: 'UTC+8', offset: 8 },
+  { label: 'UTC-5 (EST)', offset: -5 },
+  { label: 'UTC-8 (PST)', offset: -8 },
+];
 
 // Enhanced reason parser with detailed field extraction
 interface ParsedReason {
@@ -259,6 +274,18 @@ const parseReason = (reason: string): { type: string; icon: string; label: strin
 const LiveActions = () => {
   const { trades, metrics, loading, error, refresh, enableRealtime, setEnableRealtime, limit, setLimit, timeRange, setTimeRange } = useActions();
   
+  // Timezone state - Load from localStorage or default to UTC+3
+  const [globalTimezone, setGlobalTimezone] = useState(() => {
+    const saved = localStorage.getItem('chartTimezone')
+    return saved ? parseInt(saved, 10) : 3 // Default UTC+3
+  })
+  
+  // Save timezone to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('chartTimezone', globalTimezone.toString())
+    console.log(`🌍 Global timezone changed to: UTC${globalTimezone > 0 ? '+' : ''}${globalTimezone}`)
+  }, [globalTimezone])
+  
   // CoinGecko popup state
   const [selectedTrade, setSelectedTrade] = useState<ClosedTradeSimple | null>(null);
   
@@ -345,6 +372,24 @@ const LiveActions = () => {
                 <span className="page__title-accent">Actions</span>
               </h1>
               <p className="page__subtitle">Gerçek zamanlı işlem takibi ve performans metrikleri</p>
+            </div>
+            
+            {/* Global Timezone Selector */}
+            <div className="global-timezone-selector">
+              <label className="global-timezone-selector__label">
+                🌍 Timezone:
+              </label>
+              <select 
+                className="global-timezone-selector__select"
+                value={globalTimezone}
+                onChange={(e) => setGlobalTimezone(parseInt(e.target.value))}
+              >
+                {TIMEZONE_OPTIONS.map(tz => (
+                  <option key={tz.offset} value={tz.offset}>
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
             </div>
             
             {/* Bot Selector - Stats'tan önce */}
@@ -679,7 +724,8 @@ const LiveActions = () => {
       {selectedTrade && (
         <TradeDetailPopup 
           trade={selectedTrade} 
-          onClose={() => setSelectedTrade(null)} 
+          onClose={() => setSelectedTrade(null)}
+          initialTimezone={globalTimezone}
         />
       )}
     </div>

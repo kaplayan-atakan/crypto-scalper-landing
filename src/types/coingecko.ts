@@ -49,20 +49,15 @@ export interface OHLCPoint {
 export interface CoinCacheData {
   coinId: string                    // CoinGecko coin ID (e.g., 'bitcoin')
   symbol: string                    // Trading symbol (e.g., 'BTCUSDT')
-  rawOHLC: OHLCPoint[]             // Raw 5-minute OHLC candles from API
+  rawOHLC: OHLCPoint[]             // Base 5-minute OHLC candles (generated from price points)
   fetchedAt: number                 // Timestamp when data was fetched
   ttl: number                       // Cache duration in milliseconds
   dataRange: {
     from: number                    // Start timestamp (seconds)
     to: number                      // End timestamp (seconds)
   }
-  // Pre-aggregated data for performance
-  aggregated: {
-    '1m'?: OHLCPoint[]             // 1m (uses 5m as-is due to API limitation)
-    '3m'?: OHLCPoint[]             // 3m (uses 5m as-is due to API limitation)
-    '5m': OHLCPoint[]              // 5m (native from API)
-    '15m'?: OHLCPoint[]            // 15m (aggregated from 5m)
-  }
+  // Reserved for future pre-aggregated data (currently unused - dynamic resampling instead)
+  aggregated: Record<string, OHLCPoint[]>
 }
 
 export interface CoinGeckoConfig {

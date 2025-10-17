@@ -72,6 +72,9 @@ export const SYMBOL_TO_COINGECKO_ID: Record<string, string> = {
   'ZKUSDT': 'zkspace',
   'LINEAUSDT': 'linea',
   'VFYUSDT': 'zkverify', // ZKVerify - auto-discovered and persisted
+  'ENAUSDT': 'ethena', // Ethena - auto-discovered and persisted
+  'METUSDT': 'metya', // Metya - auto-discovered and persisted
+  'MITOUSDT': 'mitosis', // Mitosis - auto-discovered and persisted
   'AAVEUSDT': 'aave',
   'MKRUSDT': 'maker',
   'SNXUSDT': 'havven',

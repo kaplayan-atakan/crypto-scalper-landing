@@ -10,10 +10,19 @@ import './TradeDetailPopup.css'
 interface TradeDetailPopupProps {
   trade: ClosedTradeSimple
   onClose: () => void
+  initialTimezone?: number  // Optional timezone from parent (Live Actions page)
 }
 
-export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
+export function TradeDetailPopup({ trade, onClose, initialTimezone = 3 }: TradeDetailPopupProps) {
+  // Use initialTimezone from parent if provided, otherwise load from localStorage
+  const [timezoneOffset, setTimezoneOffset] = useState(() => {
+    if (initialTimezone !== undefined) return initialTimezone
+    const saved = localStorage.getItem('chartTimezone')
+    return saved ? parseInt(saved, 10) : 3 // Default UTC+3
+  })
+  
   const [timeframe, setTimeframe] = useState<ChartTimeframe>(ChartTimeframe.FIVE_MIN)
+  const [refreshKey, setRefreshKey] = useState(0) // Force refresh
   
   // Memoize config to prevent unnecessary re-renders
   const coinGeckoConfig = useMemo(() => ({
@@ -24,9 +33,43 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
   
   const { data, loading, error, refresh } = useCoinGecko(
     trade.symbol,
-    trade.created_at,
+    trade.created_at,  // Use original timestamp - no year replacement!
     coinGeckoConfig
   )
+
+  // Auto-refresh on timeframe change
+  const handleTimeframeChange = (newTimeframe: ChartTimeframe) => {
+    console.log('⏱️ Timeframe changed to:', newTimeframe)
+    setTimeframe(newTimeframe)
+    // useCoinGecko will automatically re-run with new timeframe
+  }
+
+  // Apply timezone offset to data
+  const adjustedData = useMemo(() => {
+    if (!data || !Array.isArray(data)) return data
+    
+    // Adjust timestamps for timezone
+    return data.map((point: any) => ({
+      ...point,
+      timestamp: point.timestamp + (timezoneOffset * 3600), // Add hours in seconds
+    }))
+  }, [data, timezoneOffset])
+
+  // Format trade time with timezone
+  const formatTradeTime = (timestamp: string) => {
+    const date = new Date(timestamp)  // Use original timestamp
+    const offsetMs = timezoneOffset * 60 * 60 * 1000
+    const localDate = new Date(date.getTime() + offsetMs)
+    
+    return localDate.toLocaleString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+  }
   
   // Type guard to check if data is OHLC
   const isOHLCData = (d: typeof data): d is OHLCPoint[] => {
@@ -114,6 +157,12 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
             <span className="cg-popup-symbol">{trade.symbol}</span>
             <span className="cg-popup-action">{trade.reason.substring(0, 30)}...</span>
           </div>
+          
+          {/* Timezone Display (Read-only) */}
+          <div className="popup-timezone-display">
+            🌍 UTC{timezoneOffset > 0 ? '+' : ''}{timezoneOffset}
+          </div>
+          
           <button className="cg-popup-close" onClick={onClose}>
             ✕
           </button>
@@ -135,7 +184,12 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
           </div>
           <div className="cg-info-item cg-info-timestamp">
             <span className="cg-info-label">Trade Time:</span>
-            <span className="cg-info-value">{formatTimestamp(trade.created_at)}</span>
+            <span className="cg-info-value">
+              {formatTradeTime(trade.created_at)}
+              {timezoneOffset !== 0 && (
+                <span className="popup-info-tz"> (UTC{timezoneOffset > 0 ? '+' : ''}{timezoneOffset})</span>
+              )}
+            </span>
           </div>
         </div>
         
@@ -144,41 +198,41 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
           <div className="cg-timeframe-toggle">
             <button
               className={`cg-timeframe-btn ${timeframe === ChartTimeframe.ONE_MIN ? 'active' : ''}`}
-              onClick={() => setTimeframe(ChartTimeframe.ONE_MIN)}
+              onClick={() => handleTimeframeChange(ChartTimeframe.ONE_MIN)}
               title="1-minute candles (60 candles for 1 hour) - Best for scalping"
             >
               1m
             </button>
             <button
               className={`cg-timeframe-btn ${timeframe === ChartTimeframe.THREE_MIN ? 'active' : ''}`}
-              onClick={() => setTimeframe(ChartTimeframe.THREE_MIN)}
+              onClick={() => handleTimeframeChange(ChartTimeframe.THREE_MIN)}
               title="3-minute candles (20 candles for 1 hour) - Quick trades"
             >
               3m
             </button>
             <button
               className={`cg-timeframe-btn ${timeframe === ChartTimeframe.FIVE_MIN ? 'active' : ''}`}
-              onClick={() => setTimeframe(ChartTimeframe.FIVE_MIN)}
+              onClick={() => handleTimeframeChange(ChartTimeframe.FIVE_MIN)}
               title="5-minute candles (36 candles for 3 hours) - Default view"
             >
               5m
             </button>
             <button
               className={`cg-timeframe-btn ${timeframe === ChartTimeframe.FIFTEEN_MIN ? 'active' : ''}`}
-              onClick={() => setTimeframe(ChartTimeframe.FIFTEEN_MIN)}
+              onClick={() => handleTimeframeChange(ChartTimeframe.FIFTEEN_MIN)}
               title="15-minute candles (24 candles for 6 hours) - Longer timeframe"
             >
               15m
             </button>
           </div>
           
-          <button className="cg-refresh-btn" onClick={refresh} disabled={loading}>
+          <button className="cg-refresh-btn" onClick={() => setRefreshKey(prev => prev + 1)} disabled={loading}>
             {loading ? '⏳' : '🔄'} Refresh
           </button>
         </div>
         
         {/* Chart Area */}
-        <div className="cg-popup-chart">
+        <div className="cg-popup-chart" key={refreshKey}>
           {loading && (
             <div className="cg-chart-loading">
               <div className="cg-spinner"></div>
@@ -207,22 +261,29 @@ export function TradeDetailPopup({ trade, onClose }: TradeDetailPopupProps) {
                   )}
                 </p>
               </div>
-              <button className="cg-retry-btn" onClick={refresh}>
+              <button className="cg-retry-btn" onClick={() => setRefreshKey(prev => prev + 1)}>
                 🔄 Tekrar Dene
               </button>
             </div>
           )}
           
-          {!loading && !error && data && isOHLCData(data) && (
-            <BinanceStyleChart
-              data={data}
-              height={450}
-              showVolume={false}
-              tradeTimestamp={trade.created_at}
-            />
+          {!loading && !error && adjustedData && Array.isArray(adjustedData) && adjustedData.length > 0 && (
+            <>
+              <BinanceStyleChart
+                data={adjustedData}
+                height={450}
+                showVolume={false}
+                tradeTimestamp={trade.created_at}  // Use original timestamp
+              />
+              <div className="cg-chart-info">
+                📍 Trade-centered window: {adjustedData.length} × {timeframe} candles
+                <br />
+                🕐 Timezone: UTC{timezoneOffset > 0 ? '+' : ''}{timezoneOffset}
+              </div>
+            </>
           )}
           
-          {!loading && !error && data && !isOHLCData(data) && (
+          {!loading && !error && (!adjustedData || !Array.isArray(adjustedData) || adjustedData.length === 0) && (
             <div className="cg-chart-error">
               <p className="cg-error-icon">⚠️</p>
               <p className="cg-error-message">Invalid chart data format</p>
