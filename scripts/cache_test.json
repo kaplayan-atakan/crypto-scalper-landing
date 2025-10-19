@@ -1,0 +1,1989 @@
+{
+  "last_created_at": "2025-10-19T13:20:05.935912+03:00",
+  "run_columns": {
+    "run_id": "30dd59e1-cd89-4db8-9367-673a068cf48e",
+    "created_at": "2025-10-19T13:19:20.652164+03:00",
+    "symbols": [
+      {
+        "symbol": "4USDT",
+        "avg_winrate": 0.5628196169960659,
+        "avg_pnl": 0.2085857048353034,
+        "test_count": 270
+      },
+      {
+        "symbol": "MLNUSDT",
+        "avg_winrate": 0.5411824562709707,
+        "avg_pnl": 0.0782754584928183,
+        "test_count": 270
+      },
+      {
+        "symbol": "BDXNUSDT",
+        "avg_winrate": 0.4884353874937471,
+        "avg_pnl": 0.06591120689206773,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARUSDT",
+        "avg_winrate": 0.5465409003067735,
+        "avg_pnl": 0.06565951139069397,
+        "test_count": 270
+      },
+      {
+        "symbol": "JELLYJELLYUSDT",
+        "avg_winrate": 0.48012338647930514,
+        "avg_pnl": 0.06414352871261404,
+        "test_count": 270
+      },
+      {
+        "symbol": "MONUSDT",
+        "avg_winrate": 0.48513573850695935,
+        "avg_pnl": 0.06034273486706899,
+        "test_count": 270
+      },
+      {
+        "symbol": "GOATUSDT",
+        "avg_winrate": 0.6033420960278463,
+        "avg_pnl": 0.05908558088715595,
+        "test_count": 270
+      },
+      {
+        "symbol": "ALCHUSDT",
+        "avg_winrate": 0.5999138087078951,
+        "avg_pnl": 0.05789596083767502,
+        "test_count": 270
+      },
+      {
+        "symbol": "MINAUSDT",
+        "avg_winrate": 0.6619048610268747,
+        "avg_pnl": 0.05658282776578516,
+        "test_count": 270
+      },
+      {
+        "symbol": "PERPUSDT",
+        "avg_winrate": 0.5779421128468616,
+        "avg_pnl": 0.0552142574167676,
+        "test_count": 270
+      },
+      {
+        "symbol": "JASMYUSDT",
+        "avg_winrate": 0.6702645938103181,
+        "avg_pnl": 0.05270042432201103,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000PEPEUSDT",
+        "avg_winrate": 0.6239599950931705,
+        "avg_pnl": 0.051401739030805485,
+        "test_count": 270
+      },
+      {
+        "symbol": "DOGEUSDT",
+        "avg_winrate": 0.6598733179662203,
+        "avg_pnl": 0.04681562069461694,
+        "test_count": 270
+      },
+      {
+        "symbol": "HOMEUSDT",
+        "avg_winrate": 0.56870503116039,
+        "avg_pnl": 0.044257644366971646,
+        "test_count": 270
+      },
+      {
+        "symbol": "IOTAUSDT",
+        "avg_winrate": 0.6248966308077838,
+        "avg_pnl": 0.04405431740753731,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000BONKUSDT",
+        "avg_winrate": 0.5207187603419671,
+        "avg_pnl": 0.04337851314134146,
+        "test_count": 270
+      },
+      {
+        "symbol": "ACXUSDT",
+        "avg_winrate": 0.6270820176171635,
+        "avg_pnl": 0.0407942749294413,
+        "test_count": 270
+      },
+      {
+        "symbol": "ACEUSDT",
+        "avg_winrate": 0.5499317204701178,
+        "avg_pnl": 0.03897459091734071,
+        "test_count": 270
+      },
+      {
+        "symbol": "BLURUSDT",
+        "avg_winrate": 0.6366839919287294,
+        "avg_pnl": 0.0386898873395073,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARKUSDT",
+        "avg_winrate": 0.685363752531331,
+        "avg_pnl": 0.037327367175343545,
+        "test_count": 270
+      },
+      {
+        "symbol": "KASUSDT",
+        "avg_winrate": 0.5687556516739981,
+        "avg_pnl": 0.036723490423892446,
+        "test_count": 270
+      },
+      {
+        "symbol": "HUMAUSDT",
+        "avg_winrate": 0.586722032770081,
+        "avg_pnl": 0.034099105800171295,
+        "test_count": 270
+      },
+      {
+        "symbol": "ONGUSDT",
+        "avg_winrate": 0.7070458876224843,
+        "avg_pnl": 0.03068015264347518,
+        "test_count": 270
+      },
+      {
+        "symbol": "ALLUSDT",
+        "avg_winrate": 0.7505674527887815,
+        "avg_pnl": 0.030267782901905387,
+        "test_count": 270
+      },
+      {
+        "symbol": "ATOMUSDT",
+        "avg_winrate": 0.6134438620484984,
+        "avg_pnl": 0.030131075112543714,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARBUSDT",
+        "avg_winrate": 0.647194601410269,
+        "avg_pnl": 0.030121204912182047,
+        "test_count": 270
+      },
+      {
+        "symbol": "LSKUSDT",
+        "avg_winrate": 0.6163669988745346,
+        "avg_pnl": 0.029878937661372257,
+        "test_count": 270
+      },
+      {
+        "symbol": "GLMUSDT",
+        "avg_winrate": 0.7346322604098772,
+        "avg_pnl": 0.02956442995798444,
+        "test_count": 270
+      },
+      {
+        "symbol": "KSMUSDT",
+        "avg_winrate": 0.6364979552726666,
+        "avg_pnl": 0.029522600129514423,
+        "test_count": 270
+      },
+      {
+        "symbol": "CELRUSDT",
+        "avg_winrate": 0.5310056795428634,
+        "avg_pnl": 0.028908709217299024,
+        "test_count": 270
+      },
+      {
+        "symbol": "1INCHUSDT",
+        "avg_winrate": 0.6367671784797909,
+        "avg_pnl": 0.02830431779101063,
+        "test_count": 270
+      },
+      {
+        "symbol": "POLUSDT",
+        "avg_winrate": 0.6702165432270162,
+        "avg_pnl": 0.028063338559875,
+        "test_count": 170
+      },
+      {
+        "symbol": "GRTUSDT",
+        "avg_winrate": 0.5608493687469176,
+        "avg_pnl": 0.027526393759185877,
+        "test_count": 270
+      },
+      {
+        "symbol": "NEOUSDT",
+        "avg_winrate": 0.6659207547244718,
+        "avg_pnl": 0.02663607586453168,
+        "test_count": 270
+      },
+      {
+        "symbol": "MEWUSDT",
+        "avg_winrate": 0.7139660996244739,
+        "avg_pnl": 0.026445561114310456,
+        "test_count": 270
+      },
+      {
+        "symbol": "BRUSDT",
+        "avg_winrate": 0.5270725025678676,
+        "avg_pnl": 0.026373393201479984,
+        "test_count": 270
+      },
+      {
+        "symbol": "KAIAUSDT",
+        "avg_winrate": 0.6599153279175167,
+        "avg_pnl": 0.026190731428857104,
+        "test_count": 270
+      },
+      {
+        "symbol": "DOTUSDT",
+        "avg_winrate": 0.65388232537333,
+        "avg_pnl": 0.026133343319461273,
+        "test_count": 270
+      },
+      {
+        "symbol": "BIOUSDT",
+        "avg_winrate": 0.5639032056986983,
+        "avg_pnl": 0.026007455207109263,
+        "test_count": 270
+      },
+      {
+        "symbol": "EPTUSDT",
+        "avg_winrate": 0.5810596252161546,
+        "avg_pnl": 0.025933011501282483,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000SHIBUSDT",
+        "avg_winrate": 0.7190211673762333,
+        "avg_pnl": 0.025303756853211134,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARKMUSDT",
+        "avg_winrate": 0.6058010200681007,
+        "avg_pnl": 0.025283551953776906,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000XECUSDT",
+        "avg_winrate": 0.7097458209709759,
+        "avg_pnl": 0.025168187508495574,
+        "test_count": 270
+      },
+      {
+        "symbol": "ETHUSDT",
+        "avg_winrate": 0.791582711426216,
+        "avg_pnl": 0.024823472864098476,
+        "test_count": 270
+      },
+      {
+        "symbol": "CHZUSDT",
+        "avg_winrate": 0.625898057698611,
+        "avg_pnl": 0.02394142861822768,
+        "test_count": 270
+      },
+      {
+        "symbol": "DMCUSDT",
+        "avg_winrate": 0.5588182590212992,
+        "avg_pnl": 0.023802661776338326,
+        "test_count": 270
+      },
+      {
+        "symbol": "ADAUSDT",
+        "avg_winrate": 0.6728489871998056,
+        "avg_pnl": 0.02284445037495785,
+        "test_count": 270
+      },
+      {
+        "symbol": "DEXEUSDT",
+        "avg_winrate": 0.5384604154688566,
+        "avg_pnl": 0.022838837028870455,
+        "test_count": 270
+      },
+      {
+        "symbol": "AXSUSDT",
+        "avg_winrate": 0.5773542433671301,
+        "avg_pnl": 0.022738750323485362,
+        "test_count": 270
+      },
+      {
+        "symbol": "LPTUSDT",
+        "avg_winrate": 0.6466683037731414,
+        "avg_pnl": 0.022023153743641805,
+        "test_count": 270
+      },
+      {
+        "symbol": "IDUSDT",
+        "avg_winrate": 0.6337168825305033,
+        "avg_pnl": 0.021913992813109448,
+        "test_count": 270
+      },
+      {
+        "symbol": "NOTUSDT",
+        "avg_winrate": 0.5603822877925217,
+        "avg_pnl": 0.02158907256478504,
+        "test_count": 270
+      },
+      {
+        "symbol": "POLYXUSDT",
+        "avg_winrate": 0.7396656897123504,
+        "avg_pnl": 0.021548732912805155,
+        "test_count": 270
+      },
+      {
+        "symbol": "EGLDUSDT",
+        "avg_winrate": 0.6465387430347511,
+        "avg_pnl": 0.020782445474328375,
+        "test_count": 270
+      },
+      {
+        "symbol": "AXLUSDT",
+        "avg_winrate": 0.6420010582114503,
+        "avg_pnl": 0.020360619822432553,
+        "test_count": 270
+      },
+      {
+        "symbol": "MTLUSDT",
+        "avg_winrate": 0.6278593222270439,
+        "avg_pnl": 0.01915636383378362,
+        "test_count": 270
+      },
+      {
+        "symbol": "AAVEUSDT",
+        "avg_winrate": 0.6146217557987693,
+        "avg_pnl": 0.01854783562491939,
+        "test_count": 270
+      },
+      {
+        "symbol": "GASUSDT",
+        "avg_winrate": 0.7358494923273261,
+        "avg_pnl": 0.01822868339107675,
+        "test_count": 270
+      },
+      {
+        "symbol": "MOVRUSDT",
+        "avg_winrate": 0.5630911311009095,
+        "avg_pnl": 0.018054070997144747,
+        "test_count": 270
+      },
+      {
+        "symbol": "DEEPUSDT",
+        "avg_winrate": 0.5723789707075613,
+        "avg_pnl": 0.017672722604096268,
+        "test_count": 270
+      },
+      {
+        "symbol": "GALAUSDT",
+        "avg_winrate": 0.5965571110810327,
+        "avg_pnl": 0.01729360328880815,
+        "test_count": 270
+      },
+      {
+        "symbol": "BNTUSDT",
+        "avg_winrate": 0.699725206397491,
+        "avg_pnl": 0.01726126895629598,
+        "test_count": 270
+      },
+      {
+        "symbol": "CVCUSDT",
+        "avg_winrate": 0.6019873762757773,
+        "avg_pnl": 0.016577327600582194,
+        "test_count": 270
+      },
+      {
+        "symbol": "ESPORTSUSDT",
+        "avg_winrate": 0.5576260264069327,
+        "avg_pnl": 0.01610158580367261,
+        "test_count": 270
+      },
+      {
+        "symbol": "LINKUSDT",
+        "avg_winrate": 0.5731626831400185,
+        "avg_pnl": 0.015693025249232526,
+        "test_count": 270
+      },
+      {
+        "symbol": "NTRNUSDT",
+        "avg_winrate": 0.6164267663506002,
+        "avg_pnl": 0.015529977379777253,
+        "test_count": 270
+      },
+      {
+        "symbol": "ANKRUSDT",
+        "avg_winrate": 0.6503621383279373,
+        "avg_pnl": 0.015506069201237881,
+        "test_count": 270
+      },
+      {
+        "symbol": "IMXUSDT",
+        "avg_winrate": 0.6042878783578778,
+        "avg_pnl": 0.015459313141045388,
+        "test_count": 270
+      },
+      {
+        "symbol": "APEUSDT",
+        "avg_winrate": 0.6806671172082638,
+        "avg_pnl": 0.015173300933009152,
+        "test_count": 270
+      },
+      {
+        "symbol": "INITUSDT",
+        "avg_winrate": 0.6038403659080919,
+        "avg_pnl": 0.015042382844397717,
+        "test_count": 270
+      },
+      {
+        "symbol": "CFXUSDT",
+        "avg_winrate": 0.5794233990191823,
+        "avg_pnl": 0.014339714027532677,
+        "test_count": 270
+      },
+      {
+        "symbol": "ENSUSDT",
+        "avg_winrate": 0.6147941108879864,
+        "avg_pnl": 0.013923624494272941,
+        "test_count": 270
+      },
+      {
+        "symbol": "ONTUSDT",
+        "avg_winrate": 0.6502333635536792,
+        "avg_pnl": 0.013606074142828026,
+        "test_count": 270
+      },
+      {
+        "symbol": "CGPTUSDT",
+        "avg_winrate": 0.621458347602536,
+        "avg_pnl": 0.013521578031888876,
+        "test_count": 270
+      },
+      {
+        "symbol": "GMTUSDT",
+        "avg_winrate": 0.6577009093653473,
+        "avg_pnl": 0.011945299893106453,
+        "test_count": 270
+      },
+      {
+        "symbol": "ALTUSDT",
+        "avg_winrate": 0.5979272299533746,
+        "avg_pnl": 0.011931844066175798,
+        "test_count": 270
+      },
+      {
+        "symbol": "AUSDT",
+        "avg_winrate": 0.6102636105057064,
+        "avg_pnl": 0.011711849549928047,
+        "test_count": 270
+      },
+      {
+        "symbol": "ENJUSDT",
+        "avg_winrate": 0.6538477396383492,
+        "avg_pnl": 0.010774104371073148,
+        "test_count": 270
+      },
+      {
+        "symbol": "MANAUSDT",
+        "avg_winrate": 0.5582765866491926,
+        "avg_pnl": 0.010396256804638945,
+        "test_count": 270
+      },
+      {
+        "symbol": "HIGHUSDT",
+        "avg_winrate": 0.5791455593286798,
+        "avg_pnl": 0.010166406048113636,
+        "test_count": 270
+      },
+      {
+        "symbol": "BIGTIMEUSDT",
+        "avg_winrate": 0.6465995224036628,
+        "avg_pnl": 0.009157827911074801,
+        "test_count": 270
+      },
+      {
+        "symbol": "BANDUSDT",
+        "avg_winrate": 0.6151756720430133,
+        "avg_pnl": 0.00906122915877043,
+        "test_count": 270
+      },
+      {
+        "symbol": "KDAUSDT",
+        "avg_winrate": 0.5360781063784391,
+        "avg_pnl": 0.008432771917291191,
+        "test_count": 270
+      },
+      {
+        "symbol": "ANIMEUSDT",
+        "avg_winrate": 0.6152308410271937,
+        "avg_pnl": 0.00807742077126197,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000XUSDT",
+        "avg_winrate": 0.6138171322324891,
+        "avg_pnl": 0.007766873863616018,
+        "test_count": 270
+      },
+      {
+        "symbol": "DOGSUSDT",
+        "avg_winrate": 0.5868133952212656,
+        "avg_pnl": 0.007116694423388383,
+        "test_count": 270
+      },
+      {
+        "symbol": "DENTUSDT",
+        "avg_winrate": 0.6535986612091439,
+        "avg_pnl": 0.006313238477198985,
+        "test_count": 270
+      },
+      {
+        "symbol": "ACHUSDT",
+        "avg_winrate": 0.6352995237862841,
+        "avg_pnl": 0.006035171617818473,
+        "test_count": 270
+      },
+      {
+        "symbol": "NEWTUSDT",
+        "avg_winrate": 0.6065471118477614,
+        "avg_pnl": 0.005973444767129212,
+        "test_count": 270
+      },
+      {
+        "symbol": "NEIROUSDT",
+        "avg_winrate": 0.5829087730966069,
+        "avg_pnl": 0.005055970992296651,
+        "test_count": 270
+      },
+      {
+        "symbol": "INJUSDT",
+        "avg_winrate": 0.5664463135088651,
+        "avg_pnl": 0.004467929024384448,
+        "test_count": 270
+      },
+      {
+        "symbol": "FFUSDT",
+        "avg_winrate": 0.563677949480084,
+        "avg_pnl": 0.004342574547670776,
+        "test_count": 270
+      },
+      {
+        "symbol": "1MBABYDOGEUSDT",
+        "avg_winrate": 0.6517919239305637,
+        "avg_pnl": 0.00408216251116477,
+        "test_count": 270
+      },
+      {
+        "symbol": "IOSTUSDT",
+        "avg_winrate": 0.5589027790859716,
+        "avg_pnl": 0.00406653988809506,
+        "test_count": 270
+      },
+      {
+        "symbol": "CARVUSDT",
+        "avg_winrate": 0.5964624767750867,
+        "avg_pnl": 0.0035156042794041416,
+        "test_count": 270
+      },
+      {
+        "symbol": "HBARUSDT",
+        "avg_winrate": 0.5360050723736229,
+        "avg_pnl": 0.0028598253776074426,
+        "test_count": 270
+      },
+      {
+        "symbol": "CKBUSDT",
+        "avg_winrate": 0.5665875317112244,
+        "avg_pnl": 0.0028288005853373157,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000FLOKIUSDT",
+        "avg_winrate": 0.5929589589090841,
+        "avg_pnl": 0.0019961913553116265,
+        "test_count": 270
+      },
+      {
+        "symbol": "ALGOUSDT",
+        "avg_winrate": 0.5968309584924381,
+        "avg_pnl": 0.0019580627826718752,
+        "test_count": 270
+      },
+      {
+        "symbol": "APTUSDT",
+        "avg_winrate": 0.5582974798516739,
+        "avg_pnl": 0.001899102717976218,
+        "test_count": 270
+      },
+      {
+        "symbol": "OMUSDT",
+        "avg_winrate": 0.5324927263507911,
+        "avg_pnl": 0.0018803268187663601,
+        "test_count": 270
+      },
+      {
+        "symbol": "LRCUSDT",
+        "avg_winrate": 0.5645596291800155,
+        "avg_pnl": 0.001320183539320843,
+        "test_count": 270
+      },
+      {
+        "symbol": "AERGOUSDT",
+        "avg_winrate": 0.6829159837881362,
+        "avg_pnl": 0.0011035604595789397,
+        "test_count": 270
+      },
+      {
+        "symbol": "AVAXUSDT",
+        "avg_winrate": 0.5547834791831456,
+        "avg_pnl": 0.0010296634277748324,
+        "test_count": 270
+      },
+      {
+        "symbol": "KNCUSDT",
+        "avg_winrate": 0.6813771677561873,
+        "avg_pnl": 0.0009689315264786311,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000LUNCUSDT",
+        "avg_winrate": 0.591477587027427,
+        "avg_pnl": 0.0003273233533760432,
+        "test_count": 270
+      },
+      {
+        "symbol": "GUSDT",
+        "avg_winrate": 0.6969319379804662,
+        "avg_pnl": 1.922839947021518E-05,
+        "test_count": 270
+      },
+      {
+        "symbol": "PAXGUSDT",
+        "avg_winrate": 0.07160493827160494,
+        "avg_pnl": -0.00022341923009957753,
+        "test_count": 270
+      },
+      {
+        "symbol": "DFUSDT",
+        "avg_winrate": 0.588715669172758,
+        "avg_pnl": -0.00027418687787469475,
+        "test_count": 270
+      },
+      {
+        "symbol": "JTOUSDT",
+        "avg_winrate": 0.5935619447061876,
+        "avg_pnl": -0.00031372287898077304,
+        "test_count": 270
+      },
+      {
+        "symbol": "COMPUSDT",
+        "avg_winrate": 0.5722787662510689,
+        "avg_pnl": -0.001338446651995748,
+        "test_count": 270
+      },
+      {
+        "symbol": "LTCUSDT",
+        "avg_winrate": 0.5770289638191873,
+        "avg_pnl": -0.0019232742435101252,
+        "test_count": 270
+      },
+      {
+        "symbol": "FIDAUSDT",
+        "avg_winrate": 0.6169126086069878,
+        "avg_pnl": -0.0020369589317863197,
+        "test_count": 270
+      },
+      {
+        "symbol": "OXTUSDT",
+        "avg_winrate": 0.6315649894481681,
+        "avg_pnl": -0.0025548719712728037,
+        "test_count": 270
+      },
+      {
+        "symbol": "ORCAUSDT",
+        "avg_winrate": 0.5872940065145812,
+        "avg_pnl": -0.0026793054549109916,
+        "test_count": 270
+      },
+      {
+        "symbol": "ETHFIUSDT",
+        "avg_winrate": 0.515966143267754,
+        "avg_pnl": -0.0031131614319149276,
+        "test_count": 270
+      },
+      {
+        "symbol": "HOOKUSDT",
+        "avg_winrate": 0.5600504181848189,
+        "avg_pnl": -0.003644854728176653,
+        "test_count": 270
+      },
+      {
+        "symbol": "JUPUSDT",
+        "avg_winrate": 0.640247181505724,
+        "avg_pnl": -0.004133787973466754,
+        "test_count": 270
+      },
+      {
+        "symbol": "HIVEUSDT",
+        "avg_winrate": 0.5307659029353423,
+        "avg_pnl": -0.004720902619332579,
+        "test_count": 270
+      },
+      {
+        "symbol": "ERAUSDT",
+        "avg_winrate": 0.6184532468390458,
+        "avg_pnl": -0.004764694050623084,
+        "test_count": 270
+      },
+      {
+        "symbol": "BTCUSDT",
+        "avg_winrate": 0.38703703703703696,
+        "avg_pnl": -0.004866044523203055,
+        "test_count": 270
+      },
+      {
+        "symbol": "FIOUSDT",
+        "avg_winrate": 0.5357164906677284,
+        "avg_pnl": -0.005482703572447817,
+        "test_count": 270
+      },
+      {
+        "symbol": "GUNUSDT",
+        "avg_winrate": 0.5753060116300304,
+        "avg_pnl": -0.0056357721194902535,
+        "test_count": 270
+      },
+      {
+        "symbol": "FLUXUSDT",
+        "avg_winrate": 0.5900692625870213,
+        "avg_pnl": -0.005693697791899726,
+        "test_count": 270
+      },
+      {
+        "symbol": "FUNUSDT",
+        "avg_winrate": 0.5721510588679214,
+        "avg_pnl": -0.006125771850349008,
+        "test_count": 270
+      },
+      {
+        "symbol": "FXSUSDT",
+        "avg_winrate": 0.5466536945645535,
+        "avg_pnl": -0.006297605902546101,
+        "test_count": 270
+      },
+      {
+        "symbol": "LDOUSDT",
+        "avg_winrate": 0.5035191314606922,
+        "avg_pnl": -0.006894075548607176,
+        "test_count": 270
+      },
+      {
+        "symbol": "JSTUSDT",
+        "avg_winrate": 0.5013828763828767,
+        "avg_pnl": -0.007630024026931242,
+        "test_count": 270
+      },
+      {
+        "symbol": "JOEUSDT",
+        "avg_winrate": 0.5824143102185471,
+        "avg_pnl": -0.007704825602317227,
+        "test_count": 270
+      },
+      {
+        "symbol": "AIUSDT",
+        "avg_winrate": 0.518153704444644,
+        "avg_pnl": -0.007722362036554415,
+        "test_count": 270
+      },
+      {
+        "symbol": "OLUSDT",
+        "avg_winrate": 0.5508273186162927,
+        "avg_pnl": -0.007757004070428708,
+        "test_count": 270
+      },
+      {
+        "symbol": "DIAUSDT",
+        "avg_winrate": 0.5936572986218821,
+        "avg_pnl": -0.00861551188191253,
+        "test_count": 270
+      },
+      {
+        "symbol": "KAVAUSDT",
+        "avg_winrate": 0.5315153898737626,
+        "avg_pnl": -0.009369311657306088,
+        "test_count": 270
+      },
+      {
+        "symbol": "AVAUSDT",
+        "avg_winrate": 0.581516558993528,
+        "avg_pnl": -0.010005911024266132,
+        "test_count": 270
+      },
+      {
+        "symbol": "BNBUSDT",
+        "avg_winrate": 0.568407844627013,
+        "avg_pnl": -0.011858721449957536,
+        "test_count": 270
+      },
+      {
+        "symbol": "MOVEUSDT",
+        "avg_winrate": 0.4965956020390196,
+        "avg_pnl": -0.012189142412793563,
+        "test_count": 270
+      },
+      {
+        "symbol": "AKTUSDT",
+        "avg_winrate": 0.5961198376108977,
+        "avg_pnl": -0.012875016496645145,
+        "test_count": 270
+      },
+      {
+        "symbol": "COSUSDT",
+        "avg_winrate": 0.6249081177798752,
+        "avg_pnl": -0.013095299694779025,
+        "test_count": 270
+      },
+      {
+        "symbol": "NXPCUSDT",
+        "avg_winrate": 0.5960811498020625,
+        "avg_pnl": -0.01382274346949907,
+        "test_count": 270
+      },
+      {
+        "symbol": "BCHUSDT",
+        "avg_winrate": 0.5918663319817388,
+        "avg_pnl": -0.013964546620419871,
+        "test_count": 270
+      },
+      {
+        "symbol": "ONEUSDT",
+        "avg_winrate": 0.5643762303274774,
+        "avg_pnl": -0.01407470073630736,
+        "test_count": 270
+      },
+      {
+        "symbol": "B2USDT",
+        "avg_winrate": 0.5524270421147408,
+        "avg_pnl": -0.014094181901435975,
+        "test_count": 270
+      },
+      {
+        "symbol": "2ZUSDT",
+        "avg_winrate": 0.55090414058384,
+        "avg_pnl": -0.01420809685809276,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000CATUSDT",
+        "avg_winrate": 0.5610833233378675,
+        "avg_pnl": -0.01467394939845323,
+        "test_count": 270
+      },
+      {
+        "symbol": "CHRUSDT",
+        "avg_winrate": 0.5405399108014622,
+        "avg_pnl": -0.015541914657959567,
+        "test_count": 270
+      },
+      {
+        "symbol": "LAYERUSDT",
+        "avg_winrate": 0.5182507689783892,
+        "avg_pnl": -0.0167231142844542,
+        "test_count": 270
+      },
+      {
+        "symbol": "ICPUSDT",
+        "avg_winrate": 0.6144499117135561,
+        "avg_pnl": -0.016769316853819924,
+        "test_count": 270
+      },
+      {
+        "symbol": "MASKUSDT",
+        "avg_winrate": 0.6138699077705647,
+        "avg_pnl": -0.016769339441929397,
+        "test_count": 270
+      },
+      {
+        "symbol": "IOUSDT",
+        "avg_winrate": 0.5876553402957768,
+        "avg_pnl": -0.017467236045458655,
+        "test_count": 270
+      },
+      {
+        "symbol": "AIXBTUSDT",
+        "avg_winrate": 0.524621449829308,
+        "avg_pnl": -0.01822367609019376,
+        "test_count": 270
+      },
+      {
+        "symbol": "ETCUSDT",
+        "avg_winrate": 0.5186997084452217,
+        "avg_pnl": -0.018361105303119407,
+        "test_count": 270
+      },
+      {
+        "symbol": "AGLDUSDT",
+        "avg_winrate": 0.5309050642829419,
+        "avg_pnl": -0.018364399573141083,
+        "test_count": 270
+      },
+      {
+        "symbol": "FORTHUSDT",
+        "avg_winrate": 0.5531429885411094,
+        "avg_pnl": -0.018438998871733493,
+        "test_count": 270
+      },
+      {
+        "symbol": "AUCTIONUSDT",
+        "avg_winrate": 0.547898918710206,
+        "avg_pnl": -0.018489802011304214,
+        "test_count": 270
+      },
+      {
+        "symbol": "FLOWUSDT",
+        "avg_winrate": 0.5121498757457572,
+        "avg_pnl": -0.019036673101414322,
+        "test_count": 270
+      },
+      {
+        "symbol": "CTSIUSDT",
+        "avg_winrate": 0.5630352937167512,
+        "avg_pnl": -0.01907835007798545,
+        "test_count": 270
+      },
+      {
+        "symbol": "BTCDOMUSDT",
+        "avg_winrate": 0.47470017636684253,
+        "avg_pnl": -0.01970703544514332,
+        "test_count": 270
+      },
+      {
+        "symbol": "EULUSDT",
+        "avg_winrate": 0.5633894050775402,
+        "avg_pnl": -0.020695307707387426,
+        "test_count": 270
+      },
+      {
+        "symbol": "CAKEUSDT",
+        "avg_winrate": 0.5307657386430455,
+        "avg_pnl": -0.020706059379839107,
+        "test_count": 270
+      },
+      {
+        "symbol": "ORDIUSDT",
+        "avg_winrate": 0.49674659716764474,
+        "avg_pnl": -0.023176626782687646,
+        "test_count": 270
+      },
+      {
+        "symbol": "NFPUSDT",
+        "avg_winrate": 0.5655651438775577,
+        "avg_pnl": -0.023826737847852532,
+        "test_count": 270
+      },
+      {
+        "symbol": "FILUSDT",
+        "avg_winrate": 0.552500230512937,
+        "avg_pnl": -0.024385196398081704,
+        "test_count": 270
+      },
+      {
+        "symbol": "METISUSDT",
+        "avg_winrate": 0.5881455696689559,
+        "avg_pnl": -0.024537909412591815,
+        "test_count": 270
+      },
+      {
+        "symbol": "LUMIAUSDT",
+        "avg_winrate": 0.5741950127170423,
+        "avg_pnl": -0.024601389183801805,
+        "test_count": 270
+      },
+      {
+        "symbol": "BEAMXUSDT",
+        "avg_winrate": 0.5646033320726472,
+        "avg_pnl": -0.025228147705835927,
+        "test_count": 270
+      },
+      {
+        "symbol": "IOTXUSDT",
+        "avg_winrate": 0.5316680752574708,
+        "avg_pnl": -0.02527379076462522,
+        "test_count": 270
+      },
+      {
+        "symbol": "GMXUSDT",
+        "avg_winrate": 0.5379091581010907,
+        "avg_pnl": -0.026333300584668325,
+        "test_count": 270
+      },
+      {
+        "symbol": "FETUSDT",
+        "avg_winrate": 0.5797858237998623,
+        "avg_pnl": -0.026453516795071796,
+        "test_count": 270
+      },
+      {
+        "symbol": "AINUSDT",
+        "avg_winrate": 0.5765015988618845,
+        "avg_pnl": -0.026953114893656444,
+        "test_count": 270
+      },
+      {
+        "symbol": "BERAUSDT",
+        "avg_winrate": 0.5402347156587187,
+        "avg_pnl": -0.027325366697117204,
+        "test_count": 270
+      },
+      {
+        "symbol": "BRETTUSDT",
+        "avg_winrate": 0.5568740184577343,
+        "avg_pnl": -0.027337776232790458,
+        "test_count": 270
+      },
+      {
+        "symbol": "ETHWUSDT",
+        "avg_winrate": 0.5488772113626657,
+        "avg_pnl": -0.027365324228436304,
+        "test_count": 270
+      },
+      {
+        "symbol": "HMSTRUSDT",
+        "avg_winrate": 0.5801064278482865,
+        "avg_pnl": -0.02749512149272701,
+        "test_count": 270
+      },
+      {
+        "symbol": "BATUSDT",
+        "avg_winrate": 0.5177511754428517,
+        "avg_pnl": -0.029318400278368212,
+        "test_count": 270
+      },
+      {
+        "symbol": "GRIFFAINUSDT",
+        "avg_winrate": 0.5246595578400238,
+        "avg_pnl": -0.029493724764849787,
+        "test_count": 270
+      },
+      {
+        "symbol": "COWUSDT",
+        "avg_winrate": 0.47106123860989485,
+        "avg_pnl": -0.03095627152068761,
+        "test_count": 270
+      },
+      {
+        "symbol": "HAEDALUSDT",
+        "avg_winrate": 0.5870528110722724,
+        "avg_pnl": -0.03101960107384368,
+        "test_count": 270
+      },
+      {
+        "symbol": "ASRUSDT",
+        "avg_winrate": 0.5073186705446256,
+        "avg_pnl": -0.031066234096143654,
+        "test_count": 270
+      },
+      {
+        "symbol": "ICXUSDT",
+        "avg_winrate": 0.4917339005227953,
+        "avg_pnl": -0.032226173672212914,
+        "test_count": 270
+      },
+      {
+        "symbol": "CHESSUSDT",
+        "avg_winrate": 0.5168167954024081,
+        "avg_pnl": -0.03305026182770857,
+        "test_count": 270
+      },
+      {
+        "symbol": "DEGENUSDT",
+        "avg_winrate": 0.5161884524027756,
+        "avg_pnl": -0.033428331207699814,
+        "test_count": 270
+      },
+      {
+        "symbol": "ENSOUSDT",
+        "avg_winrate": 0.5057871339728147,
+        "avg_pnl": -0.034418835135176684,
+        "test_count": 270
+      },
+      {
+        "symbol": "CTKUSDT",
+        "avg_winrate": 0.5803639498012904,
+        "avg_pnl": -0.03469194061146399,
+        "test_count": 270
+      },
+      {
+        "symbol": "AI16ZUSDT",
+        "avg_winrate": 0.5201766476066558,
+        "avg_pnl": -0.034740617545996784,
+        "test_count": 270
+      },
+      {
+        "symbol": "CUSDT",
+        "avg_winrate": 0.5666506843454328,
+        "avg_pnl": -0.03558966560528296,
+        "test_count": 270
+      },
+      {
+        "symbol": "MOODENGUSDT",
+        "avg_winrate": 0.5127019095883194,
+        "avg_pnl": -0.036057632882506345,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000000BOBUSDT",
+        "avg_winrate": 0.5252632470123801,
+        "avg_pnl": -0.036498792260606545,
+        "test_count": 270
+      },
+      {
+        "symbol": "BOMEUSDT",
+        "avg_winrate": 0.5022137800890897,
+        "avg_pnl": -0.03667889914286497,
+        "test_count": 270
+      },
+      {
+        "symbol": "DUSKUSDT",
+        "avg_winrate": 0.5721897338865114,
+        "avg_pnl": -0.03735469941326468,
+        "test_count": 270
+      },
+      {
+        "symbol": "ILVUSDT",
+        "avg_winrate": 0.5616069140039639,
+        "avg_pnl": -0.03748190249406932,
+        "test_count": 270
+      },
+      {
+        "symbol": "MANTAUSDT",
+        "avg_winrate": 0.568213424052595,
+        "avg_pnl": -0.0375718451447034,
+        "test_count": 270
+      },
+      {
+        "symbol": "MBOXUSDT",
+        "avg_winrate": 0.5469535121335558,
+        "avg_pnl": -0.03769716458158624,
+        "test_count": 270
+      },
+      {
+        "symbol": "LUNA2USDT",
+        "avg_winrate": 0.49999981847044167,
+        "avg_pnl": -0.038708389287170464,
+        "test_count": 270
+      },
+      {
+        "symbol": "LYNUSDT",
+        "avg_winrate": 0.5425515988212976,
+        "avg_pnl": -0.039032043451162644,
+        "test_count": 270
+      },
+      {
+        "symbol": "BSVUSDT",
+        "avg_winrate": 0.5086054567770756,
+        "avg_pnl": -0.039324311053254526,
+        "test_count": 270
+      },
+      {
+        "symbol": "HIPPOUSDT",
+        "avg_winrate": 0.5256596892565273,
+        "avg_pnl": -0.04023861119356545,
+        "test_count": 270
+      },
+      {
+        "symbol": "HANAUSDT",
+        "avg_winrate": 0.5024336295544234,
+        "avg_pnl": -0.04057170331635069,
+        "test_count": 270
+      },
+      {
+        "symbol": "MAGICUSDT",
+        "avg_winrate": 0.5120519021316815,
+        "avg_pnl": -0.042535061002544866,
+        "test_count": 270
+      },
+      {
+        "symbol": "MELANIAUSDT",
+        "avg_winrate": 0.49897069036690156,
+        "avg_pnl": -0.04308908348691764,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000WHYUSDT",
+        "avg_winrate": 0.48873558182459415,
+        "avg_pnl": -0.04336201765662324,
+        "test_count": 270
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "avg_winrate": 0.5337660106810267,
+        "avg_pnl": -0.04337653449803928,
+        "test_count": 270
+      },
+      {
+        "symbol": "MEUSDT",
+        "avg_winrate": 0.5103477898852866,
+        "avg_pnl": -0.04476580141773369,
+        "test_count": 270
+      },
+      {
+        "symbol": "DYMUSDT",
+        "avg_winrate": 0.5147684599471121,
+        "avg_pnl": -0.04481942302050568,
+        "test_count": 270
+      },
+      {
+        "symbol": "CROSSUSDT",
+        "avg_winrate": 0.5130286249874255,
+        "avg_pnl": -0.045334569894809454,
+        "test_count": 270
+      },
+      {
+        "symbol": "KGENUSDT",
+        "avg_winrate": 0.5377210789796697,
+        "avg_pnl": -0.0453748752070507,
+        "test_count": 270
+      },
+      {
+        "symbol": "MILKUSDT",
+        "avg_winrate": 0.49659108149594927,
+        "avg_pnl": -0.0467329484642846,
+        "test_count": 270
+      },
+      {
+        "symbol": "CATIUSDT",
+        "avg_winrate": 0.5855769540917444,
+        "avg_pnl": -0.047586789775489954,
+        "test_count": 270
+      },
+      {
+        "symbol": "AGTUSDT",
+        "avg_winrate": 0.5213534814298929,
+        "avg_pnl": -0.04962125993873638,
+        "test_count": 270
+      },
+      {
+        "symbol": "AEROUSDT",
+        "avg_winrate": 0.5033515352034439,
+        "avg_pnl": -0.04980088103299084,
+        "test_count": 270
+      },
+      {
+        "symbol": "HYPERUSDT",
+        "avg_winrate": 0.5181736334085386,
+        "avg_pnl": -0.050800763565627266,
+        "test_count": 270
+      },
+      {
+        "symbol": "ACTUSDT",
+        "avg_winrate": 0.4826133421116962,
+        "avg_pnl": -0.0510335866693199,
+        "test_count": 270
+      },
+      {
+        "symbol": "NKNUSDT",
+        "avg_winrate": 0.5338535408750962,
+        "avg_pnl": -0.05210794813205739,
+        "test_count": 270
+      },
+      {
+        "symbol": "HOLOUSDT",
+        "avg_winrate": 0.5433285843301422,
+        "avg_pnl": -0.052241717420461,
+        "test_count": 270
+      },
+      {
+        "symbol": "LQTYUSDT",
+        "avg_winrate": 0.5191252091263923,
+        "avg_pnl": -0.05227592670354804,
+        "test_count": 270
+      },
+      {
+        "symbol": "BICOUSDT",
+        "avg_winrate": 0.4638225126587666,
+        "avg_pnl": -0.053459716881260146,
+        "test_count": 270
+      },
+      {
+        "symbol": "COTIUSDT",
+        "avg_winrate": 0.5419136316746063,
+        "avg_pnl": -0.05383891701242658,
+        "test_count": 270
+      },
+      {
+        "symbol": "GHSTUSDT",
+        "avg_winrate": 0.5568141737332805,
+        "avg_pnl": -0.054095684372696094,
+        "test_count": 270
+      },
+      {
+        "symbol": "CETUSUSDT",
+        "avg_winrate": 0.4883194718809914,
+        "avg_pnl": -0.05656197353216654,
+        "test_count": 270
+      },
+      {
+        "symbol": "KMNOUSDT",
+        "avg_winrate": 0.5367073552908088,
+        "avg_pnl": -0.05861711051514202,
+        "test_count": 270
+      },
+      {
+        "symbol": "BABYUSDT",
+        "avg_winrate": 0.4786001840737913,
+        "avg_pnl": -0.058701212369521534,
+        "test_count": 270
+      },
+      {
+        "symbol": "MORPHOUSDT",
+        "avg_winrate": 0.5162697982543967,
+        "avg_pnl": -0.05899867996015556,
+        "test_count": 270
+      },
+      {
+        "symbol": "KOMAUSDT",
+        "avg_winrate": 0.5311685062776286,
+        "avg_pnl": -0.059454499775901254,
+        "test_count": 270
+      },
+      {
+        "symbol": "CVXUSDT",
+        "avg_winrate": 0.5405418285145303,
+        "avg_pnl": -0.059618716535480246,
+        "test_count": 270
+      },
+      {
+        "symbol": "KAITOUSDT",
+        "avg_winrate": 0.47449808214285955,
+        "avg_pnl": -0.06017541512416,
+        "test_count": 270
+      },
+      {
+        "symbol": "HOTUSDT",
+        "avg_winrate": 0.4938569108866405,
+        "avg_pnl": -0.0615021270358272,
+        "test_count": 270
+      },
+      {
+        "symbol": "NMRUSDT",
+        "avg_winrate": 0.536381299347817,
+        "avg_pnl": -0.061690631958434494,
+        "test_count": 270
+      },
+      {
+        "symbol": "CYBERUSDT",
+        "avg_winrate": 0.5195356798307796,
+        "avg_pnl": -0.06278056379946485,
+        "test_count": 270
+      },
+      {
+        "symbol": "HFTUSDT",
+        "avg_winrate": 0.5053690555400656,
+        "avg_pnl": -0.06357355432030494,
+        "test_count": 270
+      },
+      {
+        "symbol": "MEMEUSDT",
+        "avg_winrate": 0.4877615140559343,
+        "avg_pnl": -0.0643178504643904,
+        "test_count": 270
+      },
+      {
+        "symbol": "PARTIUSDT",
+        "avg_winrate": 0.5067873396595862,
+        "avg_pnl": -0.06520076495463169,
+        "test_count": 270
+      },
+      {
+        "symbol": "DODOXUSDT",
+        "avg_winrate": 0.4769241312392654,
+        "avg_pnl": -0.06525468102351967,
+        "test_count": 270
+      },
+      {
+        "symbol": "ASTRUSDT",
+        "avg_winrate": 0.4493647261456418,
+        "avg_pnl": -0.06529486100431883,
+        "test_count": 270
+      },
+      {
+        "symbol": "BIDUSDT",
+        "avg_winrate": 0.556556951769119,
+        "avg_pnl": -0.06567088676873245,
+        "test_count": 270
+      },
+      {
+        "symbol": "ENAUSDT",
+        "avg_winrate": 0.4995483602751517,
+        "avg_pnl": -0.06675418360142696,
+        "test_count": 270
+      },
+      {
+        "symbol": "IDOLUSDT",
+        "avg_winrate": 0.537642982414241,
+        "avg_pnl": -0.06903320980634775,
+        "test_count": 270
+      },
+      {
+        "symbol": "ATHUSDT",
+        "avg_winrate": 0.5341289164644084,
+        "avg_pnl": -0.06918986719326704,
+        "test_count": 270
+      },
+      {
+        "symbol": "ICNTUSDT",
+        "avg_winrate": 0.5312238403575754,
+        "avg_pnl": -0.0694784036813009,
+        "test_count": 270
+      },
+      {
+        "symbol": "AIOUSDT",
+        "avg_winrate": 0.5468226834853159,
+        "avg_pnl": -0.07115689991025843,
+        "test_count": 270
+      },
+      {
+        "symbol": "GPSUSDT",
+        "avg_winrate": 0.5118533045647105,
+        "avg_pnl": -0.07286453647294629,
+        "test_count": 270
+      },
+      {
+        "symbol": "AIOTUSDT",
+        "avg_winrate": 0.4829325710831715,
+        "avg_pnl": -0.07302338057876641,
+        "test_count": 270
+      },
+      {
+        "symbol": "BANANAS31USDT",
+        "avg_winrate": 0.5594837989374649,
+        "avg_pnl": -0.07328154806765422,
+        "test_count": 270
+      },
+      {
+        "symbol": "BANANAUSDT",
+        "avg_winrate": 0.5014066729008495,
+        "avg_pnl": -0.07356427725666079,
+        "test_count": 270
+      },
+      {
+        "symbol": "FLUIDUSDT",
+        "avg_winrate": 0.5134555521768039,
+        "avg_pnl": -0.07440742658902912,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000CHEEMSUSDT",
+        "avg_winrate": 0.5365373566143735,
+        "avg_pnl": -0.07512346268547672,
+        "test_count": 270
+      },
+      {
+        "symbol": "EIGENUSDT",
+        "avg_winrate": 0.5003601453557839,
+        "avg_pnl": -0.07563621128167819,
+        "test_count": 270
+      },
+      {
+        "symbol": "API3USDT",
+        "avg_winrate": 0.5256851907663185,
+        "avg_pnl": -0.07611422740216046,
+        "test_count": 270
+      },
+      {
+        "symbol": "B3USDT",
+        "avg_winrate": 0.5127892706061207,
+        "avg_pnl": -0.0772068300137939,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARIAUSDT",
+        "avg_winrate": 0.5709890903114802,
+        "avg_pnl": -0.07986232253987649,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000000MOGUSDT",
+        "avg_winrate": 0.5009135405861402,
+        "avg_pnl": -0.08029932978460114,
+        "test_count": 270
+      },
+      {
+        "symbol": "OGUSDT",
+        "avg_winrate": 0.48765584591768757,
+        "avg_pnl": -0.0805272225678473,
+        "test_count": 270
+      },
+      {
+        "symbol": "OBOLUSDT",
+        "avg_winrate": 0.5342674058480748,
+        "avg_pnl": -0.08205147431877716,
+        "test_count": 270
+      },
+      {
+        "symbol": "BBUSDT",
+        "avg_winrate": 0.5223495547656303,
+        "avg_pnl": -0.08279021897546514,
+        "test_count": 270
+      },
+      {
+        "symbol": "GRASSUSDT",
+        "avg_winrate": 0.5052828753009452,
+        "avg_pnl": -0.08305912601810758,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARCUSDT",
+        "avg_winrate": 0.5104880339603975,
+        "avg_pnl": -0.08567951496980633,
+        "test_count": 270
+      },
+      {
+        "symbol": "FISUSDT",
+        "avg_winrate": 0.49664916781444607,
+        "avg_pnl": -0.08574736704148507,
+        "test_count": 270
+      },
+      {
+        "symbol": "CLOUSDT",
+        "avg_winrate": 0.5120585807263879,
+        "avg_pnl": -0.08579691953912753,
+        "test_count": 270
+      },
+      {
+        "symbol": "COOKIEUSDT",
+        "avg_winrate": 0.47262619591883687,
+        "avg_pnl": -0.0881003600528359,
+        "test_count": 270
+      },
+      {
+        "symbol": "LISTAUSDT",
+        "avg_winrate": 0.5228630223072068,
+        "avg_pnl": -0.088442016301659,
+        "test_count": 270
+      },
+      {
+        "symbol": "ATAUSDT",
+        "avg_winrate": 0.4538459422405044,
+        "avg_pnl": -0.08918148054858568,
+        "test_count": 270
+      },
+      {
+        "symbol": "BMTUSDT",
+        "avg_winrate": 0.48281396855712594,
+        "avg_pnl": -0.09001770279754684,
+        "test_count": 270
+      },
+      {
+        "symbol": "AVAAIUSDT",
+        "avg_winrate": 0.5302718309134969,
+        "avg_pnl": -0.09136224373250461,
+        "test_count": 270
+      },
+      {
+        "symbol": "DRIFTUSDT",
+        "avg_winrate": 0.5168619329419583,
+        "avg_pnl": -0.09137217482662892,
+        "test_count": 270
+      },
+      {
+        "symbol": "DEGOUSDT",
+        "avg_winrate": 0.5119434262989062,
+        "avg_pnl": -0.09419667920140756,
+        "test_count": 270
+      },
+      {
+        "symbol": "HEIUSDT",
+        "avg_winrate": 0.5068990863668313,
+        "avg_pnl": -0.09431287676223937,
+        "test_count": 270
+      },
+      {
+        "symbol": "OPENUSDT",
+        "avg_winrate": 0.5489650577489402,
+        "avg_pnl": -0.09478801231681734,
+        "test_count": 270
+      },
+      {
+        "symbol": "AWEUSDT",
+        "avg_winrate": 0.5058815412402977,
+        "avg_pnl": -0.09501715844382215,
+        "test_count": 270
+      },
+      {
+        "symbol": "NAORISUSDT",
+        "avg_winrate": 0.5073340087089492,
+        "avg_pnl": -0.09508007809505252,
+        "test_count": 270
+      },
+      {
+        "symbol": "FARTCOINUSDT",
+        "avg_winrate": 0.4900375921483787,
+        "avg_pnl": -0.09555359916389539,
+        "test_count": 270
+      },
+      {
+        "symbol": "CRVUSDT",
+        "avg_winrate": 0.4810288028757185,
+        "avg_pnl": -0.09845045963773073,
+        "test_count": 270
+      },
+      {
+        "symbol": "MYROUSDT",
+        "avg_winrate": 0.48696006388986346,
+        "avg_pnl": -0.10246204367238723,
+        "test_count": 270
+      },
+      {
+        "symbol": "FHEUSDT",
+        "avg_winrate": 0.5560026717167978,
+        "avg_pnl": -0.10489310082307511,
+        "test_count": 270
+      },
+      {
+        "symbol": "METUSDT",
+        "avg_winrate": 0.4617212810868651,
+        "avg_pnl": -0.10731544392730905,
+        "test_count": 270
+      },
+      {
+        "symbol": "LABUSDT",
+        "avg_winrate": 0.34620858763469026,
+        "avg_pnl": -0.1099340424522433,
+        "test_count": 270
+      },
+      {
+        "symbol": "ARPAUSDT",
+        "avg_winrate": 0.4919963816363638,
+        "avg_pnl": -0.1103895859676321,
+        "test_count": 270
+      },
+      {
+        "symbol": "NILUSDT",
+        "avg_winrate": 0.40829383758535653,
+        "avg_pnl": -0.11162356989236953,
+        "test_count": 270
+      },
+      {
+        "symbol": "BANKUSDT",
+        "avg_winrate": 0.5484615972518111,
+        "avg_pnl": -0.119883755606749,
+        "test_count": 270
+      },
+      {
+        "symbol": "FLOCKUSDT",
+        "avg_winrate": 0.4915113724532947,
+        "avg_pnl": -0.1229304662123893,
+        "test_count": 270
+      },
+      {
+        "symbol": "A2ZUSDT",
+        "avg_winrate": 0.4954575716692701,
+        "avg_pnl": -0.12355002029792514,
+        "test_count": 270
+      },
+      {
+        "symbol": "MAVIAUSDT",
+        "avg_winrate": 0.43832204688978066,
+        "avg_pnl": -0.12788380813960862,
+        "test_count": 270
+      },
+      {
+        "symbol": "AKEUSDT",
+        "avg_winrate": 0.5136177609649026,
+        "avg_pnl": -0.12963557114692226,
+        "test_count": 270
+      },
+      {
+        "symbol": "EDUUSDT",
+        "avg_winrate": 0.4674233145275142,
+        "avg_pnl": -0.13297225825127282,
+        "test_count": 270
+      },
+      {
+        "symbol": "BELUSDT",
+        "avg_winrate": 0.49130832263425045,
+        "avg_pnl": -0.13397076702300553,
+        "test_count": 270
+      },
+      {
+        "symbol": "BULLAUSDT",
+        "avg_winrate": 0.523213342510656,
+        "avg_pnl": -0.13472129371256095,
+        "test_count": 270
+      },
+      {
+        "symbol": "CUDISUSDT",
+        "avg_winrate": 0.5247320876078412,
+        "avg_pnl": -0.13664063812550786,
+        "test_count": 270
+      },
+      {
+        "symbol": "ALPINEUSDT",
+        "avg_winrate": 0.5413023936647674,
+        "avg_pnl": -0.13921315569531048,
+        "test_count": 270
+      },
+      {
+        "symbol": "DUSDT",
+        "avg_winrate": 0.43553794300143084,
+        "avg_pnl": -0.13942562629545469,
+        "test_count": 270
+      },
+      {
+        "symbol": "MIRAUSDT",
+        "avg_winrate": 0.4996209242021528,
+        "avg_pnl": -0.1395775565024933,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000RATSUSDT",
+        "avg_winrate": 0.5043258448722362,
+        "avg_pnl": -0.14048124793049174,
+        "test_count": 270
+      },
+      {
+        "symbol": "DOLOUSDT",
+        "avg_winrate": 0.5093381447962366,
+        "avg_pnl": -0.14052117996572966,
+        "test_count": 270
+      },
+      {
+        "symbol": "DYDXUSDT",
+        "avg_winrate": 0.4558583334718374,
+        "avg_pnl": -0.140769236977909,
+        "test_count": 270
+      },
+      {
+        "symbol": "BUSDT",
+        "avg_winrate": 0.5197902324577828,
+        "avg_pnl": -0.1442486150341884,
+        "test_count": 270
+      },
+      {
+        "symbol": "LINEAUSDT",
+        "avg_winrate": 0.49736927889555593,
+        "avg_pnl": -0.14979684118067377,
+        "test_count": 270
+      },
+      {
+        "symbol": "DOODUSDT",
+        "avg_winrate": 0.513148511593587,
+        "avg_pnl": -0.15439487644286792,
+        "test_count": 270
+      },
+      {
+        "symbol": "GIGGLEUSDT",
+        "avg_winrate": 0.47986772973485575,
+        "avg_pnl": -0.16112861725722571,
+        "test_count": 270
+      },
+      {
+        "symbol": "BARDUSDT",
+        "avg_winrate": 0.47675810114145667,
+        "avg_pnl": -0.16193999722103114,
+        "test_count": 270
+      },
+      {
+        "symbol": "BANUSDT",
+        "avg_winrate": 0.43338732472704955,
+        "avg_pnl": -0.16448256984058077,
+        "test_count": 270
+      },
+      {
+        "symbol": "AEVOUSDT",
+        "avg_winrate": 0.442511749240981,
+        "avg_pnl": -0.16794436141405683,
+        "test_count": 270
+      },
+      {
+        "symbol": "ALICEUSDT",
+        "avg_winrate": 0.4642064809411475,
+        "avg_pnl": -0.16893149353529832,
+        "test_count": 270
+      },
+      {
+        "symbol": "CELOUSDT",
+        "avg_winrate": 0.43816809104553334,
+        "avg_pnl": -0.1716969822319727,
+        "test_count": 270
+      },
+      {
+        "symbol": "EPICUSDT",
+        "avg_winrate": 0.44654625250314456,
+        "avg_pnl": -0.1718280223994471,
+        "test_count": 270
+      },
+      {
+        "symbol": "NOMUSDT",
+        "avg_winrate": 0.47174407249100675,
+        "avg_pnl": -0.17216513716571683,
+        "test_count": 270
+      },
+      {
+        "symbol": "DASHUSDT",
+        "avg_winrate": 0.484943752848622,
+        "avg_pnl": -0.17819138822364697,
+        "test_count": 270
+      },
+      {
+        "symbol": "LIGHTUSDT",
+        "avg_winrate": 0.5176454905999156,
+        "avg_pnl": -0.18603168011393634,
+        "test_count": 270
+      },
+      {
+        "symbol": "GTCUSDT",
+        "avg_winrate": 0.35138435689532194,
+        "avg_pnl": -0.18665832729042484,
+        "test_count": 270
+      },
+      {
+        "symbol": "LAUSDT",
+        "avg_winrate": 0.48187062136780034,
+        "avg_pnl": -0.18748984705438448,
+        "test_count": 270
+      },
+      {
+        "symbol": "KERNELUSDT",
+        "avg_winrate": 0.4776509496121344,
+        "avg_pnl": -0.18909490707543744,
+        "test_count": 270
+      },
+      {
+        "symbol": "C98USDT",
+        "avg_winrate": 0.44011326403548295,
+        "avg_pnl": -0.18963161632524453,
+        "test_count": 270
+      },
+      {
+        "symbol": "BROCCOLI714USDT",
+        "avg_winrate": 0.4910632841969529,
+        "avg_pnl": -0.1911888005220533,
+        "test_count": 270
+      },
+      {
+        "symbol": "MUBARAKUSDT",
+        "avg_winrate": 0.5150065582346747,
+        "avg_pnl": -0.1979842784607408,
+        "test_count": 270
+      },
+      {
+        "symbol": "EDENUSDT",
+        "avg_winrate": 0.4830730210734869,
+        "avg_pnl": -0.20491802500990264,
+        "test_count": 270
+      },
+      {
+        "symbol": "BTRUSDT",
+        "avg_winrate": 0.5475684333467797,
+        "avg_pnl": -0.2052885299268234,
+        "test_count": 270
+      },
+      {
+        "symbol": "HUSDT",
+        "avg_winrate": 0.5144807499843782,
+        "avg_pnl": -0.2070234498728144,
+        "test_count": 270
+      },
+      {
+        "symbol": "CHILLGUYUSDT",
+        "avg_winrate": 0.514501874334769,
+        "avg_pnl": -0.21155788701905456,
+        "test_count": 270
+      },
+      {
+        "symbol": "BLESSUSDT",
+        "avg_winrate": 0.5130364234889674,
+        "avg_pnl": -0.2119399167161219,
+        "test_count": 270
+      },
+      {
+        "symbol": "FUSDT",
+        "avg_winrate": 0.49586292157289946,
+        "avg_pnl": -0.21573668882817432,
+        "test_count": 270
+      },
+      {
+        "symbol": "1000SATSUSDT",
+        "avg_winrate": 0.4445547639654663,
+        "avg_pnl": -0.22361393533196902,
+        "test_count": 270
+      },
+      {
+        "symbol": "0GUSDT",
+        "avg_winrate": 0.47471636119299365,
+        "avg_pnl": -0.23493494545912177,
+        "test_count": 270
+      },
+      {
+        "symbol": "HEMIUSDT",
+        "avg_winrate": 0.49554051391737985,
+        "avg_pnl": -0.2523579789554663,
+        "test_count": 270
+      },
+      {
+        "symbol": "EVAAUSDT",
+        "avg_winrate": 0.5118489970438017,
+        "avg_pnl": -0.253712402695299,
+        "test_count": 270
+      },
+      {
+        "symbol": "BASUSDT",
+        "avg_winrate": 0.49460660024623126,
+        "avg_pnl": -0.26939980069348796,
+        "test_count": 270
+      },
+      {
+        "symbol": "BROCCOLIF3BUSDT",
+        "avg_winrate": 0.4697829761897343,
+        "avg_pnl": -0.276324746024922,
+        "test_count": 270
+      },
+      {
+        "symbol": "AVNTUSDT",
+        "avg_winrate": 0.5148873077916475,
+        "avg_pnl": -0.29289747547234646,
+        "test_count": 270
+      },
+      {
+        "symbol": "DAMUSDT",
+        "avg_winrate": 0.49285331147617867,
+        "avg_pnl": -0.3327159907607117,
+        "test_count": 270
+      },
+      {
+        "symbol": "FORMUSDT",
+        "avg_winrate": 0.4681071199474653,
+        "avg_pnl": -0.34902362810362797,
+        "test_count": 270
+      },
+      {
+        "symbol": "FLMUSDT",
+        "avg_winrate": 0.28378035000745083,
+        "avg_pnl": -0.3570387105373512,
+        "test_count": 270
+      },
+      {
+        "symbol": "AIAUSDT",
+        "avg_winrate": 0.4960668694353365,
+        "avg_pnl": -0.39146293125937554,
+        "test_count": 270
+      },
+      {
+        "symbol": "COAIUSDT",
+        "avg_winrate": 0.5191880503575115,
+        "avg_pnl": -0.4516229264804442,
+        "test_count": 270
+      },
+      {
+        "symbol": "ASTERUSDT",
+        "avg_winrate": 0.46675114451387234,
+        "avg_pnl": -0.4569877702472614,
+        "test_count": 270
+      },
+      {
+        "symbol": "INUSDT",
+        "avg_winrate": 0.4757801270531706,
+        "avg_pnl": -0.46803323668135344,
+        "test_count": 270
+      },
+      {
+        "symbol": "MYXUSDT",
+        "avg_winrate": 0.472838810612673,
+        "avg_pnl": -0.5792653702143733,
+        "test_count": 270
+      }
+    ]
+  }
+}

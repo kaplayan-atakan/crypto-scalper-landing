@@ -46,6 +46,46 @@ export interface BotSelectorState {
   error: Error | null
 }
 
+// Backtest Result Types
+export interface BacktestResult {
+  id: string
+  run_id: string
+  symbol: string
+  len1: number
+  mult1: number
+  rr: number
+  min_bw_pct: number
+  min_count: number
+  max_count: number
+  early_tp: boolean
+  trades: number
+  winrate: number | null
+  payoff: number | null
+  mean_ret: number | null
+  sharpe_like: number | null
+  sum_ret: number | null
+  equity: number | null
+  max_dd: number | null
+  created_at: string
+}
+
+export interface SymbolMetrics {
+  symbol: string
+  winrate: number
+  pnl: number
+}
+
+export interface RunOverview {
+  run_id: string
+  created_at: string
+  positive_count: number
+  negative_count: number
+}
+
+export interface RunColumn extends RunOverview {
+  symbols: SymbolMetrics[] // Sorted by PNL descending
+}
+
 // Supabase Database Types
 export interface Database {
   public: {

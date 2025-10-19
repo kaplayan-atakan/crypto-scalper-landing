@@ -115,6 +115,11 @@ function App() {
             <span className="btn-live-actions__text">Live Actions</span>
             <span className="btn-live-actions__arrow">→</span>
           </Link>
+          <Link to="/strategy-overalls" className="btn-strategy-overalls">
+            <span className="btn-strategy-overalls__icon">📊</span>
+            <span className="btn-strategy-overalls__text">Strategy Overalls</span>
+            <span className="btn-strategy-overalls__arrow">→</span>
+          </Link>
         </div>
       </header>
       <main className="page__content">

@@ -1,0 +1,50 @@
+Navigated to http://localhost:5173/crypto-scalper-landing/strategy-overalls
+content-script.js:1 [2025-10-19T13:24:43.916Z][DEBUG][YouTube] {YouTube} init 
+client:733 [vite] connecting...
+backtestService.ts:157 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:158 📊 STRATEGY OVERALLS: Fetching all data
+backtestService.ts:159 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:9 📊 Fetching run IDs...
+backtestService.ts:157 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:158 📊 STRATEGY OVERALLS: Fetching all data
+backtestService.ts:159 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:9 📊 Fetching run IDs...
+client:827 [vite] connected.
+backtestService.ts:85 ✅ Found 1 run IDs
+backtestService.ts:86 📅 Date range: {oldest: '2025-10-19T10:19:20.652164+00:00', newest: '2025-10-19T10:19:20.652164+00:00'}
+backtestService.ts:170 
+📋 Processing 1 runs...
+backtestService.ts:175 
+[1/1] Processing run: 30dd59e1...
+backtestService.ts:99 🔍 Fetching symbols for run_id: 30dd59e1...
+backtestService.ts:85 ✅ Found 1 run IDs
+backtestService.ts:86 📅 Date range: {oldest: '2025-10-19T10:19:20.652164+00:00', newest: '2025-10-19T10:19:20.652164+00:00'}
+backtestService.ts:170 
+📋 Processing 1 runs...
+backtestService.ts:175 
+[1/1] Processing run: 30dd59e1...
+backtestService.ts:99 🔍 Fetching symbols for run_id: 30dd59e1...
+backtestService.ts:146 ✅ Found 4 symbols (sorted by PNL)
+backtestService.ts:147 🏆 Top 3: (3) ['1000BONKUSDT: 0.04', '1000CATUSDT: -0.01', '1000000BOBUSDT: -0.05']
+backtestService.ts:185 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:186 ✅ DATA FETCH COMPLETE
+backtestService.ts:187 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:188 📊 Total runs: 1
+backtestService.ts:189 🪙 Total symbols: 4
+backtestService.ts:190 💚 Positive coins: 1
+backtestService.ts:191 ❤️ Negative coins: 3
+backtestService.ts:192 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+backtestService.ts:146 ✅ Found 4 symbols (sorted by PNL)
+backtestService.ts:147 🏆 Top 3: (3) ['1000BONKUSDT: 0.04', '1000CATUSDT: -0.01', '1000000BOBUSDT: -0.05']
+backtestService.ts:185 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:186 ✅ DATA FETCH COMPLETE
+backtestService.ts:187 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+backtestService.ts:188 📊 Total runs: 1
+backtestService.ts:189 🪙 Total symbols: 4
+backtestService.ts:190 💚 Positive coins: 1
+backtestService.ts:191 ❤️ Negative coins: 3
+backtestService.ts:192 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
