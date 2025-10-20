@@ -31,7 +31,7 @@ export function StrategyOveralls() {
   
   const formatPNL = (pnl: number) => {
     const sign = pnl > 0 ? '+' : ''
-    return `${sign}${pnl.toFixed(1)}`
+    return `${sign}${pnl.toFixed(4)}`  // 4 decimal places for precision
   }
   
   const formatDate = (dateStr: string) => {
