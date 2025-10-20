@@ -73,13 +73,29 @@ export interface SymbolMetrics {
   symbol: string
   winrate: number
   pnl: number
+  trades_count: number
+  sharpe: number
+  max_dd: number
+  avg_pnl_positive: number  // Symbol's positive trades average
+  avg_pnl_negative: number  // Symbol's negative trades average
 }
 
 export interface RunOverview {
   run_id: string
   created_at: string
+  total_symbols: number
   positive_count: number
   negative_count: number
+  // Run-level statistics
+  avg_pnl_all: number
+  min_pnl_all: number
+  max_pnl_all: number
+  avg_pnl_positive: number
+  min_pnl_positive: number
+  max_pnl_positive: number
+  avg_pnl_negative: number
+  min_pnl_negative: number
+  max_pnl_negative: number
 }
 
 export interface RunColumn extends RunOverview {

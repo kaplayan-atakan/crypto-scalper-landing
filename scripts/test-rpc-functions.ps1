@@ -54,8 +54,23 @@ try {
             Write-Host "   ├─ run_id: $($run.run_id)" -ForegroundColor Gray
             Write-Host "   ├─ created_at: $($run.created_at)" -ForegroundColor Gray
             Write-Host "   ├─ total_symbols: $($run.total_symbols)" -ForegroundColor Gray
-            Write-Host "   ├─ positive_pnl_count: $($run.positive_pnl_count)" -ForegroundColor Green
-            Write-Host "   └─ negative_pnl_count: $($run.negative_pnl_count)" -ForegroundColor Red
+            Write-Host "   ├─ positive_count: $($run.positive_pnl_count)" -ForegroundColor Green
+            Write-Host "   ├─ negative_count: $($run.negative_pnl_count)" -ForegroundColor Red
+            Write-Host "   │" -ForegroundColor Gray
+            Write-Host "   ├─ 📊 ALL COINS STATS:" -ForegroundColor Cyan
+            Write-Host "   │  ├─ Avg: $([math]::Round($run.avg_pnl_all, 4))" -ForegroundColor Cyan
+            Write-Host "   │  ├─ Min: $([math]::Round($run.min_pnl_all, 4))" -ForegroundColor Cyan
+            Write-Host "   │  └─ Max: $([math]::Round($run.max_pnl_all, 4))" -ForegroundColor Cyan
+            Write-Host "   │" -ForegroundColor Gray
+            Write-Host "   ├─ ✓ POSITIVE COINS STATS:" -ForegroundColor Green
+            Write-Host "   │  ├─ Avg: $([math]::Round($run.avg_pnl_positive, 4))" -ForegroundColor Green
+            Write-Host "   │  ├─ Min: $([math]::Round($run.min_pnl_positive, 4))" -ForegroundColor Green
+            Write-Host "   │  └─ Max: $([math]::Round($run.max_pnl_positive, 4))" -ForegroundColor Green
+            Write-Host "   │" -ForegroundColor Gray
+            Write-Host "   └─ ✗ NEGATIVE COINS STATS:" -ForegroundColor Red
+            Write-Host "      ├─ Avg: $([math]::Round($run.avg_pnl_negative, 4))" -ForegroundColor Red
+            Write-Host "      ├─ Min: $([math]::Round($run.min_pnl_negative, 4))" -ForegroundColor Red
+            Write-Host "      └─ Max: $([math]::Round($run.max_pnl_negative, 4))" -ForegroundColor Red
             Write-Host ""
             $runIndex++
         }
@@ -97,7 +112,7 @@ if ($runSummaries.Count -eq 0) {
 }
 
 # Test with first run_id
-$testRunId = $runSummaries[0].run_id
+$testRunId = $runSummaries[7].run_id
 Write-Host "🔍 Testing with run_id: $testRunId" -ForegroundColor Cyan
 Write-Host ""
 
@@ -139,10 +154,17 @@ try {
             foreach ($sym in $topSymbols) {
                 $pnlColor = if ($sym.pnl -gt 0) { "Green" } else { "Red" }
                 Write-Host "   │  ├─ $($sym.symbol):" -ForegroundColor $pnlColor
-                Write-Host "   │  │  ├─ PNL: $([math]::Round($sym.pnl, 4))" -ForegroundColor $pnlColor
-                Write-Host "   │  │  ├─ Avg All: $([math]::Round($sym.avg_pnl_all, 4))" -ForegroundColor Cyan
-                Write-Host "   │  │  ├─ Avg Positive: $([math]::Round($sym.avg_pnl_positive, 4))" -ForegroundColor Green
-                Write-Host "   │  │  ├─ Avg Negative: $([math]::Round($sym.avg_pnl_negative, 4))" -ForegroundColor Red
+                Write-Host "   │  │  ├─ Symbol PNL: $([math]::Round($sym.pnl, 4))" -ForegroundColor $pnlColor
+                
+                # Symbol-level positive/negative trade averages
+                $avgPosColor = if ($sym.avg_pnl_positive) { "Green" } else { "Gray" }
+                $avgNegColor = if ($sym.avg_pnl_negative) { "Red" } else { "Gray" }
+                
+                $avgPosText = if ($sym.avg_pnl_positive) { [math]::Round($sym.avg_pnl_positive, 4) } else { "N/A" }
+                $avgNegText = if ($sym.avg_pnl_negative) { [math]::Round($sym.avg_pnl_negative, 4) } else { "N/A" }
+                
+                Write-Host "   │  │  ├─ ✓ Positive Trades Avg: $avgPosText" -ForegroundColor $avgPosColor
+                Write-Host "   │  │  ├─ ✗ Negative Trades Avg: $avgNegText" -ForegroundColor $avgNegColor
                 Write-Host "   │  │  ├─ WR: $([math]::Round($sym.winrate, 2))%" -ForegroundColor Gray
                 Write-Host "   │  │  └─ Trades: $($sym.trades_count)" -ForegroundColor Gray
             }

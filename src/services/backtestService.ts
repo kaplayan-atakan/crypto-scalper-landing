@@ -1,8 +1,35 @@
 import { supabase } from '../lib/supabase';
 
-export interface SymbolData { symbol: string; winrate: number; pnl: number; trades_count: number; sharpe: number; max_dd: number; }
+export interface SymbolData {
+  symbol: string;
+  winrate: number;
+  pnl: number;
+  trades_count: number;
+  sharpe: number;
+  max_dd: number;
+  avg_pnl_positive: number;  // Symbol-level: positive trades avg
+  avg_pnl_negative: number;  // Symbol-level: negative trades avg
+}
 
-export interface RunColumn { run_id: string; created_at: string; positive_count: number; negative_count: number; symbols: SymbolData[]; }
+export interface RunColumn {
+  run_id: string;
+  created_at: string;
+  total_symbols: number;
+  positive_count: number;
+  negative_count: number;
+  // Run-level statistics
+  avg_pnl_all: number;
+  min_pnl_all: number;
+  max_pnl_all: number;
+  avg_pnl_positive: number;
+  min_pnl_positive: number;
+  max_pnl_positive: number;
+  avg_pnl_negative: number;
+  min_pnl_negative: number;
+  max_pnl_negative: number;
+  // Symbol details
+  symbols: SymbolData[];
+}
 
 export async function fetchAllRunColumns() {
   if (!supabase) throw new Error('Supabase not initialized');
@@ -54,12 +81,24 @@ export async function fetchAllRunColumns() {
   
   console.log('✅ All details fetched!');
   
-  // Build result columns
+  // Build result columns with full run statistics
   return runs.map((s: any) => ({
     run_id: s.run_id,
     created_at: s.created_at,
+    total_symbols: s.total_symbols,
     positive_count: s.positive_pnl_count,
     negative_count: s.negative_pnl_count,
+    // Run-level statistics
+    avg_pnl_all: s.avg_pnl_all,
+    min_pnl_all: s.min_pnl_all,
+    max_pnl_all: s.max_pnl_all,
+    avg_pnl_positive: s.avg_pnl_positive,
+    min_pnl_positive: s.min_pnl_positive,
+    max_pnl_positive: s.max_pnl_positive,
+    avg_pnl_negative: s.avg_pnl_negative,
+    min_pnl_negative: s.min_pnl_negative,
+    max_pnl_negative: s.max_pnl_negative,
+    // Symbol details
     symbols: grouped.get(s.run_id) || []
   }));
 }

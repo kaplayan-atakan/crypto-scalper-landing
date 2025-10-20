@@ -7,6 +7,8 @@ export function StrategyOveralls() {
   const [columns, setColumns] = useState<RunColumn[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterType, setFilterType] = useState<'all' | 'positive' | 'negative'>('all')
   
   useEffect(() => {
     async function loadData() {
@@ -26,10 +28,36 @@ export function StrategyOveralls() {
     loadData()
   }, [])
   
+  // Filter symbols based on search query and filter type
+  const filterSymbols = (symbols: RunColumn['symbols']) => {
+    return symbols.filter(symbol => {
+      // Search query filter
+      const matchesSearch = searchQuery === '' || 
+        symbol.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+      
+      // PNL type filter
+      const matchesType = 
+        filterType === 'all' ||
+        (filterType === 'positive' && symbol.pnl > 0) ||
+        (filterType === 'negative' && symbol.pnl <= 0)
+      
+      return matchesSearch && matchesType
+    })
+  }
+  
+  // Apply filters to all columns
+  const filteredColumns = columns.map(col => ({
+    ...col,
+    symbols: filterSymbols(col.symbols)
+  }))
+  
   // Format helpers
   const formatWinrate = (wr: number) => `${(wr * 100).toFixed(1)}%`
   
-  const formatPNL = (pnl: number) => {
+  const formatPNL = (pnl: number | null | undefined) => {
+    // null, undefined veya 0 için N/A döndür
+    // 0 = hiç o tür trade yok demek (pozitif veya negatif)
+    if (pnl === null || pnl === undefined || pnl === 0) return 'N/A'
     const sign = pnl > 0 ? '+' : ''
     return `${sign}${pnl.toFixed(4)}`  // 4 decimal places for precision
   }
@@ -48,7 +76,7 @@ export function StrategyOveralls() {
   }
   
   // Find max rows needed (longest symbol list)
-  const maxRows = Math.max(...columns.map(col => col.symbols.length), 0)
+  const maxRows = Math.max(...filteredColumns.map(col => col.symbols.length), 0)
   
   if (loading) {
     return (
@@ -89,25 +117,70 @@ export function StrategyOveralls() {
       <header className="page-header">
         <h1>📊 Strategy Overalls</h1>
         <p>Backtest sonuçlarını karşılaştırmalı analiz</p>
+        
+        {/* Search and Filter Bar */}
+        <div className="search-filter-bar">
+          <div className="search-box">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search symbols (e.g., BTC, ETH, USDT...)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            {searchQuery && (
+              <button 
+                className="clear-button"
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          
+          <div className="filter-buttons">
+            <button
+              className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+              onClick={() => setFilterType('all')}
+            >
+              All ({columns.reduce((sum, c) => sum + c.total_symbols, 0)})
+            </button>
+            <button
+              className={`filter-btn positive ${filterType === 'positive' ? 'active' : ''}`}
+              onClick={() => setFilterType('positive')}
+            >
+              ✓ Positive ({columns.reduce((sum, c) => sum + c.positive_count, 0)})
+            </button>
+            <button
+              className={`filter-btn negative ${filterType === 'negative' ? 'active' : ''}`}
+              onClick={() => setFilterType('negative')}
+            >
+              ✗ Negative ({columns.reduce((sum, c) => sum + c.negative_count, 0)})
+            </button>
+          </div>
+        </div>
+        
         <div className="stats-summary">
           <div className="stat-item">
             <span className="stat-label">Total Runs:</span>
             <span className="stat-value">{columns.length}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Total Symbols:</span>
+            <span className="stat-label">Showing Symbols:</span>
             <span className="stat-value">{maxRows}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Positive:</span>
             <span className="stat-value positive">
-              {columns.reduce((sum, c) => sum + c.positive_count, 0)}
+              {filteredColumns.reduce((sum, c) => sum + c.symbols.filter(s => s.pnl > 0).length, 0)}
             </span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Negative:</span>
             <span className="stat-value negative">
-              {columns.reduce((sum, c) => sum + c.negative_count, 0)}
+              {filteredColumns.reduce((sum, c) => sum + c.symbols.filter(s => s.pnl <= 0).length, 0)}
             </span>
           </div>
         </div>
@@ -117,16 +190,56 @@ export function StrategyOveralls() {
         <table className="strategy-table">
           <thead>
             <tr>
-              {columns.map(col => (
+              {columns.map((col, index) => (
                 <th key={col.run_id} className="run-header">
-                  <div className="run-id" title={col.run_id}>
-                    {formatRunId(col.run_id)}
+                  <div className="run-header-info">
+                    <div className="run-id" title={col.run_id}>
+                      Run #{index + 1}
+                    </div>
+                    <div className="run-date">{formatDate(col.created_at)}</div>
+                    <div className="run-basic-stats">
+                      <span className="positive">✓{col.positive_count}</span>
+                      {' / '}
+                      <span className="negative">✗{col.negative_count}</span>
+                    </div>
                   </div>
-                  <div className="run-date">{formatDate(col.created_at)}</div>
-                  <div className="run-stats">
-                    <span className="positive">+{col.positive_count}</span>
-                    {' / '}
-                    <span className="negative">-{col.negative_count}</span>
+                  
+                  {/* Overall Statistics Box */}
+                  <div className="run-overall-stats">
+                    <div className="stats-title">📊 Overall ({col.total_symbols} symbols)</div>
+                    
+                    <div className="stat-group all">
+                      <div className="stat-label">All Coins</div>
+                      <div className="stat-line">
+                        <span>Avg: {formatPNL(col.avg_pnl_all)}</span>
+                      </div>
+                      <div className="stat-line-range">
+                        <span>Min: {formatPNL(col.min_pnl_all)}</span>
+                        <span>Max: {formatPNL(col.max_pnl_all)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="stat-group positive">
+                      <div className="stat-label">✓ Positive ({col.positive_count})</div>
+                      <div className="stat-line">
+                        <span>Avg: {formatPNL(col.avg_pnl_positive)}</span>
+                      </div>
+                      <div className="stat-line-range">
+                        <span>Min: {formatPNL(col.min_pnl_positive)}</span>
+                        <span>Max: {formatPNL(col.max_pnl_positive)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="stat-group negative">
+                      <div className="stat-label">✗ Negative ({col.negative_count})</div>
+                      <div className="stat-line">
+                        <span>Avg: {formatPNL(col.avg_pnl_negative)}</span>
+                      </div>
+                      <div className="stat-line-range">
+                        <span>Min: {formatPNL(col.min_pnl_negative)}</span>
+                        <span>Max: {formatPNL(col.max_pnl_negative)}</span>
+                      </div>
+                    </div>
                   </div>
                 </th>
               ))}
@@ -135,7 +248,7 @@ export function StrategyOveralls() {
           <tbody>
             {Array.from({ length: maxRows }).map((_, rowIndex) => (
               <tr key={rowIndex}>
-                {columns.map(col => {
+                {filteredColumns.map(col => {
                   const symbolData = col.symbols[rowIndex]
                   
                   if (!symbolData) {
@@ -148,13 +261,42 @@ export function StrategyOveralls() {
                     <td 
                       key={col.run_id} 
                       className={`symbol-cell ${pnlClass}`}
-                      title={`${symbolData.symbol}\nWinrate: ${formatWinrate(symbolData.winrate)}\nPNL: ${formatPNL(symbolData.pnl)}`}
+                      title={`${symbolData.symbol}
+━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Symbol PNL: ${formatPNL(symbolData.pnl)}
+━━━━━━━━━━━━━━━━━━━━━━━━
+📈 Symbol Trade Averages:
+  • Positive Trades Avg: ${formatPNL(symbolData.avg_pnl_positive)}
+  • Negative Trades Avg: ${formatPNL(symbolData.avg_pnl_negative)}
+━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Winrate: ${formatWinrate(symbolData.winrate)}
+📊 Trades: ${symbolData.trades_count.toLocaleString()}
+⚡ Sharpe: ${symbolData.sharpe.toFixed(2)}
+📉 Max DD: ${symbolData.max_dd.toFixed(2)}`}
                     >
                       <div className="symbol-name">{symbolData.symbol}</div>
                       <div className="metrics">
-                        <span className="winrate">WR: {formatWinrate(symbolData.winrate)}</span>
+                        <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
                         <br />
-                        <span className="pnl">PNL: {formatPNL(symbolData.pnl)}</span>
+                        <span className="pnl" style={{ fontWeight: 'bold', fontSize: '0.95em' }}>
+                          {formatPNL(symbolData.pnl)}
+                        </span>
+                        <br />
+                        <div className="pnl-stats" style={{ 
+                          fontSize: '0.65em', 
+                          marginTop: '4px',
+                          padding: '4px',
+                          background: 'rgba(0,0,0,0.2)',
+                          borderRadius: '4px',
+                          lineHeight: '1.4'
+                        }}>
+                          <div style={{ color: '#00ff88', fontWeight: '500' }}>
+                            ✓ {formatPNL(symbolData.avg_pnl_positive)}
+                          </div>
+                          <div style={{ color: '#ff6b6b', fontWeight: '500' }}>
+                            ✗ {formatPNL(symbolData.avg_pnl_negative)}
+                          </div>
+                        </div>
                       </div>
                     </td>
                   )
