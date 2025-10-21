@@ -264,7 +264,14 @@
 .run-date {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
+}
+
+.run-time {
+  font-size: 11px;
+  color: rgba(0, 255, 255, 0.6);
   margin-bottom: 6px;
+  font-family: 'Courier New', monospace;
 }
 
 .run-uuid-container {
@@ -320,6 +327,35 @@
   transform: translateY(0);
 }
 
+.run-trade-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.trade-stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.stat-icon {
+  font-size: 14px;
+}
+
+.stat-text {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
 .run-basic-stats {
   font-size: 13px;
   font-weight: 600;
@@ -327,6 +363,10 @@
 
 .run-basic-stats .positive {
   color: #00ff88;
+}
+
+.run-basic-stats .neutral {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .run-basic-stats .negative {

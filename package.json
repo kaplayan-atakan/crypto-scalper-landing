@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vite build && pwsh -Command \"Copy-Item -Path 'public/404.html' -Destination 'dist/404.html' -Force\"",
+    "build:unix": "vite build && cp public/404.html dist/404.html",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.74.0",

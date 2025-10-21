@@ -8,8 +8,11 @@ RETURNS TABLE (
   run_id uuid,
   created_at timestamptz,
   total_symbols int,
+  total_trades bigint,
+  overall_winrate numeric,
   positive_pnl_count int,
   negative_pnl_count int,
+  neutral_pnl_count int,
   -- All trades statistics
   avg_pnl_all numeric,
   min_pnl_all numeric,
@@ -33,7 +36,9 @@ BEGIN
       br.run_id,
       br.symbol,
       MIN(br.created_at) as created_at,
-      AVG(br.sum_ret) as avg_pnl
+      AVG(br.sum_ret) as avg_pnl,
+      AVG(br.winrate) as avg_winrate,
+      SUM(br.trades) as total_symbol_trades
     FROM backtest_resultsv1 br
     GROUP BY br.run_id, br.symbol
   )
@@ -41,8 +46,11 @@ BEGIN
     sa.run_id,
     MIN(sa.created_at) as created_at,
     COUNT(DISTINCT sa.symbol)::int as total_symbols,
+    SUM(sa.total_symbol_trades)::bigint as total_trades,
+    ROUND(AVG(sa.avg_winrate)::numeric, 4) as overall_winrate,
     COUNT(DISTINCT CASE WHEN sa.avg_pnl > 0 THEN sa.symbol END)::int as positive_pnl_count,
-    COUNT(DISTINCT CASE WHEN sa.avg_pnl <= 0 THEN sa.symbol END)::int as negative_pnl_count,
+    COUNT(DISTINCT CASE WHEN sa.avg_pnl < 0 THEN sa.symbol END)::int as negative_pnl_count,
+    COUNT(DISTINCT CASE WHEN sa.avg_pnl = 0 THEN sa.symbol END)::int as neutral_pnl_count,
     -- All trades statistics
     ROUND(AVG(sa.avg_pnl)::numeric, 4) as avg_pnl_all,
     ROUND(MIN(sa.avg_pnl)::numeric, 4) as min_pnl_all,
@@ -52,9 +60,9 @@ BEGIN
     ROUND(MIN(CASE WHEN sa.avg_pnl > 0 THEN sa.avg_pnl END)::numeric, 4) as min_pnl_positive,
     ROUND(MAX(CASE WHEN sa.avg_pnl > 0 THEN sa.avg_pnl END)::numeric, 4) as max_pnl_positive,
     -- Negative trades statistics
-    ROUND(AVG(CASE WHEN sa.avg_pnl <= 0 THEN sa.avg_pnl END)::numeric, 4) as avg_pnl_negative,
-    ROUND(MIN(CASE WHEN sa.avg_pnl <= 0 THEN sa.avg_pnl END)::numeric, 4) as min_pnl_negative,
-    ROUND(MAX(CASE WHEN sa.avg_pnl <= 0 THEN sa.avg_pnl END)::numeric, 4) as max_pnl_negative
+    ROUND(AVG(CASE WHEN sa.avg_pnl < 0 THEN sa.avg_pnl END)::numeric, 4) as avg_pnl_negative,
+    ROUND(MIN(CASE WHEN sa.avg_pnl < 0 THEN sa.avg_pnl END)::numeric, 4) as min_pnl_negative,
+    ROUND(MAX(CASE WHEN sa.avg_pnl < 0 THEN sa.avg_pnl END)::numeric, 4) as max_pnl_negative
   FROM symbol_averages sa
   GROUP BY sa.run_id
   ORDER BY MIN(sa.created_at) ASC;

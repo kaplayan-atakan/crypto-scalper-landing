@@ -83,6 +83,15 @@ export function StrategyOveralls() {
     })
   }
   
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleTimeString('tr-TR', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  }
+  
   const formatRunId = (runId: string) => {
     return runId.slice(0, 8)
   }
@@ -209,6 +218,7 @@ export function StrategyOveralls() {
                       Run #{index + 1}
                     </div>
                     <div className="run-date">{formatDate(col.created_at)}</div>
+                    <div className="run-time">⏰ {formatTime(col.created_at)}</div>
                     <div className="run-uuid-container">
                       <div className="run-uuid" title={`Full UUID: ${col.run_id}`}>
                         🆔 {formatRunId(col.run_id)}
@@ -221,8 +231,27 @@ export function StrategyOveralls() {
                         {copiedRunId === col.run_id ? '✓' : '📋'}
                       </button>
                     </div>
+                    
+                    {/* Overall Trade Stats */}
+                    <div className="run-trade-stats">
+                      <div className="trade-stat-item">
+                        <span className="stat-icon">📊</span>
+                        <span className="stat-text">
+                          {col.total_trades.toLocaleString()} trades
+                        </span>
+                      </div>
+                      <div className="trade-stat-item">
+                        <span className="stat-icon">🎯</span>
+                        <span className="stat-text">
+                          WR: {(col.overall_winrate * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                    
                     <div className="run-basic-stats">
                       <span className="positive">✓{col.positive_count}</span>
+                      {' / '}
+                      <span className="neutral">●{col.neutral_count}</span>
                       {' / '}
                       <span className="negative">✗{col.negative_count}</span>
                     </div>

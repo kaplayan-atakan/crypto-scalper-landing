@@ -15,8 +15,11 @@ export interface RunColumn {
   run_id: string;
   created_at: string;
   total_symbols: number;
+  total_trades: number;         // NEW
+  overall_winrate: number;       // NEW
   positive_count: number;
   negative_count: number;
+  neutral_count: number;         // NEW
   // Run-level statistics
   avg_pnl_all: number;
   min_pnl_all: number;
@@ -86,8 +89,11 @@ export async function fetchAllRunColumns() {
     run_id: s.run_id,
     created_at: s.created_at,
     total_symbols: s.total_symbols,
+    total_trades: s.total_trades,           // NEW
+    overall_winrate: s.overall_winrate,     // NEW
     positive_count: s.positive_pnl_count,
     negative_count: s.negative_pnl_count,
+    neutral_count: s.neutral_pnl_count,     // NEW
     // Run-level statistics
     avg_pnl_all: s.avg_pnl_all,
     min_pnl_all: s.min_pnl_all,

@@ -84,8 +84,11 @@ export interface RunOverview {
   run_id: string
   created_at: string
   total_symbols: number
+  total_trades: number         // NEW: Toplam trade sayısı
+  overall_winrate: number       // NEW: Overall winrate
   positive_count: number
   negative_count: number
+  neutral_count: number         // NEW: PNL = 0 olan symbol sayısı
   // Run-level statistics
   avg_pnl_all: number
   min_pnl_all: number

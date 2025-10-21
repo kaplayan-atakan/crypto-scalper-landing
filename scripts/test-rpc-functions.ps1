@@ -54,7 +54,10 @@ try {
             Write-Host "   ├─ run_id: $($run.run_id)" -ForegroundColor Gray
             Write-Host "   ├─ created_at: $($run.created_at)" -ForegroundColor Gray
             Write-Host "   ├─ total_symbols: $($run.total_symbols)" -ForegroundColor Gray
+            Write-Host "   ├─ 📊 total_trades: $($run.total_trades)" -ForegroundColor Cyan
+            Write-Host "   ├─ 🎯 overall_winrate: $([math]::Round($run.overall_winrate * 100, 2))%" -ForegroundColor Cyan
             Write-Host "   ├─ positive_count: $($run.positive_pnl_count)" -ForegroundColor Green
+            Write-Host "   ├─ neutral_count: $($run.neutral_pnl_count)" -ForegroundColor Gray
             Write-Host "   ├─ negative_count: $($run.negative_pnl_count)" -ForegroundColor Red
             Write-Host "   │" -ForegroundColor Gray
             Write-Host "   ├─ 📊 ALL COINS STATS:" -ForegroundColor Cyan
