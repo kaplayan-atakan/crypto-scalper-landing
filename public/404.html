@@ -16,10 +16,15 @@
       var base = l.pathname.split('/').slice(0, segmentCount + 1).join('/');
       var route = l.pathname.slice(base.length);
       
+      // Remove leading slash from route to prevent double slashes
+      if (route && route.charAt(0) === '/') {
+        route = route.slice(1);
+      }
+      
       if (route) {
         l.replace(
           l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          base + '/?p=' + route.replace(/&/g, '~and~') +
+          base + '/?p=/' + route.replace(/&/g, '~and~') +
           (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
           l.hash
         );

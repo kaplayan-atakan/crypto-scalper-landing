@@ -135,6 +135,24 @@ export function StrategyOveralls() {
   
   return (
     <div className="strategy-overalls">
+      {/* Action Buttons - Top Right */}
+      <div className="action-buttons">
+        <button
+          className="action-btn home-btn"
+          onClick={() => window.location.href = '/crypto-scalper-landing/'}
+          title="Ana Sayfaya Dön"
+        >
+          🏠 Ana Sayfa
+        </button>
+        <button
+          className="action-btn refresh-btn"
+          onClick={() => window.location.reload()}
+          title="Sayfayı Yenile"
+        >
+          🔄 Yenile
+        </button>
+      </div>
+      
       <header className="page-header">
         <h1>📊 Strategy Overalls</h1>
         <p>Backtest sonuçlarını karşılaştırmalı analiz</p>
