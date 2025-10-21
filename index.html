@@ -15,23 +15,34 @@
     
     <!-- GitHub Pages SPA redirect handler -->
     <script type="text/javascript">
-      // Handle the redirect from 404.html
+      // Handle the redirect from 404.html and normalize path to avoid double slashes
       (function(l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&') 
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
+        function decodeAndNormalize(s) {
+          if (!s) return '';
+          // Replace placeholder and decode
+          var decoded = s.replace(/~and~/g, '&');
+          // Ensure it starts with a single slash
+          if (decoded.charAt(0) !== '/') decoded = '/' + decoded;
+          // Collapse multiple contiguous slashes into a single slash
+          decoded = decoded.replace(/\/+/g, '/');
+          return decoded;
+        }
+
+        // Format 1: legacy ?/path
+        if (l.search && l.search[1] === '/') {
+          var raw = l.search.slice(1);
+          var decoded = decodeAndNormalize(raw.split('&').map(function(s){ return s.replace(/~and~/g,'&'); }).join('?'));
+          // Replace history but keep the base (without trailing slash)
+          var base = l.pathname.replace(/\/$/, '');
+          window.history.replaceState(null, null, base + decoded + l.hash);
         } else if (l.search) {
-          // Handle legacy format
+          // Format 2: ?p=/path
           var params = new URLSearchParams(l.search);
           var p = params.get('p');
           if (p) {
-            window.history.replaceState(null, null,
-              l.pathname + p.replace(/~and~/g, '&') + l.hash
-            );
+            var normalized = decodeAndNormalize(p);
+            var base = l.pathname.replace(/\/$/, '');
+            window.history.replaceState(null, null, base + normalized + l.hash);
           }
         }
       }(window.location));
