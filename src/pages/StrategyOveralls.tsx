@@ -8,7 +8,7 @@ export function StrategyOveralls() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterType, setFilterType] = useState<'all' | 'positive' | 'negative'>('all')
+  const [filterType, setFilterType] = useState<'all' | 'positive' | 'neutral' | 'negative'>('all')
   const [copiedRunId, setCopiedRunId] = useState<string | null>(null)
   
   useEffect(() => {
@@ -40,7 +40,8 @@ export function StrategyOveralls() {
       const matchesType = 
         filterType === 'all' ||
         (filterType === 'positive' && symbol.pnl > 0) ||
-        (filterType === 'negative' && symbol.pnl <= 0)
+        (filterType === 'neutral' && symbol.pnl === 0) ||
+        (filterType === 'negative' && symbol.pnl < 0)
       
       return matchesSearch && matchesType
     })
@@ -193,6 +194,12 @@ export function StrategyOveralls() {
               ✓ Positive ({columns.reduce((sum, c) => sum + c.positive_count, 0)})
             </button>
             <button
+              className={`filter-btn neutral ${filterType === 'neutral' ? 'active' : ''}`}
+              onClick={() => setFilterType('neutral')}
+            >
+              ● Neutral ({columns.reduce((sum, c) => sum + c.neutral_count, 0)})
+            </button>
+            <button
               className={`filter-btn negative ${filterType === 'negative' ? 'active' : ''}`}
               onClick={() => setFilterType('negative')}
             >
@@ -326,7 +333,7 @@ export function StrategyOveralls() {
                     return <td key={col.run_id} className="empty-cell"></td>
                   }
                   
-                  const pnlClass = symbolData.pnl > 0 ? 'pnl-positive' : 'pnl-negative'
+                  const pnlClass = symbolData.pnl > 0 ? 'pnl-positive' : symbolData.pnl === 0 ? 'pnl-neutral' : 'pnl-negative'
                   
                   return (
                     <td 
