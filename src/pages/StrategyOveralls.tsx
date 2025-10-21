@@ -9,6 +9,7 @@ export function StrategyOveralls() {
   const [error, setError] = useState<Error | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'positive' | 'negative'>('all')
+  const [copiedRunId, setCopiedRunId] = useState<string | null>(null)
   
   useEffect(() => {
     async function loadData() {
@@ -43,6 +44,17 @@ export function StrategyOveralls() {
       
       return matchesSearch && matchesType
     })
+  }
+  
+  // Copy run_id to clipboard
+  const copyRunId = async (runId: string) => {
+    try {
+      await navigator.clipboard.writeText(runId)
+      setCopiedRunId(runId)
+      setTimeout(() => setCopiedRunId(null), 2000) // Reset after 2 seconds
+    } catch (err) {
+      console.error('Failed to copy run_id:', err)
+    }
   }
   
   // Apply filters to all columns
@@ -197,6 +209,18 @@ export function StrategyOveralls() {
                       Run #{index + 1}
                     </div>
                     <div className="run-date">{formatDate(col.created_at)}</div>
+                    <div className="run-uuid-container">
+                      <div className="run-uuid" title={`Full UUID: ${col.run_id}`}>
+                        🆔 {formatRunId(col.run_id)}
+                      </div>
+                      <button
+                        className="copy-btn"
+                        onClick={() => copyRunId(col.run_id)}
+                        title="Copy full run_id to clipboard"
+                      >
+                        {copiedRunId === col.run_id ? '✓' : '📋'}
+                      </button>
+                    </div>
                     <div className="run-basic-stats">
                       <span className="positive">✓{col.positive_count}</span>
                       {' / '}
