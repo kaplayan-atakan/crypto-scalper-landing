@@ -335,6 +335,21 @@
   vertical-align: middle;
 }
 
+/* Empty Symbol Header (no text, just spacing) */
+.symbol-header-empty {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.95);
+  min-width: 140px;
+  max-width: 160px;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  border-radius: 6px;
+  vertical-align: middle;
+}
+
 .symbol-header-content {
   display: flex;
   flex-direction: column;
@@ -556,6 +571,17 @@
   flex-direction: column;
   gap: 4px;
   font-size: 13px;
+}
+
+.metrics-compact .symbol-name-in-card {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .metrics-compact .winrate {

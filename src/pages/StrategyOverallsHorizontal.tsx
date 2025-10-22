@@ -336,11 +336,9 @@ export function StrategyOverallsHorizontal() {
                 <div className="header-title">Run Details</div>
               </th>
               
-              {/* Symbol headers (just symbol name) */}
+              {/* Empty headers for symbol columns (symbol names will be in cards) */}
               {displaySymbols.map(symbol => (
-                <th key={symbol} className="symbol-header">
-                  <div className="symbol-name">{symbol}</div>
-                </th>
+                <th key={symbol} className="symbol-header-empty"></th>
               ))}
             </tr>
           </thead>
@@ -427,6 +425,7 @@ export function StrategyOverallsHorizontal() {
 📉 Max DD: ${symbolData.max_dd != null ? symbolData.max_dd.toFixed(2) : 'N/A'}`}
                     >
                       <div className="metrics-compact">
+                        <div className="symbol-name-in-card">{symbol}</div>
                         <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
                         <span className="pnl">{formatPNL(symbolData.pnl)}</span>
                         <div className="pnl-stats-mini">
