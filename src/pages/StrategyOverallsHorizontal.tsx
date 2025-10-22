@@ -19,7 +19,12 @@ export function StrategyOverallsHorizontal() {
       try {
         setLoading(true)
         const data = await fetchAllRunColumns()
-        setColumns(data)
+        // Sort each run's symbols by PNL DESC (highest first)
+        const sortedData = data.map(run => ({
+          ...run,
+          symbols: [...run.symbols].sort((a, b) => b.pnl - a.pnl)
+        }))
+        setColumns(sortedData)
       } catch (err) {
         console.error('Failed to load backtest data:', err)
         setError(err as Error)
@@ -31,34 +36,13 @@ export function StrategyOverallsHorizontal() {
     loadData()
   }, [])
   
-  // Get all unique symbols across all runs, sorted by average PNL DESC
+  // Get all unique symbols across all runs (no sorting here, just collection)
   const allSymbols = useMemo(() => {
-    const symbolPnlMap = new Map<string, number[]>()
-    
-    // Collect all PNL values for each symbol
+    const symbolSet = new Set<string>()
     columns.forEach(run => {
-      run.symbols.forEach(s => {
-        if (!symbolPnlMap.has(s.symbol)) {
-          symbolPnlMap.set(s.symbol, [])
-        }
-        symbolPnlMap.get(s.symbol)!.push(s.pnl)
-      })
+      run.symbols.forEach(s => symbolSet.add(s.symbol))
     })
-    
-    // Calculate average PNL for each symbol and sort DESC
-    const symbolsWithAvg = Array.from(symbolPnlMap.entries()).map(([symbol, pnls]) => ({
-      symbol,
-      avgPnl: pnls.reduce((sum, pnl) => sum + pnl, 0) / pnls.length
-    }))
-    
-    const sorted = symbolsWithAvg
-      .sort((a, b) => b.avgPnl - a.avgPnl) // DESC: highest PNL first
-      .map(s => s.symbol)
-    
-    console.log('🔥 Symbol sorting by avg PNL DESC:', 
-      symbolsWithAvg.slice(0, 5).map(s => `${s.symbol}: ${s.avgPnl.toFixed(4)}`))
-    
-    return sorted
+    return Array.from(symbolSet)
   }, [columns])
   
   // Transpose data: create map of symbol → runs
@@ -124,48 +108,54 @@ export function StrategyOverallsHorizontal() {
     setAlignedSymbol(targetRunId)
   }
   
-  // Get aligned symbols when a run is selected
-  const getAlignedSymbols = (): string[] => {
-    const filteredSyms = filterSymbols(allSymbols)
+  // Get symbol order for display
+  // If aligned: use target run's symbol order for ALL runs
+  // If not aligned: each run uses its own symbol order (already sorted by PNL DESC)
+  const getSymbolsForRun = (run: RunColumn): string[] => {
+    const filtered = filterSymbols(run.symbols.map(s => s.symbol))
     
     if (!alignedSymbol) {
-      // No alignment: return filtered symbols sorted by avg PNL DESC
-      return filteredSyms
+      // No alignment: use this run's own symbol order (already PNL sorted)
+      return filtered
     }
     
-    // Find the target run
+    // Alignment active: use target run's symbol order
     const targetRun = columns.find(r => r.run_id === alignedSymbol)
-    if (!targetRun) return filteredSyms
+    if (!targetRun) return filtered
     
-    // Get target run's symbol order (sorted by PNL within that run)
-    const targetSymbols = targetRun.symbols
-      .sort((a, b) => b.pnl - a.pnl)  // Sort by PNL DESC within target run
-      .map(s => s.symbol)
+    // Get target run's symbol order
+    const targetOrder = targetRun.symbols.map(s => s.symbol)
     
-    // Align all symbols to this order
-    const alignedSymbols: string[] = []
-    const remainingSymbols = new Set(filteredSyms)
+    // Reorder current run's symbols to match target order
+    const orderedSymbols: string[] = []
+    const remainingSet = new Set(filtered)
     
-    // First: add symbols from target order that exist in filtered list
-    targetSymbols.forEach(symbol => {
-      if (remainingSymbols.has(symbol)) {
-        alignedSymbols.push(symbol)
-        remainingSymbols.delete(symbol)
+    // First: add symbols in target order
+    targetOrder.forEach(symbol => {
+      if (remainingSet.has(symbol)) {
+        orderedSymbols.push(symbol)
+        remainingSet.delete(symbol)
       }
     })
     
-    // Second: add remaining symbols in their original PNL-sorted order
-    const remaining = filteredSyms.filter(s => remainingSymbols.has(s))
-    alignedSymbols.push(...remaining)
+    // Second: add remaining symbols in current run's PNL order
+    const remaining = filtered.filter(s => remainingSet.has(s))
+    orderedSymbols.push(...remaining)
     
-    return alignedSymbols
+    return orderedSymbols
   }
   
   // Display data
-  const displaySymbols = getAlignedSymbols()
   const displayRuns = [...columns].sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
+  
+  // Get max number of columns needed (for table structure)
+  const maxSymbolCount = useMemo(() => {
+    return Math.max(...displayRuns.map(run => 
+      filterSymbols(run.symbols.map(s => s.symbol)).length
+    ), 0)
+  }, [displayRuns, searchQuery, filterType])
   
   // Format helpers
   const formatWinrate = (wr: number | null) => {
@@ -328,97 +318,89 @@ export function StrategyOverallsHorizontal() {
             <span className="stat-value">{allSymbols.length}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Showing Symbols:</span>
-            <span className="stat-value">{displaySymbols.length}</span>
+            <span className="stat-label">Max Columns:</span>
+            <span className="stat-value">{maxSymbolCount}</span>
           </div>
         </div>
       </header>
       
       <div className="table-container">
         <table className="strategy-table-horizontal">
-          <thead>
-            <tr>
-              {/* First header: Run Info Column */}
-              <th className="run-info-header">
-                <div className="header-title">Run Details</div>
-              </th>
-              
-              {/* Empty headers for symbol columns (symbol names will be in cards) */}
-              {displaySymbols.map(symbol => (
-                <th key={symbol} className="symbol-header-empty"></th>
-              ))}
-            </tr>
-          </thead>
-          
           <tbody>
             {/* Each row = one run */}
-            {displayRuns.map((run, runIndex) => (
-              <tr key={run.run_id}>
-                {/* First column: Run info */}
-                <td className="run-info-cell">
-                  <div className="run-info-compact">
-                    <div className="run-header-line">
-                      <span className="run-id">Run #{runIndex + 1}</span>
-                      <span className="run-date">{formatDate(run.created_at)}</span>
-                      <span className="run-time">⏰ {formatTime(run.created_at)}</span>
-                    </div>
+            {displayRuns.map((run, runIndex) => {
+              const runSymbols = getSymbolsForRun(run)
+              const symbolDataMap = new Map(run.symbols.map(s => [s.symbol, s]))
+              
+              return (
+                <React.Fragment key={run.run_id}>
+                  {/* Run info row */}
+                  <tr className="run-row">
+                    {/* First column: Run info */}
+                    <td className="run-info-cell">
+                      <div className="run-info-compact">
+                        <div className="run-header-line">
+                          <span className="run-id">Run #{runIndex + 1}</span>
+                          <span className="run-date">{formatDate(run.created_at)}</span>
+                          <span className="run-time">⏰ {formatTime(run.created_at)}</span>
+                        </div>
+                        
+                        <div className="run-stats-line">
+                          <span>📊 {run.total_trades.toLocaleString()} trades</span>
+                          <span>🎯 WR: {run.overall_winrate != null ? (run.overall_winrate * 100).toFixed(1) : 'N/A'}%</span>
+                        </div>
                     
-                    <div className="run-stats-line">
-                      <span>📊 {run.total_trades.toLocaleString()} trades</span>
-                      <span>🎯 WR: {run.overall_winrate != null ? (run.overall_winrate * 100).toFixed(1) : 'N/A'}%</span>
-                    </div>
-                    
-                    <div className="run-split">
-                      <span className="positive">✓{run.positive_count}</span>
-                      <span className="neutral">●{run.neutral_count}</span>
-                      <span className="negative">✗{run.negative_count}</span>
-                    </div>
-                    
-                    <div className="run-overall-compact">
-                      Overall: Avg {formatPNL(run.avg_pnl_all)} | 
-                      Min {formatPNL(run.min_pnl_all)} / Max {formatPNL(run.max_pnl_all)}
-                    </div>
-                    
-                    <div className="run-actions">
-                      <div className="run-uuid" title={`Full UUID: ${run.run_id}`}>
-                        🆔 {formatRunId(run.run_id)}
+                        <div className="run-split">
+                          <span className="positive">✓{run.positive_count}</span>
+                          <span className="neutral">●{run.neutral_count}</span>
+                          <span className="negative">✗{run.negative_count}</span>
+                        </div>
+                        
+                        <div className="run-overall-compact">
+                          Overall: Avg {formatPNL(run.avg_pnl_all)} | 
+                          Min {formatPNL(run.min_pnl_all)} / Max {formatPNL(run.max_pnl_all)}
+                        </div>
+                        
+                        <div className="run-actions">
+                          <div className="run-uuid" title={`Full UUID: ${run.run_id}`}>
+                            🆔 {formatRunId(run.run_id)}
+                          </div>
+                          <button 
+                            className="copy-btn" 
+                            onClick={() => copyRunId(run.run_id)}
+                            title="Copy full run_id to clipboard"
+                          >
+                            {copiedRunId === run.run_id ? '✓' : '📋'}
+                          </button>
+                        </div>
+                        
+                        {/* Align All Runs Button */}
+                        <button
+                          className={`align-btn ${alignedSymbol === run.run_id ? 'active' : ''}`}
+                          onClick={() => alignColumnsToRun(run.run_id)}
+                          title={alignedSymbol === run.run_id ? 'Clear alignment' : 'Align all runs to this run\'s symbol order'}
+                        >
+                          {alignedSymbol === run.run_id ? '🔓 Clear' : '🔗 Align All'}
+                        </button>
                       </div>
-                      <button 
-                        className="copy-btn" 
-                        onClick={() => copyRunId(run.run_id)}
-                        title="Copy full run_id to clipboard"
-                      >
-                        {copiedRunId === run.run_id ? '✓' : '📋'}
-                      </button>
-                    </div>
+                    </td>
                     
-                    {/* Align All Runs Button */}
-                    <button
-                      className={`align-btn ${alignedSymbol === run.run_id ? 'active' : ''}`}
-                      onClick={() => alignColumnsToRun(run.run_id)}
-                      title={alignedSymbol === run.run_id ? 'Clear alignment' : 'Align all runs to this run\'s symbol order'}
-                    >
-                      {alignedSymbol === run.run_id ? '🔓 Clear' : '🔗 Align All'}
-                    </button>
-                  </div>
-                </td>
-                
-                {/* Symbol data columns */}
-                {displaySymbols.map(symbol => {
-                  const symbolData = symbolToRunsMap.get(symbol)?.get(run.run_id)
-                  
-                  if (!symbolData) {
-                    return <td key={symbol} className="empty-cell"></td>
-                  }
-                  
-                  const pnlClass = symbolData.pnl > 0 ? 'pnl-positive' : 
-                                  symbolData.pnl === 0 ? 'pnl-neutral' : 'pnl-negative'
-                  
-                  return (
-                    <td 
-                      key={symbol} 
-                      className={`symbol-data-cell ${pnlClass}`}
-                      title={`${symbol}
+                    {/* Symbol data columns - each run shows its own symbol order */}
+                    {runSymbols.map(symbol => {
+                      const symbolData = symbolDataMap.get(symbol)
+                      
+                      if (!symbolData) {
+                        return <td key={symbol} className="empty-cell"></td>
+                      }
+                      
+                      const pnlClass = symbolData.pnl > 0 ? 'pnl-positive' : 
+                                      symbolData.pnl === 0 ? 'pnl-neutral' : 'pnl-negative'
+                      
+                      return (
+                        <td 
+                          key={symbol} 
+                          className={`symbol-data-cell ${pnlClass}`}
+                          title={`${symbol}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 📊 Symbol PNL: ${formatPNL(symbolData.pnl)}
 ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -430,21 +412,23 @@ export function StrategyOverallsHorizontal() {
 📊 Trades: ${symbolData.trades_count.toLocaleString()}
 ⚡ Sharpe: ${symbolData.sharpe != null ? symbolData.sharpe.toFixed(2) : 'N/A'}
 📉 Max DD: ${symbolData.max_dd != null ? symbolData.max_dd.toFixed(2) : 'N/A'}`}
-                    >
-                      <div className="metrics-compact">
-                        <div className="symbol-name-in-card">{symbol}</div>
-                        <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
-                        <span className="pnl">{formatPNL(symbolData.pnl)}</span>
-                        <div className="pnl-stats-mini">
-                          <div className="positive">✓ {formatPNL(symbolData.avg_pnl_positive)}</div>
-                          <div className="negative">✗ {formatPNL(symbolData.avg_pnl_negative)}</div>
-                        </div>
-                      </div>
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
+                        >
+                          <div className="metrics-compact">
+                            <div className="symbol-name-in-card">{symbol}</div>
+                            <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
+                            <span className="pnl">{formatPNL(symbolData.pnl)}</span>
+                            <div className="pnl-stats-mini">
+                              <div className="positive">✓ {formatPNL(symbolData.avg_pnl_positive)}</div>
+                              <div className="negative">✗ {formatPNL(symbolData.avg_pnl_negative)}</div>
+                            </div>
+                          </div>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                </React.Fragment>
+              )
+            })}
           </tbody>
         </table>
       </div>
