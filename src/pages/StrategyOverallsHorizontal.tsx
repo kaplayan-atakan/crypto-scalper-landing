@@ -31,13 +31,29 @@ export function StrategyOverallsHorizontal() {
     loadData()
   }, [])
   
-  // Get all unique symbols across all runs
+  // Get all unique symbols across all runs, sorted by average PNL DESC
   const allSymbols = useMemo(() => {
-    const symbolSet = new Set<string>()
+    const symbolPnlMap = new Map<string, number[]>()
+    
+    // Collect all PNL values for each symbol
     columns.forEach(run => {
-      run.symbols.forEach(s => symbolSet.add(s.symbol))
+      run.symbols.forEach(s => {
+        if (!symbolPnlMap.has(s.symbol)) {
+          symbolPnlMap.set(s.symbol, [])
+        }
+        symbolPnlMap.get(s.symbol)!.push(s.pnl)
+      })
     })
-    return Array.from(symbolSet).sort()
+    
+    // Calculate average PNL for each symbol and sort DESC
+    const symbolsWithAvg = Array.from(symbolPnlMap.entries()).map(([symbol, pnls]) => ({
+      symbol,
+      avgPnl: pnls.reduce((sum, pnl) => sum + pnl, 0) / pnls.length
+    }))
+    
+    return symbolsWithAvg
+      .sort((a, b) => b.avgPnl - a.avgPnl) // DESC: highest PNL first
+      .map(s => s.symbol)
   }, [columns])
   
   // Transpose data: create map of symbol → runs
@@ -93,53 +109,56 @@ export function StrategyOverallsHorizontal() {
     }
   }
   
-  // Align rows (runs) to match selected symbol's PNL order
-  const alignRowsToSymbol = (targetSymbol: string) => {
-    if (alignedSymbol === targetSymbol) {
+  // Align columns (symbols) to match selected run's symbol order
+  const alignColumnsToRun = (targetRunId: string) => {
+    if (alignedSymbol === targetRunId) {
+      // Toggle off alignment
       setAlignedSymbol(null)
       return
     }
-    setAlignedSymbol(targetSymbol)
+    setAlignedSymbol(targetRunId)
   }
   
-  // Get aligned runs when a symbol is selected
-  const getAlignedRuns = (): RunColumn[] => {
-    if (!alignedSymbol) return columns
+  // Get aligned symbols when a run is selected
+  const getAlignedSymbols = (): string[] => {
+    const filteredSyms = filterSymbols(allSymbols)
     
-    // Get PNL values for the target symbol across all runs
-    const runPnlMap = new Map<string, number>()
+    if (!alignedSymbol) {
+      // No alignment: return filtered symbols sorted by avg PNL DESC
+      return filteredSyms
+    }
     
-    columns.forEach(run => {
-      const symbolData = run.symbols.find(s => s.symbol === alignedSymbol)
-      if (symbolData) {
-        runPnlMap.set(run.run_id, symbolData.pnl)
+    // Find the target run
+    const targetRun = columns.find(r => r.run_id === alignedSymbol)
+    if (!targetRun) return filteredSyms
+    
+    // Get target run's symbol order
+    const targetSymbols = targetRun.symbols.map(s => s.symbol)
+    
+    // Align all symbols to this order
+    const alignedSymbols: string[] = []
+    const remainingSymbols = new Set(filteredSyms)
+    
+    // First: add symbols from target order that exist in filtered list
+    targetSymbols.forEach(symbol => {
+      if (remainingSymbols.has(symbol)) {
+        alignedSymbols.push(symbol)
+        remainingSymbols.delete(symbol)
       }
     })
     
-    // Sort runs: those with target symbol first (by PNL desc), then others
-    return [...columns].sort((a, b) => {
-      const aPnl = runPnlMap.get(a.run_id)
-      const bPnl = runPnlMap.get(b.run_id)
-      
-      // Both have the symbol: sort by PNL
-      if (aPnl !== undefined && bPnl !== undefined) {
-        return bPnl - aPnl
-      }
-      
-      // Only a has symbol: a comes first
-      if (aPnl !== undefined) return -1
-      
-      // Only b has symbol: b comes first
-      if (bPnl !== undefined) return 1
-      
-      // Neither has symbol: maintain original order
-      return 0
-    })
+    // Second: add remaining symbols sorted by avg PNL DESC
+    const remaining = Array.from(remainingSymbols)
+    alignedSymbols.push(...remaining)
+    
+    return alignedSymbols
   }
   
   // Display data
-  const displaySymbols = filterSymbols(allSymbols)
-  const displayRuns = getAlignedRuns()
+  const displaySymbols = getAlignedSymbols()
+  const displayRuns = [...columns].sort((a, b) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
   
   // Format helpers
   const formatWinrate = (wr: number | null) => {
@@ -306,19 +325,6 @@ export function StrategyOverallsHorizontal() {
             <span className="stat-value">{displaySymbols.length}</span>
           </div>
         </div>
-        
-        {/* Alignment Indicator */}
-        {alignedSymbol && (
-          <div className="alignment-indicator">
-            🔗 Runs aligned to {alignedSymbol} PNL order
-            <button 
-              className="clear-alignment-btn"
-              onClick={() => setAlignedSymbol(null)}
-            >
-              ✕ Clear
-            </button>
-          </div>
-        )}
       </header>
       
       <div className="table-container">
@@ -330,19 +336,10 @@ export function StrategyOverallsHorizontal() {
                 <div className="header-title">Run Details</div>
               </th>
               
-              {/* Symbol headers (one per column) */}
+              {/* Symbol headers (just symbol name) */}
               {displaySymbols.map(symbol => (
                 <th key={symbol} className="symbol-header">
-                  <div className="symbol-header-content">
-                    <div className="symbol-name">{symbol}</div>
-                    <button
-                      className={`align-btn ${alignedSymbol === symbol ? 'active' : ''}`}
-                      onClick={() => alignRowsToSymbol(symbol)}
-                      title={alignedSymbol === symbol ? 'Clear alignment' : 'Align runs to this symbol\'s PNL order'}
-                    >
-                      {alignedSymbol === symbol ? '🔓 Clear' : '🔗 Align'}
-                    </button>
-                  </div>
+                  <div className="symbol-name">{symbol}</div>
                 </th>
               ))}
             </tr>
@@ -389,6 +386,15 @@ export function StrategyOverallsHorizontal() {
                         {copiedRunId === run.run_id ? '✓' : '📋'}
                       </button>
                     </div>
+                    
+                    {/* Align All Runs Button */}
+                    <button
+                      className={`align-btn ${alignedSymbol === run.run_id ? 'active' : ''}`}
+                      onClick={() => alignColumnsToRun(run.run_id)}
+                      title={alignedSymbol === run.run_id ? 'Clear alignment' : 'Align all runs to this run\'s symbol order'}
+                    >
+                      {alignedSymbol === run.run_id ? '🔓 Clear' : '🔗 Align All'}
+                    </button>
                   </div>
                 </td>
                 
