@@ -413,8 +413,8 @@ export function StrategyOverallsHorizontal() {
 ━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 Winrate: ${formatWinrate(symbolData.winrate)}
 📊 Trades: ${symbolData.trades_count.toLocaleString()}
-⚡ Sharpe: ${symbolData.sharpe.toFixed(2)}
-📉 Max DD: ${symbolData.max_dd.toFixed(2)}`}
+⚡ Sharpe: ${symbolData.sharpe != null ? symbolData.sharpe.toFixed(2) : 'N/A'}
+📉 Max DD: ${symbolData.max_dd != null ? symbolData.max_dd.toFixed(2) : 'N/A'}`}
                     >
                       <div className="metrics-compact">
                         <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
