@@ -51,9 +51,14 @@ export function StrategyOverallsHorizontal() {
       avgPnl: pnls.reduce((sum, pnl) => sum + pnl, 0) / pnls.length
     }))
     
-    return symbolsWithAvg
+    const sorted = symbolsWithAvg
       .sort((a, b) => b.avgPnl - a.avgPnl) // DESC: highest PNL first
       .map(s => s.symbol)
+    
+    console.log('🔥 Symbol sorting by avg PNL DESC:', 
+      symbolsWithAvg.slice(0, 5).map(s => `${s.symbol}: ${s.avgPnl.toFixed(4)}`))
+    
+    return sorted
   }, [columns])
   
   // Transpose data: create map of symbol → runs
@@ -132,8 +137,10 @@ export function StrategyOverallsHorizontal() {
     const targetRun = columns.find(r => r.run_id === alignedSymbol)
     if (!targetRun) return filteredSyms
     
-    // Get target run's symbol order
-    const targetSymbols = targetRun.symbols.map(s => s.symbol)
+    // Get target run's symbol order (sorted by PNL within that run)
+    const targetSymbols = targetRun.symbols
+      .sort((a, b) => b.pnl - a.pnl)  // Sort by PNL DESC within target run
+      .map(s => s.symbol)
     
     // Align all symbols to this order
     const alignedSymbols: string[] = []
@@ -147,8 +154,8 @@ export function StrategyOverallsHorizontal() {
       }
     })
     
-    // Second: add remaining symbols sorted by avg PNL DESC
-    const remaining = Array.from(remainingSymbols)
+    // Second: add remaining symbols in their original PNL-sorted order
+    const remaining = filteredSyms.filter(s => remainingSymbols.has(s))
     alignedSymbols.push(...remaining)
     
     return alignedSymbols
