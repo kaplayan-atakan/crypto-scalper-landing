@@ -142,9 +142,13 @@ export function StrategyOverallsHorizontal() {
   const displayRuns = getAlignedRuns()
   
   // Format helpers
-  const formatWinrate = (wr: number) => `${(wr * 100).toFixed(1)}%`
+  const formatWinrate = (wr: number | null) => {
+    if (wr == null) return 'N/A'
+    return `${(wr * 100).toFixed(1)}%`
+  }
   
-  const formatPNL = (pnl: number) => {
+  const formatPNL = (pnl: number | null) => {
+    if (pnl == null) return 'N/A'
     const sign = pnl > 0 ? '+' : ''
     return `${sign}${pnl.toFixed(4)}`
   }
@@ -359,7 +363,7 @@ export function StrategyOverallsHorizontal() {
                     
                     <div className="run-stats-line">
                       <span>📊 {run.total_trades.toLocaleString()} trades</span>
-                      <span>🎯 WR: {(run.overall_winrate * 100).toFixed(1)}%</span>
+                      <span>🎯 WR: {run.overall_winrate != null ? (run.overall_winrate * 100).toFixed(1) : 'N/A'}%</span>
                     </div>
                     
                     <div className="run-split">
