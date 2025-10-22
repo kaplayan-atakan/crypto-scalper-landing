@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchAllRunColumns } from '../services/backtestService'
 import type { RunColumn } from '../types/supabase'
 import './StrategyOveralls.css'
 
 export function StrategyOveralls() {
+  const navigate = useNavigate()
   const [columns, setColumns] = useState<RunColumn[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -195,18 +197,25 @@ export function StrategyOveralls() {
       {/* Action Buttons - Top Right */}
       <div className="action-buttons">
         <button
+          className="action-btn view-btn"
+          onClick={() => navigate('/strategy-overalls-horizontal')}
+          title="Horizontal View (Runs as Rows)"
+        >
+          📊 Horizontal
+        </button>
+        <button
           className="action-btn home-btn"
-          onClick={() => window.location.href = '/crypto-scalper-landing/'}
+          onClick={() => navigate('/crypto-scalper-landing/')}
           title="Ana Sayfaya Dön"
         >
-          🏠 Ana Sayfa
+          🏠 Home
         </button>
         <button
           className="action-btn refresh-btn"
           onClick={() => window.location.reload()}
           title="Sayfayı Yenile"
         >
-          🔄 Yenile
+          🔄 Refresh
         </button>
       </div>
       
