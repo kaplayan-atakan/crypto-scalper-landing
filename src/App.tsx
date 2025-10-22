@@ -120,6 +120,11 @@ function App() {
             <span className="btn-strategy-overalls__text">Strategy Overalls</span>
             <span className="btn-strategy-overalls__arrow">→</span>
           </Link>
+          <Link to="/strategy-overalls-horizontal" className="btn-strategy-overalls-horizontal">
+            <span className="btn-strategy-overalls-horizontal__icon">📊</span>
+            <span className="btn-strategy-overalls-horizontal__text">Strategy Overalls (Horizontal)</span>
+            <span className="btn-strategy-overalls-horizontal__arrow">→</span>
+          </Link>
         </div>
       </header>
       <main className="page__content">

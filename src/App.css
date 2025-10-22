@@ -1442,6 +1442,69 @@
   transform: translateX(4px);
 }
 
+/* Strategy Overalls Horizontal Button */
+.btn-strategy-overalls-horizontal {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(186, 85, 211, 0.1));
+  border: 2px solid rgba(138, 43, 226, 0.4);
+  border-radius: 16px;
+  color: var(--text-light);
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(138, 43, 226, 0.2);
+}
+
+.btn-strategy-overalls-horizontal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(186, 85, 211, 0.15));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+.btn-strategy-overalls-horizontal:hover::before {
+  opacity: 1;
+}
+
+.btn-strategy-overalls-horizontal:hover {
+  transform: translateY(-4px);
+  border-color: #ba55d3;
+  box-shadow: 0 12px 36px rgba(138, 43, 226, 0.4);
+}
+
+.btn-strategy-overalls-horizontal__icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-strategy-overalls-horizontal__text {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-strategy-overalls-horizontal__arrow {
+  font-size: 1.2rem;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.4s ease;
+}
+
+.btn-strategy-overalls-horizontal:hover .btn-strategy-overalls-horizontal__arrow {
+  transform: translateX(4px);
+}
+
 /* Back Button */
 .back-button {
   display: inline-flex;
