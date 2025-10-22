@@ -10,6 +10,7 @@ export function StrategyOveralls() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'positive' | 'neutral' | 'negative'>('all')
   const [copiedRunId, setCopiedRunId] = useState<string | null>(null)
+  const [alignedRunId, setAlignedRunId] = useState<string | null>(null)
   
   useEffect(() => {
     async function loadData() {
@@ -58,11 +59,66 @@ export function StrategyOveralls() {
     }
   }
   
+  // Align all columns to match selected run's order
+  const alignColumnsToRun = (targetRunId: string) => {
+    if (alignedRunId === targetRunId) {
+      // Toggle off alignment
+      setAlignedRunId(null)
+      return
+    }
+    
+    setAlignedRunId(targetRunId)
+  }
+  
   // Apply filters to all columns
   const filteredColumns = columns.map(col => ({
     ...col,
     symbols: filterSymbols(col.symbols)
   }))
+  
+  // Get aligned data when a run is selected
+  const getAlignedColumns = (): RunColumn[] => {
+    if (!alignedRunId) return filteredColumns
+    
+    // Find the target run
+    const targetRun = filteredColumns.find(c => c.run_id === alignedRunId)
+    if (!targetRun) return filteredColumns
+    
+    // Get target run's symbol order
+    const targetSymbols = targetRun.symbols.map(s => s.symbol)
+    
+    // Align all columns to this order
+    return filteredColumns.map(col => {
+      // Create a map for quick lookup
+      const symbolMap = new Map(col.symbols.map(s => [s.symbol, s]))
+      
+      // Build aligned symbol list
+      const alignedSymbols: typeof col.symbols = []
+      
+      // First: add symbols from target order that exist in this run
+      targetSymbols.forEach(symbol => {
+        const data = symbolMap.get(symbol)
+        if (data) {
+          alignedSymbols.push(data)
+          symbolMap.delete(symbol) // Remove from map
+        }
+      })
+      
+      // Second: add remaining symbols (not in target run) sorted by PNL
+      const remainingSymbols = Array.from(symbolMap.values())
+        .sort((a, b) => b.pnl - a.pnl)
+      
+      alignedSymbols.push(...remainingSymbols)
+      
+      return {
+        ...col,
+        symbols: alignedSymbols
+      }
+    })
+  }
+  
+  // Use aligned data instead of filtered
+  const displayColumns = getAlignedColumns()
   
   // Format helpers
   const formatWinrate = (wr: number) => `${(wr * 100).toFixed(1)}%`
@@ -98,7 +154,7 @@ export function StrategyOveralls() {
   }
   
   // Find max rows needed (longest symbol list)
-  const maxRows = Math.max(...filteredColumns.map(col => col.symbols.length), 0)
+  const maxRows = Math.max(...displayColumns.map(col => col.symbols.length), 0)
   
   if (loading) {
     return (
@@ -230,6 +286,19 @@ export function StrategyOveralls() {
             </span>
           </div>
         </div>
+        
+        {/* Alignment Indicator */}
+        {alignedRunId && (
+          <div className="alignment-indicator">
+            🔗 Aligned to Run #{columns.findIndex(c => c.run_id === alignedRunId) + 1}
+            <button 
+              className="clear-alignment-btn"
+              onClick={() => setAlignedRunId(null)}
+            >
+              ✕ Clear
+            </button>
+          </div>
+        )}
       </header>
       
       <div className="table-container">
@@ -256,6 +325,15 @@ export function StrategyOveralls() {
                         {copiedRunId === col.run_id ? '✓' : '📋'}
                       </button>
                     </div>
+                    
+                    {/* Alignment Button */}
+                    <button
+                      className={`align-btn ${alignedRunId === col.run_id ? 'active' : ''}`}
+                      onClick={() => alignColumnsToRun(col.run_id)}
+                      title={alignedRunId === col.run_id ? 'Clear alignment' : 'Align all runs to this order'}
+                    >
+                      {alignedRunId === col.run_id ? '🔓 Clear' : '🔗 Align All'}
+                    </button>
                     
                     {/* Overall Trade Stats */}
                     <div className="run-trade-stats">
@@ -326,7 +404,7 @@ export function StrategyOveralls() {
           <tbody>
             {Array.from({ length: maxRows }).map((_, rowIndex) => (
               <tr key={rowIndex}>
-                {filteredColumns.map(col => {
+                {displayColumns.map(col => {
                   const symbolData = col.symbols[rowIndex]
                   
                   if (!symbolData) {
