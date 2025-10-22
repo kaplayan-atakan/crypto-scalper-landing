@@ -89,7 +89,7 @@ export interface RunOverview {
   positive_count: number
   negative_count: number
   neutral_count: number         // NEW: PNL = 0 olan symbol sayısı
-  // Run-level statistics
+  // Run-level statistics (ALL symbols)
   avg_pnl_all: number
   min_pnl_all: number
   max_pnl_all: number
@@ -99,6 +99,17 @@ export interface RunOverview {
   avg_pnl_negative: number
   min_pnl_negative: number
   max_pnl_negative: number
+  // Top 40 symbols statistics
+  top40_total_trades?: number
+  top40_overall_winrate?: number
+  top40_avg_pnl?: number
+  top40_min_pnl?: number
+  top40_max_pnl?: number
+  top40_avg_pnl_positive?: number
+  top40_avg_pnl_negative?: number
+  top40_positive_count?: number
+  top40_negative_count?: number
+  top40_neutral_count?: number
 }
 
 export interface RunColumn extends RunOverview {

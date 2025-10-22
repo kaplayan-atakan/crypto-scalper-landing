@@ -403,7 +403,7 @@
   }
 }
 
-/* Run Info Cell (First Column, Sticky Left) */
+/* Run Info Cell (First Column, Sticky Left) - EXPANDED for Top 40 */
 .run-info-cell {
   position: sticky;
   left: 0;
@@ -412,8 +412,8 @@
   border: 1px solid rgba(0, 255, 255, 0.2);
   border-radius: 6px;
   padding: 12px;
-  min-width: 350px;
-  max-width: 350px;
+  min-width: 420px;
+  max-width: 420px;
   font-size: 11px;
   line-height: 1.5;
   vertical-align: top;
@@ -474,10 +474,95 @@
 .run-overall-compact {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.7);
+  margin-top: 4px;
+}
+
+.run-overall-compact .overall-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+/* Top 40 Overall Statistics */
+.run-top40-compact {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(255, 215, 0, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.run-top40-compact .top40-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.run-top40-compact .top40-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 215, 0, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.run-top40-compact .top40-split {
+  display: flex;
+  gap: 4px;
+  font-size: 9px;
+}
+
+.run-top40-compact .top40-split .positive {
+  color: #00ff88;
+}
+
+.run-top40-compact .top40-split .neutral {
+  color: #999999;
+}
+
+.run-top40-compact .top40-split .negative {
+  color: #ff0066;
+}
+
+.run-top40-compact .top40-stats {
+  display: flex;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 4px 0;
+  font-size: 9px;
+}
+
+.run-top40-compact .top40-pnl {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 3px 0;
+  font-size: 9px;
+}
+
+.run-top40-compact .top40-trades {
+  display: flex;
+  gap: 8px;
+  margin-top: 3px;
+  font-size: 9px;
+}
+
+.run-top40-compact .top40-trades .positive {
+  color: #00ff88;
+  font-weight: 600;
+}
+
+.run-top40-compact .top40-trades .negative {
+  color: #ff0066;
+  font-weight: 600;
 }
 
 .run-actions {
-  margin-top: 4px;
+  margin-top: 8px;
   padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }

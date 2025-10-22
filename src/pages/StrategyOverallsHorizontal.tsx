@@ -357,9 +357,36 @@ export function StrategyOverallsHorizontal() {
                         </div>
                         
                         <div className="run-overall-compact">
-                          Overall: Avg {formatPNL(run.avg_pnl_all)} | 
+                          <div className="overall-label">📈 ALL COINS</div>
+                          Avg {formatPNL(run.avg_pnl_all)} | 
                           Min {formatPNL(run.min_pnl_all)} / Max {formatPNL(run.max_pnl_all)}
                         </div>
+                        
+                        {/* Top 40 Overall Statistics */}
+                        {run.top40_avg_pnl != null && (
+                          <div className="run-top40-compact">
+                            <div className="top40-header">
+                              <span className="top40-label">🏆 TOP 40 COINS</span>
+                              <span className="top40-split">
+                                <span className="positive">✓{run.top40_positive_count}</span>
+                                <span className="neutral">●{run.top40_neutral_count}</span>
+                                <span className="negative">✗{run.top40_negative_count}</span>
+                              </span>
+                            </div>
+                            <div className="top40-stats">
+                              <span>📊 {run.top40_total_trades?.toLocaleString()} trades</span>
+                              <span>🎯 WR: {run.top40_overall_winrate != null ? (run.top40_overall_winrate * 100).toFixed(1) : 'N/A'}%</span>
+                            </div>
+                            <div className="top40-pnl">
+                              Avg {formatPNL(run.top40_avg_pnl ?? null)} | 
+                              Min {formatPNL(run.top40_min_pnl ?? null)} / Max {formatPNL(run.top40_max_pnl ?? null)}
+                            </div>
+                            <div className="top40-trades">
+                              <span className="positive">✓ {formatPNL(run.top40_avg_pnl_positive ?? null)}</span>
+                              <span className="negative">✗ {formatPNL(run.top40_avg_pnl_negative ?? null)}</span>
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="run-actions">
                           <div className="run-uuid" title={`Full UUID: ${run.run_id}`}>
