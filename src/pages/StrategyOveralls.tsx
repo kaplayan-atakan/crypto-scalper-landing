@@ -205,7 +205,7 @@ export function StrategyOveralls() {
         </button>
         <button
           className="action-btn home-btn"
-          onClick={() => navigate('/crypto-scalper-landing/')}
+          onClick={() => navigate('/')}
           title="Ana Sayfaya Dön"
         >
           🏠 Home
