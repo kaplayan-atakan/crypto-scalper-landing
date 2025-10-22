@@ -65,7 +65,7 @@ BEGIN
   )
   SELECT 
     ts.run_id,
-    ts.total_trades,
+    ts.total_trades::bigint,  -- Explicit cast to bigint
     ROUND(ts.overall_winrate::numeric, 4) as top40_overall_winrate,
     ROUND(ts.avg_pnl::numeric, 4) as top40_avg_pnl,
     ROUND(ts.min_pnl::numeric, 4) as top40_min_pnl,
