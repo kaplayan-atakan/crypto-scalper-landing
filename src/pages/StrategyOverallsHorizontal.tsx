@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchAllRunColumns, deleteBacktestRun } from '../services/backtestService'
-import type { RunColumn, SymbolMetrics } from '../types/supabase'
+import type { RunColumn, SymbolMetrics, RunNote } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
+import { supabase } from '../lib/supabase'
 import './StrategyOverallsHorizontal.css'
 
 export function StrategyOverallsHorizontal() {
@@ -15,6 +16,7 @@ export function StrategyOverallsHorizontal() {
   const [filterType, setFilterType] = useState<'all' | 'positive' | 'neutral' | 'negative'>('all')
   const [copiedRunId, setCopiedRunId] = useState<string | null>(null)
   const [alignedSymbol, setAlignedSymbol] = useState<string | null>(null)
+  const [pinnedNotesMap, setPinnedNotesMap] = useState<Map<string, RunNote>>(new Map())
   
   useEffect(() => {
     async function loadData() {
@@ -37,6 +39,67 @@ export function StrategyOverallsHorizontal() {
     
     loadData()
   }, [])
+
+  // Batch load pinned notes for all runs
+  useEffect(() => {
+    if (columns.length === 0 || !supabase) return
+
+    const loadAllPinnedNotes = async () => {
+      if (!supabase) return // Extra null guard inside async
+      
+      try {
+        const runIds = columns.map(c => c.run_id)
+        
+        // ✅ Single batch request for ALL pinned notes
+        const { data, error } = await supabase
+          .from('run_notes')
+          .select('*')
+          .in('run_id', runIds)
+          .eq('is_pinned', true)
+        
+        if (error) throw error
+        
+        // Convert to Map for fast lookup
+        const notes = data as RunNote[] || []
+        const map = new Map(notes.map(note => [note.run_id, note]))
+        setPinnedNotesMap(map)
+        
+        console.log(`✅ Loaded ${map.size} pinned notes in batch`)
+      } catch (err) {
+        console.error('Failed to load pinned notes:', err)
+      }
+    }
+
+    loadAllPinnedNotes()
+  }, [columns])
+
+  // Listen for pin changes and refresh batch
+  useEffect(() => {
+    const handlePinChange = () => {
+      if (columns.length === 0 || !supabase) return
+      
+      // Re-fetch all pinned notes when any pin changes
+      const refreshPinnedNotes = async () => {
+        if (!supabase) return // Extra null guard inside async
+        
+        const runIds = columns.map(c => c.run_id)
+        const { data } = await supabase
+          .from('run_notes')
+          .select('*')
+          .in('run_id', runIds)
+          .eq('is_pinned', true)
+        
+        const notes = data as RunNote[] || []
+        const map = new Map(notes.map(note => [note.run_id, note]))
+        setPinnedNotesMap(map)
+      }
+      
+      refreshPinnedNotes()
+    }
+
+    window.addEventListener('notesPinChanged', handlePinChange)
+    return () => window.removeEventListener('notesPinChanged', handlePinChange)
+  }, [columns])
   
   // Get all unique symbols across all runs (no sorting here, just collection)
   const allSymbols = useMemo(() => {
@@ -377,7 +440,7 @@ export function StrategyOverallsHorizontal() {
                           <span className="run-time">⏰ {formatTime(run.created_at)}</span>
                         </div>
 
-                        <PinnedNoteDisplay runId={run.run_id} />
+                        <PinnedNoteDisplay pinnedNote={pinnedNotesMap.get(run.run_id) || null} />
                         
                         <div className="run-stats-line">
                           <span>📊 {run.total_trades.toLocaleString()} trades</span>

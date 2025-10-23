@@ -49,41 +49,38 @@ export async function fetchAllRunColumns() {
   }
   
   console.log(`✅ Found ${runs.length} runs`);
-  console.log('🔄 Fetching details for each run...');
+  console.log('🔄 Fetching details for all runs in batch...');
   
-  // Fetch details for each run_id separately
+  // Fetch details for ALL runs in a single batch request
   const grouped = new Map();
   const runIds = runs.map(r => r.run_id);
   
-  for (let i = 0; i < runs.length; i++) {
-    const summary = runs[i];
-    const runId = summary.run_id;
+  try {
+    const { data: allDetails, error: e2 } = await (supabase as any).rpc('get_backtest_details_by_runs', {
+      run_ids: runIds  // ✅ All run_ids at once (batch request)
+    });
     
-    console.log(`  [${i + 1}/${runs.length}] Fetching run: ${runId.substring(0, 8)}...`);
-    
-    try {
-      const { data: details, error: e2 } = await (supabase as any).rpc('get_backtest_details_by_runs', {
-        run_ids: [runId]  // Single run_id at a time
+    if (e2) {
+      console.error('  ❌ Error fetching batch details:', e2);
+    } else {
+      const symbols: any[] = allDetails || [];
+      
+      // Group symbols by run_id
+      symbols.forEach(symbol => {
+        if (!grouped.has(symbol.run_id)) {
+          grouped.set(symbol.run_id, []);
+        }
+        grouped.get(symbol.run_id).push(symbol);
       });
       
-      if (e2) {
-        console.error(`  ❌ Error fetching run ${runId}:`, e2);
-        continue;  // Skip this run, continue with others
-      }
-      
-      const symbols: any[] = details || [];
-      
-      if (symbols.length > 0) {
-        grouped.set(runId, symbols);
-        console.log(`  ✅ Got ${symbols.length} symbols`);
-      }
-    } catch (error) {
-      console.error(`  ❌ Error fetching run ${runId}:`, error);
-      continue;
+      console.log(`  ✅ Got ${symbols.length} total symbols for ${grouped.size} runs`);
     }
+  } catch (error) {
+    console.error('  ❌ Error fetching batch details:', error);
   }
   
   console.log('✅ All details fetched!');
+
   
   // Fetch top 40 overall statistics
   console.log('🔄 Fetching top 40 overall stats...');

@@ -78,32 +78,6 @@ class NotesService {
       return false
     }
   }
-
-  // Get pinned note for a run (for display in overall box)
-  async getPinnedNote(runId: string): Promise<RunNote | null> {
-    try {
-      if (!supabase) return null
-      
-      const { data, error } = await supabase
-        .from('run_notes')
-        .select('*')
-        .eq('run_id', runId)
-        .eq('is_pinned', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (error) {
-        if (error.code === 'PGRST116') return null // No pinned note
-        throw error
-      }
-      
-      return data
-    } catch (err) {
-      console.error('Error fetching pinned note:', err)
-      return null
-    }
-  }
 }
 
 export const notesService = new NotesService()

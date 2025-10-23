@@ -1,41 +1,12 @@
-import { useState, useEffect } from 'react'
-import { notesService } from '../services/notesService'
 import type { RunNote } from '../types/supabase'
 import './PinnedNoteDisplay.css'
 
 interface PinnedNoteDisplayProps {
-  runId: string
+  pinnedNote: RunNote | null  // ✅ Receives data as prop, no fetch needed
 }
 
-export function PinnedNoteDisplay({ runId }: PinnedNoteDisplayProps) {
-  const [pinnedNote, setPinnedNote] = useState<RunNote | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    loadPinnedNote()
-
-    // Listen for pin changes from NoteButton
-    const handlePinChange = (event: CustomEvent) => {
-      if (event.detail.runId === runId) {
-        loadPinnedNote()
-      }
-    }
-
-    window.addEventListener('notesPinChanged', handlePinChange as EventListener)
-
-    return () => {
-      window.removeEventListener('notesPinChanged', handlePinChange as EventListener)
-    }
-  }, [runId])
-
-  const loadPinnedNote = async () => {
-    setIsLoading(true)
-    const note = await notesService.getPinnedNote(runId)
-    setPinnedNote(note)
-    setIsLoading(false)
-  }
-
-  if (isLoading || !pinnedNote) return null
+export function PinnedNoteDisplay({ pinnedNote }: PinnedNoteDisplayProps) {
+  if (!pinnedNote) return null
 
   return (
     <div className="pinned-note-display">
