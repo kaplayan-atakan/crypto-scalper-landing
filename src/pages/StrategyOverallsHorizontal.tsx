@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchAllRunColumns } from '../services/backtestService'
+import { fetchAllRunColumns, deleteBacktestRun } from '../services/backtestService'
 import type { RunColumn, SymbolMetrics } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
@@ -99,6 +99,34 @@ export function StrategyOverallsHorizontal() {
       console.error('Failed to copy run_id:', err)
     }
   }
+
+  const handleDeleteRun = async (runId: string, runLabel: string) => {
+    const confirmed = confirm(
+      `⚠️ DELETE ${runLabel}?\n\n` +
+      `This will permanently delete:\n` +
+      `✗ All backtest results\n` +
+      `✗ All trade summaries\n` +
+      `✗ All notes for this run\n\n` +
+      `⚠️ This action CANNOT be undone!\n\n` +
+      `Click OK to delete permanently.`
+    )
+    
+    if (!confirmed) return
+    
+    setLoading(true)
+    const success = await deleteBacktestRun(runId)
+    
+    if (success) {
+      // Refresh data
+      const data = await fetchAllRunColumns()
+      setColumns(data)
+      alert(`✅ ${runLabel} deleted successfully!`)
+    } else {
+      alert('❌ Failed to delete run. Check console for errors.')
+    }
+    
+    setLoading(false)
+  }
   
   // Align columns (symbols) to match selected run's symbol order
   const alignColumnsToRun = (targetRunId: string) => {
@@ -108,6 +136,7 @@ export function StrategyOverallsHorizontal() {
       return
     }
     setAlignedSymbol(targetRunId)
+
   }
   
   // Get symbol order for display
@@ -413,6 +442,15 @@ export function StrategyOverallsHorizontal() {
                           title={alignedSymbol === run.run_id ? 'Clear alignment' : 'Align all runs to this run\'s symbol order'}
                         >
                           {alignedSymbol === run.run_id ? '🔓 Clear' : '🔗 Align All'}
+                        </button>
+
+                        {/* Delete Run Button */}
+                        <button
+                          className="delete-run-btn"
+                          onClick={() => handleDeleteRun(run.run_id, `Run #${runIndex + 1}`)}
+                          title="Delete this run permanently"
+                        >
+                          🗑️ Delete Run
                         </button>
                       </div>
                     </td>

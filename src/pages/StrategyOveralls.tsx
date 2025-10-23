@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchAllRunColumns } from '../services/backtestService'
+import { fetchAllRunColumns, deleteBacktestRun } from '../services/backtestService'
 import type { RunColumn } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
@@ -72,6 +72,34 @@ export function StrategyOveralls() {
     }
     
     setAlignedRunId(targetRunId)
+  }
+
+  const handleDeleteRun = async (runId: string, runLabel: string) => {
+    const confirmed = confirm(
+      `⚠️ DELETE ${runLabel}?\n\n` +
+      `This will permanently delete:\n` +
+      `✗ All backtest results\n` +
+      `✗ All trade summaries\n` +
+      `✗ All notes for this run\n\n` +
+      `⚠️ This action CANNOT be undone!\n\n` +
+      `Click OK to delete permanently.`
+    )
+    
+    if (!confirmed) return
+    
+    setLoading(true)
+    const success = await deleteBacktestRun(runId)
+    
+    if (success) {
+      // Refresh data
+      const data = await fetchAllRunColumns()
+      setColumns(data)
+      alert(`✅ ${runLabel} deleted successfully!`)
+    } else {
+      alert('❌ Failed to delete run. Check console for errors.')
+    }
+    
+    setLoading(false)
   }
   
   // Apply filters to all columns
@@ -346,6 +374,15 @@ export function StrategyOveralls() {
                       title={alignedRunId === col.run_id ? 'Clear alignment' : 'Align all runs to this order'}
                     >
                       {alignedRunId === col.run_id ? '🔓 Clear' : '🔗 Align All'}
+                    </button>
+
+                    {/* Delete Run Button */}
+                    <button
+                      className="delete-run-btn"
+                      onClick={() => handleDeleteRun(col.run_id, `Run #${index + 1}`)}
+                      title="Delete this run permanently"
+                    >
+                      🗑️ Delete Run
                     </button>
                     
                     {/* Overall Trade Stats */}

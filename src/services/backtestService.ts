@@ -145,4 +145,25 @@ export async function fetchAllRunColumns() {
   });
 }
 
+// Delete a backtest run by run_id
+export async function deleteBacktestRun(runId: string): Promise<boolean> {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  try {
+    // Delete from backtest_resultsv1 (cascade will handle trade_summaries and run_notes)
+    const { error } = await supabase
+      .from('backtest_resultsv1')
+      .delete()
+      .eq('run_id', runId);
+    
+    if (error) throw error;
+    
+    console.log(`✅ Deleted run: ${runId}`);
+    return true;
+  } catch (err) {
+    console.error('❌ Failed to delete run:', err);
+    return false;
+  }
+}
+
 export function clearCache() { console.log('Cache cleared'); }
