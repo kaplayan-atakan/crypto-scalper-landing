@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { fetchAllRunColumns } from '../services/backtestService'
 import type { RunColumn } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
+import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
 import './StrategyOveralls.css'
 
 export function StrategyOveralls() {
@@ -324,6 +325,7 @@ export function StrategyOveralls() {
                     </div>
                     <div className="run-date">{formatDate(col.created_at)}</div>
                     <div className="run-time">⏰ {formatTime(col.created_at)}</div>
+                    <PinnedNoteDisplay runId={col.run_id} />
                     <div className="run-uuid-container">
                       <div className="run-uuid" title={`Full UUID: ${col.run_id}`}>
                         🆔 {formatRunId(col.run_id)}

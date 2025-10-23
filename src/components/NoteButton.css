@@ -234,6 +234,18 @@
   box-shadow: 0 2px 8px rgba(0, 255, 255, 0.2);
 }
 
+/* Pinned Note - Gold Border */
+.note-item.pinned {
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.note-item.pinned:hover {
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 2px 16px rgba(255, 215, 0, 0.4);
+}
+
 .note-header {
   display: flex;
   justify-content: space-between;
@@ -245,6 +257,46 @@
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
   font-family: 'Courier New', monospace;
+}
+
+.note-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.note-pin-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.note-pin-btn:hover {
+  opacity: 0.8;
+  filter: grayscale(0);
+  background: rgba(255, 215, 0, 0.2);
+  transform: scale(1.1);
+}
+
+.note-pin-btn.pinned {
+  opacity: 1;
+  filter: grayscale(0);
+  animation: pin-glow 2s ease-in-out infinite;
+}
+
+@keyframes pin-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
+  }
 }
 
 .note-delete-btn {

@@ -52,6 +52,7 @@ export interface RunNote {
   run_id: string
   note: string
   created_at: string
+  is_pinned: boolean
 }
 
 // Backtest Result Types

@@ -67,6 +67,16 @@ export function NoteButton({ runId, runLabel }: NoteButtonProps) {
     }
   }
 
+  const handleTogglePin = async (noteId: string, currentPinStatus: boolean) => {
+    const success = await notesService.togglePin(noteId, !currentPinStatus)
+    
+    if (success) {
+      await loadNotes() // Refresh to show new pin order
+    } else {
+      alert('Failed to pin/unpin note. Please try again.')
+    }
+  }
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleString('en-GB', {
@@ -124,21 +134,36 @@ export function NoteButton({ runId, runLabel }: NoteButtonProps) {
                 ) : notes.length === 0 ? (
                   <div className="notes-empty">No notes yet. Add your first note above!</div>
                 ) : (
-                  notes.map((note) => (
-                    <div key={note.id} className="note-item">
-                      <div className="note-header">
-                        <span className="note-date">{formatDate(note.created_at)}</span>
-                        <button
-                          className="note-delete-btn"
-                          onClick={() => handleDeleteNote(note.id)}
-                          title="Delete note"
-                        >
-                          🗑️
-                        </button>
+                  // Sort: Pinned notes first, then by created_at desc
+                  [...notes]
+                    .sort((a, b) => {
+                      if (a.is_pinned === b.is_pinned) return 0
+                      return a.is_pinned ? -1 : 1
+                    })
+                    .map((note) => (
+                      <div key={note.id} className={`note-item ${note.is_pinned ? 'pinned' : ''}`}>
+                        <div className="note-header">
+                          <span className="note-date">{formatDate(note.created_at)}</span>
+                          <div className="note-actions">
+                            <button
+                              className={`note-pin-btn ${note.is_pinned ? 'pinned' : ''}`}
+                              onClick={() => handleTogglePin(note.id, note.is_pinned)}
+                              title={note.is_pinned ? 'Unpin note' : 'Pin note'}
+                            >
+                              📌
+                            </button>
+                            <button
+                              className="note-delete-btn"
+                              onClick={() => handleDeleteNote(note.id)}
+                              title="Delete note"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                        <div className="note-content">{note.note}</div>
                       </div>
-                      <div className="note-content">{note.note}</div>
-                    </div>
-                  ))
+                    ))
                 )}
               </div>
             </div>

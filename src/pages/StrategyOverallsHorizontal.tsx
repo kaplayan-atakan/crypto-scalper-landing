@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { fetchAllRunColumns } from '../services/backtestService'
 import type { RunColumn, SymbolMetrics } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
+import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
 import './StrategyOverallsHorizontal.css'
 
 export function StrategyOverallsHorizontal() {
@@ -346,6 +347,8 @@ export function StrategyOverallsHorizontal() {
                           <span className="run-date">{formatDate(run.created_at)}</span>
                           <span className="run-time">⏰ {formatTime(run.created_at)}</span>
                         </div>
+
+                        <PinnedNoteDisplay runId={run.run_id} />
                         
                         <div className="run-stats-line">
                           <span>📊 {run.total_trades.toLocaleString()} trades</span>

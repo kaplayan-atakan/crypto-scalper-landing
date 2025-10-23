@@ -1,0 +1,72 @@
+/* Pinned Note Display (for overall boxes) */
+.pinned-note-display {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 6px;
+  animation: pinned-note-fade-in 0.3s ease;
+}
+
+@keyframes pinned-note-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pinned-note-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  animation: pin-rotate 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
+}
+
+@keyframes pin-rotate {
+  0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+.pinned-note-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'Courier New', monospace;
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pinned-note-display {
+    padding: 6px 10px;
+  }
+
+  .pinned-note-icon {
+    font-size: 12px;
+  }
+
+  .pinned-note-text {
+    font-size: 11px;
+    max-height: 48px;
+    -webkit-line-clamp: 2;
+  }
+}
