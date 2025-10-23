@@ -1,70 +1,81 @@
 import { supabase } from '../lib/supabase'
-
-export interface RunNote {
-  id: string
-  run_id: string
-  note: string
-  created_at: string
-  updated_at: string
-}
+import type { RunNote } from '../types/supabase'
 
 class NotesService {
-  // Fetch note for a specific run
-  async getNote(runId: string): Promise<string> {
+  // Fetch all notes for a specific run (ordered by newest first)
+  async getNotes(runId: string): Promise<RunNote[]> {
     try {
+      if (!supabase) return []
+      
       const { data, error } = await supabase
         .from('run_notes')
-        .select('note')
+        .select('*')
         .eq('run_id', runId)
-        .single()
+        .order('created_at', { ascending: false })
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No note found - return empty
-          return ''
-        }
-        throw error
-      }
-
-      return data?.note || ''
+      if (error) throw error
+      return data || []
     } catch (err) {
-      console.error('Error fetching note:', err)
-      return ''
+      console.error('Error fetching notes:', err)
+      return []
     }
   }
 
-  // Save or update note
-  async saveNote(runId: string, note: string): Promise<boolean> {
+  // Add a new note
+  async addNote(runId: string, note: string): Promise<boolean> {
     try {
-      // Upsert: insert or update if exists
+      if (!supabase) return false
+      
+      const trimmedNote = note.trim()
+      if (trimmedNote.length === 0) {
+        return false
+      }
+
       const { error } = await supabase
         .from('run_notes')
-        .upsert(
-          { run_id: runId, note },
-          { onConflict: 'run_id' }
-        )
+        .insert({ run_id: runId, note: trimmedNote } as any)
 
       if (error) throw error
       return true
     } catch (err) {
-      console.error('Error saving note:', err)
+      console.error('Error adding note:', err)
       return false
     }
   }
 
-  // Delete note
-  async deleteNote(runId: string): Promise<boolean> {
+  // Delete a specific note by id
+  async deleteNote(noteId: string): Promise<boolean> {
     try {
+      if (!supabase) return false
+      
       const { error } = await supabase
         .from('run_notes')
         .delete()
-        .eq('run_id', runId)
+        .eq('id', noteId)
 
       if (error) throw error
       return true
     } catch (err) {
       console.error('Error deleting note:', err)
       return false
+    }
+  }
+
+  // Get note count for a run (for badge display)
+  async getNoteCount(runId: string): Promise<number> {
+    try {
+      if (!supabase) return 0
+      
+      const { count, error } = await supabase
+        .from('run_notes')
+        .select('*', { count: 'exact', head: true })
+        .eq('run_id', runId)
+
+      if (error) throw error
+      return count || 0
+    } catch (err) {
+      console.error('Error fetching note count:', err)
+      return 0
     }
   }
 }

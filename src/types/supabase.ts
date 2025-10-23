@@ -46,6 +46,14 @@ export interface BotSelectorState {
   error: Error | null
 }
 
+// Run Notes Types
+export interface RunNote {
+  id: string
+  run_id: string
+  note: string
+  created_at: string
+}
+
 // Backtest Result Types
 export interface BacktestResult {
   id: string
@@ -124,6 +132,11 @@ export interface Database {
         Row: ClosedTradeSimple
         Insert: Omit<ClosedTradeSimple, 'id' | 'created_at'>
         Update: Partial<Omit<ClosedTradeSimple, 'id' | 'created_at'>>
+      }
+      run_notes: {
+        Row: RunNote
+        Insert: Omit<RunNote, 'id' | 'created_at'>
+        Update: Partial<Omit<RunNote, 'id' | 'created_at'>>
       }
     }
     Views: {

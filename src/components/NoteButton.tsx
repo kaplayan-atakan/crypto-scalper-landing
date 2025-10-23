@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { notesService } from '../services/notesService'
+import type { RunNote } from '../types/supabase'
 import './NoteButton.css'
 
 interface NoteButtonProps {
@@ -9,141 +10,144 @@ interface NoteButtonProps {
 
 export function NoteButton({ runId, runLabel }: NoteButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [note, setNote] = useState('')
-  const [originalNote, setOriginalNote] = useState('')
-  const [hasNote, setHasNote] = useState(false)
+  const [notes, setNotes] = useState<RunNote[]>([])
+  const [newNote, setNewNote] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [noteCount, setNoteCount] = useState(0)
 
-  // Load note on mount
+  // Load notes and count on mount
   useEffect(() => {
-    loadNote()
+    loadNotes()
+    loadCount()
   }, [runId])
 
-  const loadNote = async () => {
+  const loadNotes = async () => {
     setIsLoading(true)
-    const fetchedNote = await notesService.getNote(runId)
-    setNote(fetchedNote)
-    setOriginalNote(fetchedNote)
-    setHasNote(fetchedNote.trim().length > 0)
+    const fetchedNotes = await notesService.getNotes(runId)
+    setNotes(fetchedNotes)
     setIsLoading(false)
+  }
+
+  const loadCount = async () => {
+    const count = await notesService.getNoteCount(runId)
+    setNoteCount(count)
   }
 
   const handleOpen = () => {
     setIsOpen(true)
+    loadNotes() // Refresh when opening
   }
 
-  const handleSave = async () => {
+  const handleClose = () => {
+    setIsOpen(false)
+    setNewNote('')
+  }
+
+  const handleAddNote = async () => {
+    if (newNote.trim().length === 0) return
+
     setIsSaving(true)
-    const trimmedNote = note.trim()
+    const success = await notesService.addNote(runId, newNote)
     
-    if (trimmedNote.length === 0) {
-      // Delete if empty
-      if (hasNote) {
-        const success = await notesService.deleteNote(runId)
-        if (success) {
-          setNote('')
-          setOriginalNote('')
-          setHasNote(false)
-          setIsOpen(false)
-        } else {
-          alert('Failed to delete note. Please try again.')
-        }
-      } else {
-        setIsOpen(false)
-      }
+    if (success) {
+      setNewNote('')
+      await loadNotes()
+      await loadCount()
     } else {
-      // Save note
-      const success = await notesService.saveNote(runId, trimmedNote)
-      
-      if (success) {
-        setOriginalNote(trimmedNote)
-        setHasNote(true)
-        setIsOpen(false)
-      } else {
-        alert('Failed to save note. Please try again.')
-      }
+      alert('Failed to save note. Please try again.')
     }
     
     setIsSaving(false)
   }
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this note?')) return
-    
-    setIsSaving(true)
-    const success = await notesService.deleteNote(runId)
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm('Delete this note?')) return
+
+    const success = await notesService.deleteNote(noteId)
     
     if (success) {
-      setNote('')
-      setOriginalNote('')
-      setHasNote(false)
-      setIsOpen(false)
+      await loadNotes()
+      await loadCount()
     } else {
       alert('Failed to delete note. Please try again.')
     }
-    
-    setIsSaving(false)
   }
 
-  const handleCancel = () => {
-    setNote(originalNote) // Restore original
-    setIsOpen(false)
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   return (
     <>
       <button
-        className={`note-btn ${hasNote ? 'has-note' : ''}`}
+        className={`note-btn ${noteCount > 0 ? 'has-notes' : ''}`}
         onClick={handleOpen}
-        title={hasNote ? 'Edit note' : 'Add note'}
         disabled={isLoading}
+        title={noteCount > 0 ? `${noteCount} note(s)` : 'Add notes'}
       >
-        {isLoading ? '⏳' : hasNote ? '📝' : '📄'}
+        {isLoading ? '⏳' : noteCount > 0 ? `📝 ${noteCount}` : '📝'}
       </button>
 
       {isOpen && (
-        <div className="note-modal-overlay" onClick={handleCancel}>
-          <div className="note-modal" onClick={e => e.stopPropagation()}>
+        <div className="note-modal-overlay" onClick={handleClose}>
+          <div className="note-modal" onClick={(e) => e.stopPropagation()}>
             <div className="note-modal-header">
-              <h3>📝 Note for {runLabel}</h3>
-              <button className="note-close-btn" onClick={handleCancel}>✕</button>
+              <h3>📝 Notes for {runLabel}</h3>
+              <button className="note-close-btn" onClick={handleClose}>✕</button>
             </div>
 
-            <textarea
-              className="note-textarea"
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="Add your notes here..."
-              rows={8}
-              autoFocus
-              disabled={isSaving}
-            />
-
-            <div className="note-modal-footer">
-              {hasNote && (
-                <button 
-                  className="note-btn-delete" 
-                  onClick={handleDelete}
+            <div className="note-modal-body">
+              {/* Add Note Form */}
+              <div className="add-note-section">
+                <textarea
+                  className="note-textarea"
+                  placeholder="Type your note here..."
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  rows={4}
                   disabled={isSaving}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={handleAddNote}
+                  disabled={isSaving || newNote.trim().length === 0}
                 >
-                  🗑️ Delete
+                  {isSaving ? '⏳ Adding...' : '➕ Add Note'}
                 </button>
-              )}
-              <button 
-                className="note-btn-cancel" 
-                onClick={handleCancel}
-                disabled={isSaving}
-              >
-                Cancel
-              </button>
-              <button 
-                className="note-btn-save" 
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                {isSaving ? '⏳ Saving...' : '💾 Save Note'}
-              </button>
+              </div>
+
+              {/* Notes List */}
+              <div className="notes-list">
+                {isLoading ? (
+                  <div className="notes-loading">⏳ Loading notes...</div>
+                ) : notes.length === 0 ? (
+                  <div className="notes-empty">No notes yet. Add your first note above!</div>
+                ) : (
+                  notes.map((note) => (
+                    <div key={note.id} className="note-item">
+                      <div className="note-header">
+                        <span className="note-date">{formatDate(note.created_at)}</span>
+                        <button
+                          className="note-delete-btn"
+                          onClick={() => handleDeleteNote(note.id)}
+                          title="Delete note"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                      <div className="note-content">{note.note}</div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
