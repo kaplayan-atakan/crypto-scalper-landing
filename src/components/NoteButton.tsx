@@ -72,6 +72,11 @@ export function NoteButton({ runId, runLabel }: NoteButtonProps) {
     
     if (success) {
       await loadNotes() // Refresh to show new pin order
+      
+      // Notify PinnedNoteDisplay components to refresh
+      window.dispatchEvent(new CustomEvent('notesPinChanged', { 
+        detail: { runId } 
+      }))
     } else {
       alert('Failed to pin/unpin note. Please try again.')
     }

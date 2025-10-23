@@ -13,6 +13,19 @@ export function PinnedNoteDisplay({ runId }: PinnedNoteDisplayProps) {
 
   useEffect(() => {
     loadPinnedNote()
+
+    // Listen for pin changes from NoteButton
+    const handlePinChange = (event: CustomEvent) => {
+      if (event.detail.runId === runId) {
+        loadPinnedNote()
+      }
+    }
+
+    window.addEventListener('notesPinChanged', handlePinChange as EventListener)
+
+    return () => {
+      window.removeEventListener('notesPinChanged', handlePinChange as EventListener)
+    }
   }, [runId])
 
   const loadPinnedNote = async () => {
