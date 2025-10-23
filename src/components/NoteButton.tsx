@@ -16,22 +16,17 @@ export function NoteButton({ runId, runLabel }: NoteButtonProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [noteCount, setNoteCount] = useState(0)
 
-  // Load notes and count on mount
+  // Load notes on mount
   useEffect(() => {
     loadNotes()
-    loadCount()
   }, [runId])
 
   const loadNotes = async () => {
     setIsLoading(true)
     const fetchedNotes = await notesService.getNotes(runId)
     setNotes(fetchedNotes)
+    setNoteCount(fetchedNotes.length) // Use array length instead of separate query
     setIsLoading(false)
-  }
-
-  const loadCount = async () => {
-    const count = await notesService.getNoteCount(runId)
-    setNoteCount(count)
   }
 
   const handleOpen = () => {
@@ -52,8 +47,7 @@ export function NoteButton({ runId, runLabel }: NoteButtonProps) {
     
     if (success) {
       setNewNote('')
-      await loadNotes()
-      await loadCount()
+      await loadNotes() // Refresh notes and count
     } else {
       alert('Failed to save note. Please try again.')
     }
@@ -67,8 +61,7 @@ export function NoteButton({ runId, runLabel }: NoteButtonProps) {
     const success = await notesService.deleteNote(noteId)
     
     if (success) {
-      await loadNotes()
-      await loadCount()
+      await loadNotes() // Refresh notes and count
     } else {
       alert('Failed to delete note. Please try again.')
     }

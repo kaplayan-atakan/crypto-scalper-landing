@@ -60,24 +60,6 @@ class NotesService {
       return false
     }
   }
-
-  // Get note count for a run (for badge display)
-  async getNoteCount(runId: string): Promise<number> {
-    try {
-      if (!supabase) return 0
-      
-      const { count, error } = await supabase
-        .from('run_notes')
-        .select('*', { count: 'exact', head: true })
-        .eq('run_id', runId)
-
-      if (error) throw error
-      return count || 0
-    } catch (err) {
-      console.error('Error fetching note count:', err)
-      return 0
-    }
-  }
 }
 
 export const notesService = new NotesService()
