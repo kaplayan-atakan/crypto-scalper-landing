@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchAllRunColumns } from '../services/backtestService'
 import type { RunColumn, SymbolMetrics } from '../types/supabase'
+import { NoteButton } from '../components/NoteButton'
 import './StrategyOverallsHorizontal.css'
 
 export function StrategyOverallsHorizontal() {
@@ -341,6 +342,7 @@ export function StrategyOverallsHorizontal() {
                       <div className="run-info-compact">
                         <div className="run-header-line">
                           <span className="run-id">Run #{runIndex + 1}</span>
+                          <NoteButton runId={run.run_id} runLabel={`Run #${runIndex + 1}`} />
                           <span className="run-date">{formatDate(run.created_at)}</span>
                           <span className="run-time">⏰ {formatTime(run.created_at)}</span>
                         </div>
