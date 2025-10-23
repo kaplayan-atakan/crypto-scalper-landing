@@ -68,7 +68,7 @@ class NotesService {
       
       const { error } = await supabase
         .from('run_notes')
-        .update({ is_pinned: isPinned } as any)
+        .update({ is_pinned: isPinned })
         .eq('id', noteId)
 
       if (error) throw error

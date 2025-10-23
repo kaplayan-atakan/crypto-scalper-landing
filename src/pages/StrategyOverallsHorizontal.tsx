@@ -50,6 +50,11 @@ export function StrategyOverallsHorizontal() {
       try {
         const runIds = columns.map(c => c.run_id)
         
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📌 [PINNED NOTES - HORIZONTAL] Loading batch for', runIds.length, 'runs');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📤 run_ids:', runIds.map(id => id.substring(0, 8) + '...'));
+        
         // ✅ Single batch request for ALL pinned notes
         const { data, error } = await supabase
           .from('run_notes')
@@ -61,12 +66,19 @@ export function StrategyOverallsHorizontal() {
         
         // Convert to Map for fast lookup
         const notes = data as RunNote[] || []
+        
+        console.log(`📥 Received ${notes.length} pinned notes`);
+        notes.forEach(note => {
+          console.log(`   • ${note.run_id.substring(0, 8)}... → "${note.note?.substring(0, 30)}..."`);
+        });
+        
         const map = new Map(notes.map(note => [note.run_id, note]))
         setPinnedNotesMap(map)
         
-        console.log(`✅ Loaded ${map.size} pinned notes in batch`)
+        console.log(`✅ Pinned notes mapped: ${map.size} runs have pinned notes`);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
       } catch (err) {
-        console.error('Failed to load pinned notes:', err)
+        console.error('❌ Failed to load pinned notes:', err)
       }
     }
 

@@ -49,35 +49,34 @@ export async function fetchAllRunColumns() {
   }
   
   console.log(`✅ Found ${runs.length} runs`);
-  console.log('🔄 Fetching details for all runs in batch...');
+  console.log('🔄 Fetching details for each run individually...');
   
-  // Fetch details for ALL runs in a single batch request
+  // Fetch details for each run one by one (fallback to original approach)
   const grouped = new Map();
   const runIds = runs.map(r => r.run_id);
   
-  try {
-    const { data: allDetails, error: e2 } = await (supabase as any).rpc('get_backtest_details_by_runs', {
-      run_ids: runIds  // ✅ All run_ids at once (batch request)
-    });
+  for (let i = 0; i < runIds.length; i++) {
+    const runId = runIds[i];
+    console.log(`  📄 Fetching run ${i + 1}/${runIds.length}: ${runId}`);
     
-    if (e2) {
-      console.error('  ❌ Error fetching batch details:', e2);
-    } else {
-      const symbols: any[] = allDetails || [];
-      
-      // Group symbols by run_id
-      symbols.forEach(symbol => {
-        if (!grouped.has(symbol.run_id)) {
-          grouped.set(symbol.run_id, []);
-        }
-        grouped.get(symbol.run_id).push(symbol);
+    try {
+      const { data: details, error } = await (supabase as any).rpc('get_backtest_details_by_runs', {
+        run_ids: [runId]  // Single run_id at a time
       });
       
-      console.log(`  ✅ Got ${symbols.length} total symbols for ${grouped.size} runs`);
+      if (error) {
+        console.error(`    ❌ Error for run ${runId}:`, error);
+      } else {
+        const symbols: any[] = details || [];
+        grouped.set(runId, symbols);
+        console.log(`    ✅ Got ${symbols.length} symbols`);
+      }
+    } catch (error) {
+      console.error(`    ❌ Error for run ${runId}:`, error);
     }
-  } catch (error) {
-    console.error('  ❌ Error fetching batch details:', error);
   }
+  
+  console.log(`  ✅ Total: ${Array.from(grouped.values()).flat().length} symbols for ${grouped.size} runs`);
   
   console.log('✅ All details fetched!');
 
