@@ -37,8 +37,9 @@ BEGIN
     SELECT 
       br.run_id,
       br.symbol,
-      MIN(br.created_at) as first_created_at,
+      MAX(br.created_at) as latest_created_at,  -- ✅ En yeni test (eskiden MIN idi)
       AVG(br.sum_ret) as symbol_avg_pnl,
+      SUM(br.sum_ret) as symbol_total_pnl,  -- ✅ Toplam PNL (örnek sorgu: SUM(sum_ret))
       AVG(br.winrate) as symbol_avg_winrate,
       SUM(br.trades) as symbol_total_trades
     FROM backtest_resultsv1 br
@@ -47,7 +48,7 @@ BEGIN
   )
   SELECT 
     sa.run_id,
-    MIN(sa.first_created_at)::timestamptz as created_at,
+    MAX(sa.latest_created_at)::timestamptz as created_at,  -- ✅ En yeni test (eskiden MIN idi)
     
     -- Symbol count
     COUNT(DISTINCT sa.symbol)::int as total_symbols,
@@ -66,10 +67,10 @@ BEGIN
     COUNT(DISTINCT CASE WHEN sa.symbol_avg_pnl < 0 THEN sa.symbol END)::int as negative_pnl_count,
     COUNT(DISTINCT CASE WHEN sa.symbol_avg_pnl = 0 THEN sa.symbol END)::int as neutral_pnl_count,
     
-    -- ✅ All trades statistics (trade-weighted)
-    -- Ortalama: Her symbol'ün PNL'i, trade sayısıyla ağırlıklandırılır
+    -- ✅ All trades statistics - PNL per trade (örnek sorgudaki pnl_per_trade mantığı)
+    -- avg_pnl_all = SUM(sum_ret) / SUM(trades)
     ROUND(
-      (SUM(sa.symbol_avg_pnl * sa.symbol_total_trades) / NULLIF(SUM(sa.symbol_total_trades), 0))::numeric,
+      (SUM(sa.symbol_total_pnl) / NULLIF(SUM(sa.symbol_total_trades), 0))::numeric,
       4
     ) as avg_pnl_all,
     ROUND(MIN(sa.symbol_avg_pnl)::numeric, 4) as min_pnl_all,

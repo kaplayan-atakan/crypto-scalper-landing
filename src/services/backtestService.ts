@@ -1,5 +1,44 @@
 import { supabase } from '../lib/supabase';
 
+// ============================================================================
+// RETRY UTILITY: 500 Internal Server Error için otomatik retry
+// ============================================================================
+async function retryOnServerError<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  delayMs: number = 1000
+): Promise<T> {
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      
+      // 500 Internal Server Error veya network hatası mı kontrol et
+      const is500Error = error?.message?.includes('500') || 
+                         error?.code === '500' ||
+                         error?.status === 500 ||
+                         error?.message?.includes('Internal Server Error');
+      
+      if (!is500Error || attempt === maxRetries) {
+        // 500 değilse veya son deneme ise hatayı fırlat
+        throw error;
+      }
+      
+      // 500 hatası - retry yapacağız
+      console.warn(`⚠️ Server error (attempt ${attempt}/${maxRetries}), retrying in ${delayMs}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      
+      // Her denemede delay'i artır (exponential backoff)
+      delayMs *= 1.5;
+    }
+  }
+  
+  throw lastError;
+}
+
 export interface SymbolData {
   symbol: string;
   winrate: number;
@@ -44,16 +83,19 @@ export async function fetchRunIdsLight(
   
   console.log(`🔄 Fetching run IDs - limit: ${limit}, cursor: ${lastCreatedAt ? 'NEXT' : 'START'}...`);
   
-  const { data, error } = await (supabase as any).rpc('get_backtest_run_ids_light', {
-    p_limit: limit,
-    p_last_created_at: lastCreatedAt,
-    p_last_run_id: lastRunId
+  // ✅ Retry wrapper: 500 hatası alırsa otomatik yeniden dene
+  return retryOnServerError(async () => {
+    const { data, error } = await (supabase as any).rpc('get_backtest_run_ids_light', {
+      p_limit: limit,
+      p_last_created_at: lastCreatedAt,
+      p_last_run_id: lastRunId
+    });
+    
+    if (error) throw error;
+    
+    console.log(`✅ Got ${data?.length || 0} run IDs`);
+    return data || [];
   });
-  
-  if (error) throw error;
-  
-  console.log(`✅ Got ${data?.length || 0} run IDs`);
-  return data || [];
 }
 
 // Fetch summary for a specific run_id

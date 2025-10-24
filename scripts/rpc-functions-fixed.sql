@@ -24,14 +24,14 @@ BEGIN
     -- İlk sayfa: tüm kayıtlar
     p_last_created_at IS NULL
     OR
-    -- Sonraki sayfalar: created_at'den küçük olanlar (DESC sıralama için)
-    br.created_at < p_last_created_at
+    -- Sonraki sayfalar: created_at'den büyük olanlar (ASC sıralama için - eskiden yeniye)
+    br.created_at > p_last_created_at
     OR
     -- Aynı created_at'te run_id ile sırala
-    (br.created_at = p_last_created_at AND br.run_id < p_last_run_id)
+    (br.created_at = p_last_created_at AND br.run_id > p_last_run_id)
   )
   GROUP BY br.run_id
-  ORDER BY MIN(br.created_at) DESC, br.run_id DESC
+  ORDER BY MIN(br.created_at) ASC, br.run_id ASC
   LIMIT p_limit;
 END;
 $$;
