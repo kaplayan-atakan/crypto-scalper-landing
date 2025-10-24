@@ -34,26 +34,180 @@ export interface RunColumn {
   symbols: SymbolData[];
 }
 
+// Fetch run IDs only (lightweight - for pagination)
+export async function fetchRunIdsLight(
+  limit: number = 20, 
+  lastCreatedAt: string | null = null,
+  lastRunId: string | null = null
+) {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  console.log(`🔄 Fetching run IDs - limit: ${limit}, cursor: ${lastCreatedAt ? 'NEXT' : 'START'}...`);
+  
+  const { data, error } = await (supabase as any).rpc('get_backtest_run_ids_light', {
+    p_limit: limit,
+    p_last_created_at: lastCreatedAt,
+    p_last_run_id: lastRunId
+  });
+  
+  if (error) throw error;
+  
+  console.log(`✅ Got ${data?.length || 0} run IDs`);
+  return data || [];
+}
+
+// Fetch summary for a specific run_id
+export async function fetchRunSummary(runId: string) {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  console.log(`🔄 Fetching summary for run: ${runId.substring(0, 8)}...`);
+  
+  const { data, error } = await (supabase as any).rpc('get_backtest_run_summary', {
+    p_run_id: runId
+  });
+  
+  if (error) throw error;
+  
+  const summary = data && data.length > 0 ? data[0] : null;
+  console.log(`✅ Got summary for run: ${runId.substring(0, 8)}`);
+  return summary;
+}
+
+// Fetch run summaries with cursor-based pagination (for UI control) - LIGHTWEIGHT
+export async function fetchRunSummaries(
+  limit: number = 20, 
+  lastCreatedAt: string | null = null,
+  lastRunId: string | null = null
+) {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  console.log(`🔄 Fetching run IDs (light) - limit: ${limit}, cursor: ${lastCreatedAt ? lastCreatedAt.substring(0, 10) : 'START'}...`);
+  
+  const { data: runIds, error } = await (supabase as any).rpc('get_backtest_run_ids_light', {
+    p_limit: limit,
+    p_last_created_at: lastCreatedAt,
+    p_last_run_id: lastRunId
+  });
+  
+  if (error) {
+    console.error('❌ Error fetching run IDs:', error);
+    throw error;
+  }
+  
+  console.log(`✅ Got ${runIds?.length || 0} run IDs`);
+  
+  if (!runIds || runIds.length === 0) return [];
+  
+  // Now fetch detailed summaries for each run_id
+  console.log(`🔄 Fetching detailed summaries for ${runIds.length} runs...`);
+  const summaries = [];
+  
+  for (let i = 0; i < runIds.length; i++) {
+    const { run_id, created_at } = runIds[i];
+    console.log(`  📄 Fetching summary ${i + 1}/${runIds.length}: ${run_id.substring(0, 8)}...`);
+    
+    try {
+      const { data, error: summaryError } = await (supabase as any).rpc('get_backtest_run_summary', {
+        p_run_id: run_id
+      });
+      
+      if (summaryError) {
+        console.error(`    ❌ Error for run ${run_id}:`, summaryError);
+      } else if (data && data.length > 0) {
+        summaries.push(data[0]);
+        console.log(`    ✅ Got summary`);
+      }
+    } catch (error) {
+      console.error(`    ❌ Error for run ${run_id}:`, error);
+    }
+  }
+  
+  console.log(`✅ Got ${summaries.length} detailed summaries`);
+  return summaries;
+}
+
+// Fetch details for specific run_ids
+export async function fetchRunDetails(runIds: string[]) {
+  if (!supabase) throw new Error('Supabase not initialized');
+  if (runIds.length === 0) return new Map();
+  
+  console.log(`🔄 Fetching details for ${runIds.length} runs...`);
+  
+  const grouped = new Map();
+  
+  for (let i = 0; i < runIds.length; i++) {
+    const runId = runIds[i];
+    console.log(`  📄 Fetching run ${i + 1}/${runIds.length}: ${runId.substring(0, 8)}...`);
+    
+    try {
+      const { data: details, error } = await (supabase as any).rpc('get_backtest_details_by_runs', {
+        run_ids: [runId]
+      });
+      
+      if (error) {
+        console.error(`    ❌ Error for run ${runId}:`, error);
+      } else {
+        const symbols: any[] = details || [];
+        grouped.set(runId, symbols);
+        console.log(`    ✅ Got ${symbols.length} symbols`);
+      }
+    } catch (error) {
+      console.error(`    ❌ Error for run ${runId}:`, error);
+    }
+  }
+  
+  console.log(`✅ Details fetched for ${grouped.size} runs`);
+  return grouped;
+}
+
+// Legacy function for backward compatibility (loads ALL runs)
 export async function fetchAllRunColumns() {
   if (!supabase) throw new Error('Supabase not initialized');
   
-  console.log('🔄 Fetching run summaries via RPC...');
-  const { data: summaries, error: e1 } = await supabase.rpc('get_backtest_run_ids');
-  if (e1) throw e1;
+  console.log('🔄 Fetching run summaries with pagination...');
   
-  const runs: any[] = summaries || [];
+  // Fetch ALL runs with pagination (20 per page)
+  let allRuns: any[] = [];
+  let offset = 0;
+  const limit = 20;
+  let pageCount = 0;
   
-  if (runs.length === 0) {
+  while (true) {
+    pageCount++;
+    console.log(`  📄 Fetching page ${pageCount} (offset: ${offset}, limit: ${limit})...`);
+    
+    const { data: summaries, error: e1 } = await (supabase as any).rpc('get_backtest_run_ids', {
+      p_limit: limit,
+      p_offset: offset
+    });
+    
+    if (e1) throw e1;
+    
+    const runs: any[] = summaries || [];
+    allRuns = allRuns.concat(runs);
+    
+    console.log(`    ✅ Got ${runs.length} runs (total: ${allRuns.length})`);
+    
+    // If less than limit, we're done
+    if (runs.length < limit) {
+      break;
+    }
+    
+    // Move to next page
+    offset += limit;
+  }
+  
+  if (allRuns.length === 0) {
     console.log('No runs found');
     return [];
   }
   
-  console.log(`✅ Found ${runs.length} runs`);
+  console.log(`✅ Found ${allRuns.length} runs (${pageCount} pages)`);
   console.log('🔄 Fetching details for each run individually...');
   
   // Fetch details for each run one by one (fallback to original approach)
   const grouped = new Map();
-  const runIds = runs.map(r => r.run_id);
+  const runIds = allRuns.map(r => r.run_id);
   
   for (let i = 0; i < runIds.length; i++) {
     const runId = runIds[i];
@@ -103,7 +257,7 @@ export async function fetchAllRunColumns() {
   }
   
   // Build result columns with full run statistics
-  return runs.map((s: any) => {
+  return allRuns.map((s: any) => {
     const top40 = top40Map.get(s.run_id);
     return {
       run_id: s.run_id,

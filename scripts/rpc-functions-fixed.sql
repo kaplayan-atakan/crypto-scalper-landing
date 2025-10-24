@@ -2,8 +2,42 @@
 -- FIXED RPC FUNCTIONS FOR STRATEGY OVERALLS
 -- ============================================================================
 
--- 1. Tüm run_id'leri ve özet bilgilerini getiren RPC (ENHANCED WITH STATS)
-CREATE OR REPLACE FUNCTION get_backtest_run_ids()
+-- 1A. LIGHTWEIGHT: Sadece run_id listesi ve created_at (ID-BASED PAGINATION)
+CREATE OR REPLACE FUNCTION get_backtest_run_ids_light(
+  p_limit int DEFAULT 20,
+  p_last_created_at timestamptz DEFAULT NULL,
+  p_last_run_id uuid DEFAULT NULL
+)
+RETURNS TABLE (
+  run_id uuid,
+  created_at timestamptz
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    br.run_id,
+    MIN(br.created_at) as created_at
+  FROM backtest_resultsv1 br
+  WHERE (
+    -- İlk sayfa: tüm kayıtlar
+    p_last_created_at IS NULL
+    OR
+    -- Sonraki sayfalar: created_at'den küçük olanlar (DESC sıralama için)
+    br.created_at < p_last_created_at
+    OR
+    -- Aynı created_at'te run_id ile sırala
+    (br.created_at = p_last_created_at AND br.run_id < p_last_run_id)
+  )
+  GROUP BY br.run_id
+  ORDER BY MIN(br.created_at) DESC, br.run_id DESC
+  LIMIT p_limit;
+END;
+$$;
+
+-- 1B. DETAILED: Belirli bir run_id için özet bilgiler
+CREATE OR REPLACE FUNCTION get_backtest_run_summary(p_run_id uuid)
 RETURNS TABLE (
   run_id uuid,
   created_at timestamptz,
@@ -31,7 +65,7 @@ AS $$
 BEGIN
   RETURN QUERY
   WITH symbol_averages AS (
-    -- Önce her run_id + symbol kombinasyonu için ortalama PNL hesapla
+    -- Her run_id + symbol kombinasyonu için ortalama PNL hesapla
     SELECT 
       br.run_id,
       br.symbol,
@@ -40,6 +74,7 @@ BEGIN
       AVG(br.winrate) as avg_winrate,
       SUM(br.trades) as total_symbol_trades
     FROM backtest_resultsv1 br
+    WHERE br.run_id = p_run_id
     GROUP BY br.run_id, br.symbol
   )
   SELECT 
@@ -64,8 +99,7 @@ BEGIN
     ROUND(MIN(CASE WHEN sa.avg_pnl < 0 THEN sa.avg_pnl END)::numeric, 4) as min_pnl_negative,
     ROUND(MAX(CASE WHEN sa.avg_pnl < 0 THEN sa.avg_pnl END)::numeric, 4) as max_pnl_negative
   FROM symbol_averages sa
-  GROUP BY sa.run_id
-  ORDER BY MIN(sa.created_at) ASC;
+  GROUP BY sa.run_id;
 END;
 $$;
 

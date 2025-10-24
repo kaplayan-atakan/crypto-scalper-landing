@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchAllRunColumns, deleteBacktestRun } from '../services/backtestService'
+import { fetchRunIdsLight, fetchRunSummary, fetchRunDetails, deleteBacktestRun } from '../services/backtestService'
 import type { RunColumn, RunNote } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
@@ -18,12 +18,101 @@ export function StrategyOveralls() {
   const [alignedRunId, setAlignedRunId] = useState<string | null>(null)
   const [pinnedNotesMap, setPinnedNotesMap] = useState<Map<string, RunNote>>(new Map())
   
+  // Cursor-based pagination state
+  const [hasMoreRuns, setHasMoreRuns] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [lastCursor, setLastCursor] = useState<{ created_at: string; run_id: string } | null>(null)
+  const runsPerPage = 20
+  
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true)
         setError(null)
-        const data = await fetchAllRunColumns()
+        
+        // Step 1: Fetch run IDs only (lightweight) - First page
+        const runIdList = await fetchRunIdsLight(runsPerPage, null, null)
+        
+        if (runIdList.length === 0) {
+          setColumns([])
+          setHasMoreRuns(false)
+          setLoading(false)
+          return
+        }
+        
+        // Set cursor for next page
+        if (runIdList.length === runsPerPage) {
+          const lastItem = runIdList[runIdList.length - 1]
+          setLastCursor({ created_at: lastItem.created_at, run_id: lastItem.run_id })
+          setHasMoreRuns(true)
+        } else {
+          setHasMoreRuns(false)
+        }
+        
+        // Step 2: Fetch summary for each run (one by one)
+        const summaries: any[] = []
+        for (const item of runIdList) {
+          const summary = await fetchRunSummary(item.run_id)
+          if (summary) {
+            summaries.push(summary)
+          }
+        }
+        
+        // Step 3: Fetch details for these runs
+        const runIds = summaries.map((s: any) => s.run_id)
+        const detailsMap = await fetchRunDetails(runIds)
+        
+        // Step 4: Fetch top 40 stats
+        const top40Map = new Map()
+        try {
+          const { data: top40Data, error: e3 } = await (supabase as any).rpc('get_top40_overall_by_runs', {
+            run_ids: runIds
+          })
+          
+          if (!e3 && top40Data) {
+            top40Data.forEach((item: any) => {
+              top40Map.set(item.run_id, item)
+            })
+          }
+        } catch (error) {
+          console.error('Error fetching top 40 stats:', error)
+        }
+        
+        // Build columns
+        const data: RunColumn[] = summaries.map((s: any) => {
+          const top40 = top40Map.get(s.run_id)
+          return {
+            run_id: s.run_id,
+            created_at: s.created_at,
+            total_symbols: s.total_symbols,
+            total_trades: s.total_trades,
+            overall_winrate: s.overall_winrate,
+            positive_count: s.positive_pnl_count,
+            negative_count: s.negative_pnl_count,
+            neutral_count: s.neutral_pnl_count,
+            avg_pnl_all: s.avg_pnl_all,
+            min_pnl_all: s.min_pnl_all,
+            max_pnl_all: s.max_pnl_all,
+            avg_pnl_positive: s.avg_pnl_positive,
+            min_pnl_positive: s.min_pnl_positive,
+            max_pnl_positive: s.max_pnl_positive,
+            avg_pnl_negative: s.avg_pnl_negative,
+            min_pnl_negative: s.min_pnl_negative,
+            max_pnl_negative: s.max_pnl_negative,
+            top40_total_trades: top40?.top40_total_trades,
+            top40_overall_winrate: top40?.top40_overall_winrate,
+            top40_avg_pnl: top40?.top40_avg_pnl,
+            top40_min_pnl: top40?.top40_min_pnl,
+            top40_max_pnl: top40?.top40_max_pnl,
+            top40_avg_pnl_positive: top40?.top40_avg_pnl_positive,
+            top40_avg_pnl_negative: top40?.top40_avg_pnl_negative,
+            top40_positive_count: top40?.top40_positive_count,
+            top40_negative_count: top40?.top40_negative_count,
+            top40_neutral_count: top40?.top40_neutral_count,
+            symbols: detailsMap.get(s.run_id) || []
+          }
+        })
+        
         setColumns(data)
       } catch (err) {
         console.error('Failed to load backtest data:', err)
@@ -35,6 +124,101 @@ export function StrategyOveralls() {
     
     loadData()
   }, [])
+  
+  // Load more runs
+  const loadMoreRuns = async () => {
+    if (!hasMoreRuns || loadingMore || !lastCursor) return
+    
+    try {
+      setLoadingMore(true)
+      
+      // Fetch next page using cursor
+      const runIdList = await fetchRunIdsLight(runsPerPage, lastCursor.created_at, lastCursor.run_id)
+      
+      if (runIdList.length === 0) {
+        setHasMoreRuns(false)
+        setLoadingMore(false)
+        return
+      }
+      
+      // Update cursor
+      if (runIdList.length === runsPerPage) {
+        const lastItem = runIdList[runIdList.length - 1]
+        setLastCursor({ created_at: lastItem.created_at, run_id: lastItem.run_id })
+      } else {
+        setHasMoreRuns(false)
+      }
+      
+      // Fetch summaries
+      const summaries: any[] = []
+      for (const item of runIdList) {
+        const summary = await fetchRunSummary(item.run_id)
+        if (summary) summaries.push(summary)
+      }
+      
+      // Fetch details
+      const runIds = summaries.map((s: any) => s.run_id)
+      const detailsMap = await fetchRunDetails(runIds)
+      
+      // Fetch top 40 stats
+      const top40Map = new Map()
+      try {
+        const { data: top40Data, error: e3 } = await (supabase as any).rpc('get_top40_overall_by_runs', {
+          run_ids: runIds
+        })
+        
+        if (!e3 && top40Data) {
+          top40Data.forEach((item: any) => {
+            top40Map.set(item.run_id, item)
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching top 40 stats:', error)
+      }
+      
+      // Build new columns
+      const newData: RunColumn[] = summaries.map((s: any) => {
+        const top40 = top40Map.get(s.run_id)
+        return {
+          run_id: s.run_id,
+          created_at: s.created_at,
+          total_symbols: s.total_symbols,
+          total_trades: s.total_trades,
+          overall_winrate: s.overall_winrate,
+          positive_count: s.positive_pnl_count,
+          negative_count: s.negative_pnl_count,
+          neutral_count: s.neutral_pnl_count,
+          avg_pnl_all: s.avg_pnl_all,
+          min_pnl_all: s.min_pnl_all,
+          max_pnl_all: s.max_pnl_all,
+          avg_pnl_positive: s.avg_pnl_positive,
+          min_pnl_positive: s.min_pnl_positive,
+          max_pnl_positive: s.max_pnl_positive,
+          avg_pnl_negative: s.avg_pnl_negative,
+          min_pnl_negative: s.min_pnl_negative,
+          max_pnl_negative: s.max_pnl_negative,
+          top40_total_trades: top40?.top40_total_trades,
+          top40_overall_winrate: top40?.top40_overall_winrate,
+          top40_avg_pnl: top40?.top40_avg_pnl,
+          top40_min_pnl: top40?.top40_min_pnl,
+          top40_max_pnl: top40?.top40_max_pnl,
+          top40_avg_pnl_positive: top40?.top40_avg_pnl_positive,
+          top40_avg_pnl_negative: top40?.top40_avg_pnl_negative,
+          top40_positive_count: top40?.top40_positive_count,
+          top40_negative_count: top40?.top40_negative_count,
+          top40_neutral_count: top40?.top40_neutral_count,
+          symbols: detailsMap.get(s.run_id) || []
+        }
+      })
+      
+      // Append to existing columns
+      setColumns(prev => [...prev, ...newData])
+    } catch (err) {
+      console.error('Failed to load more runs:', err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   // Batch load pinned notes for all runs
   useEffect(() => {
@@ -45,11 +229,6 @@ export function StrategyOveralls() {
       
       try {
         const runIds = columns.map(c => c.run_id)
-        
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('📌 [PINNED NOTES] Loading batch for', runIds.length, 'runs');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('📤 run_ids:', runIds.map(id => id.substring(0, 8) + '...'));
         
         // ✅ Single batch request for ALL pinned notes
         const { data, error } = await supabase
@@ -62,19 +241,12 @@ export function StrategyOveralls() {
         
         // Convert to Map for fast lookup
         const notes = data as RunNote[] || []
-        
-        console.log(`📥 Received ${notes.length} pinned notes`);
-        notes.forEach(note => {
-          console.log(`   • ${note.run_id.substring(0, 8)}... → "${note.note?.substring(0, 30)}..."`);
-        });
-        
         const map = new Map(notes.map(note => [note.run_id, note]))
         setPinnedNotesMap(map)
         
-        console.log(`✅ Pinned notes mapped: ${map.size} runs have pinned notes`);
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+        console.log(`✅ Loaded ${map.size} pinned notes in batch`)
       } catch (err) {
-        console.error('❌ Failed to load pinned notes:', err)
+        console.error('Failed to load pinned notes:', err)
       }
     }
 
@@ -166,15 +338,12 @@ export function StrategyOveralls() {
     const success = await deleteBacktestRun(runId)
     
     if (success) {
-      // Refresh data
-      const data = await fetchAllRunColumns()
-      setColumns(data)
-      alert(`✅ ${runLabel} deleted successfully!`)
+      // Reload data from start
+      window.location.reload()
     } else {
       alert('❌ Failed to delete run. Check console for errors.')
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
   
   // Apply filters to all columns
@@ -380,9 +549,15 @@ export function StrategyOveralls() {
         
         <div className="stats-summary">
           <div className="stat-item">
-            <span className="stat-label">Total Runs:</span>
+            <span className="stat-label">Loaded Runs:</span>
             <span className="stat-value">{columns.length}</span>
           </div>
+          {hasMoreRuns && (
+            <div className="stat-item">
+              <span className="stat-label">Status:</span>
+              <span className="stat-value">More available ⬇️</span>
+            </div>
+          )}
           <div className="stat-item">
             <span className="stat-label">Showing Symbols:</span>
             <span className="stat-value">{maxRows}</span>
@@ -400,6 +575,19 @@ export function StrategyOveralls() {
             </span>
           </div>
         </div>
+        
+        {/* Load More Button */}
+        {hasMoreRuns && (
+          <div className="pagination-controls">
+            <button
+              className="pagination-btn load-more-btn"
+              onClick={loadMoreRuns}
+              disabled={loadingMore}
+            >
+              {loadingMore ? '⏳ Loading...' : '📥 Load More Runs'}
+            </button>
+          </div>
+        )}
         
         {/* Alignment Indicator */}
         {alignedRunId && (
