@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchRunIdsLight, fetchRunSummary, fetchRunDetails, deleteBacktestRun } from '../services/backtestService'
+import { fetchRunIdsLight, fetchRunSummary, fetchRunSummaryV2, fetchRunDetails, deleteBacktestRun } from '../services/backtestService'
 import type { RunColumn, RunNote } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
@@ -17,6 +17,12 @@ export function StrategyOveralls() {
   const [copiedRunId, setCopiedRunId] = useState<string | null>(null)
   const [alignedRunId, setAlignedRunId] = useState<string | null>(null)
   const [pinnedNotesMap, setPinnedNotesMap] = useState<Map<string, RunNote>>(new Map())
+  
+  // V2 Test Toggle (Development only) - Persist in localStorage
+  const [useV2, setUseV2] = useState(() => {
+    const saved = localStorage.getItem('strategyOveralls_useV2')
+    return saved === 'true'
+  })
   
   // Cursor-based pagination state
   const [hasMoreRuns, setHasMoreRuns] = useState(true)
@@ -52,7 +58,10 @@ export function StrategyOveralls() {
         // Step 2: Fetch summary for each run (one by one)
         const summaries: any[] = []
         for (const item of runIdList) {
-          const summary = await fetchRunSummary(item.run_id)
+          // Use V2 if toggle enabled
+          const summary = useV2 
+            ? await fetchRunSummaryV2(item.run_id)
+            : await fetchRunSummary(item.run_id)
           if (summary) {
             summaries.push(summary)
           }
@@ -152,7 +161,10 @@ export function StrategyOveralls() {
       // Fetch summaries
       const summaries: any[] = []
       for (const item of runIdList) {
-        const summary = await fetchRunSummary(item.run_id)
+        // Use V2 if toggle enabled
+        const summary = useV2 
+          ? await fetchRunSummaryV2(item.run_id)
+          : await fetchRunSummary(item.run_id)
         if (summary) summaries.push(summary)
       }
       
@@ -470,6 +482,22 @@ export function StrategyOveralls() {
     <div className="strategy-overalls">
       {/* Action Buttons - Top Right */}
       <div className="action-buttons">
+        {/* V2 Toggle (Development Only) */}
+        <label className="action-btn v2-toggle" title="Use V2 (Trade-Weighted Stats)">
+          <input
+            type="checkbox"
+            checked={useV2}
+            onChange={(e) => {
+              const newValue = e.target.checked
+              setUseV2(newValue)
+              localStorage.setItem('strategyOveralls_useV2', String(newValue))
+              window.location.reload() // Reload to apply V2
+            }}
+          />
+          <span style={{ marginLeft: '8px' }}>
+            {useV2 ? '✅ V2 (Trade-Weighted)' : '⚪ V1 (Simple AVG)'}
+          </span>
+        </label>
         <button
           className="action-btn view-btn"
           onClick={() => navigate('/strategy-overalls-horizontal')}
@@ -548,6 +576,13 @@ export function StrategyOveralls() {
         </div>
         
         <div className="stats-summary">
+          {/* V1/V2 Mode Indicator */}
+          <div className={`stat-item mode-indicator ${useV2 ? 'v2-mode' : 'v1-mode'}`}>
+            <span className="stat-label">Stats Mode:</span>
+            <span className="stat-value">
+              {useV2 ? '✅ V2 Trade-Weighted' : '⚪ V1 Simple Average'}
+            </span>
+          </div>
           <div className="stat-item">
             <span className="stat-label">Loaded Runs:</span>
             <span className="stat-value">{columns.length}</span>

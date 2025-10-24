@@ -73,6 +73,23 @@ export async function fetchRunSummary(runId: string) {
   return summary;
 }
 
+// V2: Trade-weighted statistics (more accurate)
+export async function fetchRunSummaryV2(runId: string) {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  console.log(`🔄 [V2] Fetching trade-weighted summary for run: ${runId.substring(0, 8)}...`);
+  
+  const { data, error } = await (supabase as any).rpc('get_backtest_run_summary_v2', {
+    p_run_id: runId
+  });
+  
+  if (error) throw error;
+  
+  const summary = data && data.length > 0 ? data[0] : null;
+  console.log(`✅ [V2] Got trade-weighted summary for run: ${runId.substring(0, 8)}`);
+  return summary;
+}
+
 // Fetch run summaries with cursor-based pagination (for UI control) - LIGHTWEIGHT
 export async function fetchRunSummaries(
   limit: number = 20, 

@@ -9,14 +9,19 @@
   position: relative;
 }
 
-/* Action Buttons - Top Right */
+/* Action Buttons - Top Right (Sticky) */
 .action-buttons {
   position: fixed;
   top: 20px;
   right: 20px;
   display: flex;
   gap: 12px;
-  z-index: 1000;
+  z-index: 2000; /* Higher z-index to stay on top */
+  background: rgba(10, 10, 10, 0.95); /* Dark backdrop */
+  padding: 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .action-btn {
@@ -74,6 +79,26 @@
 
 .action-btn:active {
   transform: translateY(0);
+}
+
+/* V2 Toggle */
+.v2-toggle {
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.v2-toggle:hover {
+  background: rgba(255, 215, 0, 0.25);
+  border-color: rgba(255, 215, 0, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+}
+
+.v2-toggle input[type="checkbox"] {
+  cursor: pointer;
 }
 
 /* Page Header */
@@ -246,6 +271,51 @@
   color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* Mode Indicator (V1 vs V2) */
+.mode-indicator {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid;
+  font-weight: 600;
+}
+
+.mode-indicator.v1-mode {
+  background: rgba(128, 128, 128, 0.15);
+  border-color: rgba(128, 128, 128, 0.4);
+}
+
+.mode-indicator.v1-mode .stat-label {
+  color: rgba(200, 200, 200, 0.8);
+}
+
+.mode-indicator.v1-mode .stat-value {
+  color: #b0b0b0;
+}
+
+.mode-indicator.v2-mode {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.5);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.mode-indicator.v2-mode .stat-label {
+  color: rgba(255, 215, 0, 0.9);
+}
+
+.mode-indicator.v2-mode .stat-value {
+  color: #ffd700;
+  font-weight: 700;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  }
 }
 
 /* Pagination Controls */

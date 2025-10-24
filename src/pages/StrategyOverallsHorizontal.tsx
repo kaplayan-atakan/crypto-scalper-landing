@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchRunIdsLight, fetchRunSummary, fetchRunDetails, deleteBacktestRun } from '../services/backtestService'
+import { fetchRunIdsLight, fetchRunSummary, fetchRunSummaryV2, fetchRunDetails, deleteBacktestRun } from '../services/backtestService'
 import type { RunColumn, SymbolMetrics, RunNote } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
@@ -17,6 +17,12 @@ export function StrategyOverallsHorizontal() {
   const [copiedRunId, setCopiedRunId] = useState<string | null>(null)
   const [alignedSymbol, setAlignedSymbol] = useState<string | null>(null)
   const [pinnedNotesMap, setPinnedNotesMap] = useState<Map<string, RunNote>>(new Map())
+  
+  // V2 Test Toggle - Sync with vertical page via localStorage
+  const [useV2, setUseV2] = useState(() => {
+    const saved = localStorage.getItem('strategyOveralls_useV2')
+    return saved === 'true'
+  })
   
   // Cursor-based pagination state
   const [hasMoreRuns, setHasMoreRuns] = useState(true)
@@ -52,7 +58,10 @@ export function StrategyOverallsHorizontal() {
         // Step 2: Fetch summary for each run (one by one)
         const summaries: any[] = []
         for (const item of runIdList) {
-          const summary = await fetchRunSummary(item.run_id)
+          // Use V2 if toggle enabled
+          const summary = useV2 
+            ? await fetchRunSummaryV2(item.run_id)
+            : await fetchRunSummary(item.run_id)
           if (summary) {
             summaries.push(summary)
           }
@@ -157,7 +166,10 @@ export function StrategyOverallsHorizontal() {
       // Fetch summaries
       const summaries: any[] = []
       for (const item of runIdList) {
-        const summary = await fetchRunSummary(item.run_id)
+        // Use V2 if toggle enabled
+        const summary = useV2 
+          ? await fetchRunSummaryV2(item.run_id)
+          : await fetchRunSummary(item.run_id)
         if (summary) {
           summaries.push(summary)
         }
@@ -589,6 +601,13 @@ export function StrategyOverallsHorizontal() {
         </div>
         
         <div className="stats-summary">
+          {/* V1/V2 Mode Indicator */}
+          <div className={`stat-item mode-indicator ${useV2 ? 'v2-mode' : 'v1-mode'}`}>
+            <span className="stat-label">Stats Mode:</span>
+            <span className="stat-value">
+              {useV2 ? '✅ V2 Trade-Weighted' : '⚪ V1 Simple Average'}
+            </span>
+          </div>
           <div className="stat-item">
             <span className="stat-label">Loaded Runs:</span>
             <span className="stat-value">{columns.length}</span>
