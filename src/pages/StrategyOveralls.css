@@ -9,14 +9,14 @@
   position: relative;
 }
 
-/* Action Buttons - Top Right (Sticky) */
+/* Action Buttons - Top Right (Absolute - scrolls with page) */
 .action-buttons {
-  position: fixed;
+  position: absolute;
   top: 20px;
   right: 20px;
   display: flex;
   gap: 12px;
-  z-index: 2000; /* Higher z-index to stay on top */
+  z-index: 1000;
   background: rgba(10, 10, 10, 0.95); /* Dark backdrop */
   padding: 8px;
   border-radius: 12px;
