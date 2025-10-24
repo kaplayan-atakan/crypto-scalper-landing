@@ -482,8 +482,8 @@ export function StrategyOveralls() {
     <div className="strategy-overalls">
       {/* Action Buttons - Top Right */}
       <div className="action-buttons">
-        {/* V2 Toggle (Development Only) */}
-        <label className="action-btn v2-toggle" title="Use V2 (Trade-Weighted Stats)">
+        {/* V2 Toggle (Development Only) - Shows opposite of current mode */}
+        <label className="action-btn v2-toggle" title={useV2 ? "Switch to V1 (Simple Average)" : "Switch to V2 (Trade-Weighted)"}>
           <input
             type="checkbox"
             checked={useV2}
@@ -495,7 +495,7 @@ export function StrategyOveralls() {
             }}
           />
           <span style={{ marginLeft: '8px' }}>
-            {useV2 ? '✅ V2 (Trade-Weighted)' : '⚪ V1 (Simple AVG)'}
+            {useV2 ? '⚪ Switch to V1' : '✅ Switch to V2'}
           </span>
         </label>
         <button
