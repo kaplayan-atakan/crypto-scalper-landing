@@ -767,39 +767,32 @@ export function StrategyOveralls() {
                       className={`symbol-cell ${pnlClass}`}
                       title={`${symbolData.symbol}
 ━━━━━━━━━━━━━━━━━━━━━━━━
-📊 Symbol PNL: ${formatPNL(symbolData.pnl)}
-━━━━━━━━━━━━━━━━━━━━━━━━
-📈 Symbol Trade Averages:
-  • Positive Trades Avg: ${formatPNL(symbolData.avg_pnl_positive)}
-  • Negative Trades Avg: ${formatPNL(symbolData.avg_pnl_negative)}
+� Net Getiri (Equity-1): ${formatPNL(symbolData.equity - 1)}
+📉 Max Drawdown: ${symbolData.max_dd.toFixed(2)}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 Winrate: ${formatWinrate(symbolData.winrate)}
 📊 Trades: ${symbolData.trades_count.toLocaleString()}
-⚡ Sharpe: ${symbolData.sharpe.toFixed(2)}
-📉 Max DD: ${symbolData.max_dd.toFixed(2)}`}
+⚡ Sharpe: ${symbolData.sharpe.toFixed(2)}`}
                     >
                       <div className="symbol-name">{symbolData.symbol}</div>
                       <div className="metrics">
                         <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
                         <br />
-                        <span className="pnl" style={{ fontWeight: 'bold', fontSize: '0.95em' }}>
-                          {formatPNL(symbolData.pnl)}
+                        <span className="equity-return" style={{ fontWeight: 'bold', fontSize: '0.95em' }}>
+                          {formatPNL(symbolData.equity - 1)}
                         </span>
                         <br />
-                        <div className="pnl-stats" style={{ 
-                          fontSize: '0.65em', 
+                        <div className="max-dd-display" style={{ 
+                          fontSize: '0.7em', 
                           marginTop: '4px',
                           padding: '4px',
                           background: 'rgba(0,0,0,0.2)',
                           borderRadius: '4px',
-                          lineHeight: '1.4'
+                          lineHeight: '1.4',
+                          color: '#ff6b6b',
+                          fontWeight: '500'
                         }}>
-                          <div style={{ color: '#00ff88', fontWeight: '500' }}>
-                            ✓ {formatPNL(symbolData.avg_pnl_positive)}
-                          </div>
-                          <div style={{ color: '#ff6b6b', fontWeight: '500' }}>
-                            ✗ {formatPNL(symbolData.avg_pnl_negative)}
-                          </div>
+                          � {symbolData.max_dd.toFixed(2)}
                         </div>
                       </div>
                     </td>

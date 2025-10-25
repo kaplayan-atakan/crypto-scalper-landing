@@ -43,11 +43,27 @@ export interface SymbolData {
   symbol: string;
   winrate: number;
   pnl: number;
+  equity: number;  // ✅ Equity değeri
   trades_count: number;
   sharpe: number;
   max_dd: number;
-  avg_pnl_positive: number;  // Symbol-level: positive trades avg
-  avg_pnl_negative: number;  // Symbol-level: negative trades avg
+  return_per_trade: number;  // ✅ İşlem Başı Getiri: (equity - 1) / trades
+}
+
+export interface OverallMetricsV2 {
+  run_id: string;
+  // Equity metrics
+  avg_equity: number;
+  avg_net_return: number;
+  backoff_rate: number;
+  // Trade metrics
+  n_symbols: number;
+  total_trades: number;
+  total_sum_ret: number;
+  pnl_per_trade: number;
+  max_count: number;
+  winrate_trade_weighted: number;
+  winrate_simple_avg: number;
 }
 
 export interface RunColumn {
@@ -130,6 +146,23 @@ export async function fetchRunSummaryV2(runId: string) {
   const summary = data && data.length > 0 ? data[0] : null;
   console.log(`✅ [V2] Got trade-weighted summary for run: ${runId.substring(0, 8)}`);
   return summary;
+}
+
+// V2: Overall metrics (equity + trade metrics combined)
+export async function fetchOverallMetricsV2(runId: string): Promise<OverallMetricsV2 | null> {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  console.log(`🔄 [V2 Overall] Fetching overall metrics for run: ${runId.substring(0, 8)}...`);
+  
+  const { data, error } = await (supabase as any).rpc('get_backtest_overall_metrics_v2', {
+    p_run_id: runId
+  });
+  
+  if (error) throw error;
+  
+  const metrics = data && data.length > 0 ? data[0] : null;
+  console.log(`✅ [V2 Overall] Got overall metrics for run: ${runId.substring(0, 8)}`);
+  return metrics;
 }
 
 // Fetch run summaries with cursor-based pagination (for UI control) - LIGHTWEIGHT

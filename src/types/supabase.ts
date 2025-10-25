@@ -82,11 +82,11 @@ export interface SymbolMetrics {
   symbol: string
   winrate: number
   pnl: number
+  equity: number  // ✅ Equity değeri
   trades_count: number
   sharpe: number
   max_dd: number
-  avg_pnl_positive: number  // Symbol's positive trades average
-  avg_pnl_negative: number  // Symbol's negative trades average
+  return_per_trade: number  // ✅ İşlem Başı Getiri: (equity - 1) / trades
 }
 
 export interface RunOverview {

@@ -759,25 +759,18 @@ export function StrategyOverallsHorizontal() {
                           className={`symbol-data-cell ${pnlClass}`}
                           title={`${symbol}
 ━━━━━━━━━━━━━━━━━━━━━━━━
-📊 Symbol PNL: ${formatPNL(symbolData.pnl)}
-━━━━━━━━━━━━━━━━━━━━━━━━
-📈 Symbol Trade Averages:
-  • Positive Trades Avg: ${formatPNL(symbolData.avg_pnl_positive)}
-  • Negative Trades Avg: ${formatPNL(symbolData.avg_pnl_negative)}
+� Net Getiri (Equity-1): ${formatPNL(symbolData.equity - 1)}
+📉 Max Drawdown: ${symbolData.max_dd != null ? symbolData.max_dd.toFixed(2) : 'N/A'}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 Winrate: ${formatWinrate(symbolData.winrate)}
 📊 Trades: ${symbolData.trades_count.toLocaleString()}
-⚡ Sharpe: ${symbolData.sharpe != null ? symbolData.sharpe.toFixed(2) : 'N/A'}
-📉 Max DD: ${symbolData.max_dd != null ? symbolData.max_dd.toFixed(2) : 'N/A'}`}
+⚡ Sharpe: ${symbolData.sharpe != null ? symbolData.sharpe.toFixed(2) : 'N/A'}`}
                         >
                           <div className="metrics-compact">
                             <div className="symbol-name-in-card">{symbol}</div>
                             <span className="winrate">🎯 {formatWinrate(symbolData.winrate)}</span>
-                            <span className="pnl">{formatPNL(symbolData.pnl)}</span>
-                            <div className="pnl-stats-mini">
-                              <div className="positive">✓ {formatPNL(symbolData.avg_pnl_positive)}</div>
-                              <div className="negative">✗ {formatPNL(symbolData.avg_pnl_negative)}</div>
-                            </div>
+                            <span className="equity-return">{formatPNL(symbolData.equity - 1)}</span>
+                            <span className="max-dd">� {symbolData.max_dd != null ? symbolData.max_dd.toFixed(2) : 'N/A'}</span>
                           </div>
                         </td>
                       )
