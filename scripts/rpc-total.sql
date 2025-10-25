@@ -166,6 +166,89 @@ END;
 $$;
 
 -- ============================================================================
+-- V1 RPC: get_backtest_run_summary_v2 (Trade-Weighted Stats)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION get_backtest_run_summary_v2(p_run_id uuid)
+RETURNS TABLE (
+  run_id uuid,
+  created_at timestamptz,
+  total_symbols int,
+  total_trades bigint,
+  overall_winrate numeric,
+  positive_pnl_count int,
+  negative_pnl_count int,
+  neutral_pnl_count int,
+  -- All trades statistics (trade-weighted)
+  avg_pnl_all numeric,
+  min_pnl_all numeric,
+  max_pnl_all numeric,
+  -- Positive trades statistics
+  avg_pnl_positive numeric,
+  min_pnl_positive numeric,
+  max_pnl_positive numeric,
+  -- Negative trades statistics
+  avg_pnl_negative numeric,
+  min_pnl_negative numeric,
+  max_pnl_negative numeric
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  WITH symbol_aggregates AS (
+    -- Her symbol için tek bir değer (avg of all parameter sets)
+    SELECT 
+      br.run_id,
+      br.symbol,
+      MAX(br.created_at) as latest_created_at,
+      AVG(br.sum_ret) as symbol_avg_pnl,
+      SUM(br.sum_ret) as symbol_total_pnl,
+      AVG(br.winrate) as symbol_avg_winrate,
+      SUM(br.trades) as symbol_total_trades
+    FROM backtest_resultsv1 br
+    WHERE br.run_id = p_run_id
+    GROUP BY br.run_id, br.symbol
+  )
+  SELECT 
+    sa.run_id,
+    MAX(sa.latest_created_at)::timestamptz as created_at,
+    COUNT(DISTINCT sa.symbol)::int as total_symbols,
+    SUM(sa.symbol_total_trades)::bigint as total_trades,
+    ROUND(
+      (SUM(COALESCE(sa.symbol_avg_winrate, 0) * sa.symbol_total_trades) / NULLIF(SUM(sa.symbol_total_trades), 0))::numeric, 
+      4
+    ) as overall_winrate,
+    COUNT(DISTINCT CASE WHEN sa.symbol_avg_pnl > 0 THEN sa.symbol END)::int as positive_pnl_count,
+    COUNT(DISTINCT CASE WHEN sa.symbol_avg_pnl < 0 THEN sa.symbol END)::int as negative_pnl_count,
+    COUNT(DISTINCT CASE WHEN sa.symbol_avg_pnl = 0 THEN sa.symbol END)::int as neutral_pnl_count,
+    -- avg_pnl_all = SUM(sum_ret) / SUM(trades)
+    ROUND(
+      (SUM(sa.symbol_total_pnl) / NULLIF(SUM(sa.symbol_total_trades), 0))::numeric,
+      4
+    ) as avg_pnl_all,
+    ROUND(MIN(sa.symbol_avg_pnl)::numeric, 4) as min_pnl_all,
+    ROUND(MAX(sa.symbol_avg_pnl)::numeric, 4) as max_pnl_all,
+    ROUND(
+      (SUM(CASE WHEN sa.symbol_avg_pnl > 0 THEN sa.symbol_avg_pnl * sa.symbol_total_trades END) / 
+       NULLIF(SUM(CASE WHEN sa.symbol_avg_pnl > 0 THEN sa.symbol_total_trades END), 0))::numeric,
+      4
+    ) as avg_pnl_positive,
+    ROUND(MIN(CASE WHEN sa.symbol_avg_pnl > 0 THEN sa.symbol_avg_pnl END)::numeric, 4) as min_pnl_positive,
+    ROUND(MAX(CASE WHEN sa.symbol_avg_pnl > 0 THEN sa.symbol_avg_pnl END)::numeric, 4) as max_pnl_positive,
+    ROUND(
+      (SUM(CASE WHEN sa.symbol_avg_pnl < 0 THEN sa.symbol_avg_pnl * sa.symbol_total_trades END) / 
+       NULLIF(SUM(CASE WHEN sa.symbol_avg_pnl < 0 THEN sa.symbol_total_trades END), 0))::numeric,
+      4
+    ) as avg_pnl_negative,
+    ROUND(MIN(CASE WHEN sa.symbol_avg_pnl < 0 THEN sa.symbol_avg_pnl END)::numeric, 4) as min_pnl_negative,
+    ROUND(MAX(CASE WHEN sa.symbol_avg_pnl < 0 THEN sa.symbol_avg_pnl END)::numeric, 4) as max_pnl_negative
+  FROM symbol_aggregates sa
+  GROUP BY sa.run_id;
+END;
+$$;
+
+-- ============================================================================
 -- KULLANIM ÖRNEKLERİ
 -- ============================================================================
 
