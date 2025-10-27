@@ -8,7 +8,7 @@
 CREATE OR REPLACE FUNCTION get_backtest_run_summary_v1_enhanced(p_run_id uuid)
 RETURNS TABLE (
   run_id uuid,
-  last_created_at timestamptz,
+  last_created_at timestamptz,  
   total_trades bigint,
   avg_equity numeric,
   avg_net_return numeric,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchRunIdsLight, fetchRunSummary, fetchRunSummaryV2, fetchRunDetails, deleteBacktestRun } from '../services/backtestService'
-import type { RunColumn, RunNote } from '../types/supabase'
+import { fetchRunIdsLight, fetchRunSummary, fetchRunSummaryV2, fetchRunDetails, fetchOverallMetricsV1Enhanced, deleteBacktestRun } from '../services/backtestService'
+import type { RunColumn, RunNote, OverallMetricsV1Enhanced } from '../types/supabase'
 import { NoteButton } from '../components/NoteButton'
 import { PinnedNoteDisplay } from '../components/PinnedNoteDisplay'
 import { supabase } from '../lib/supabase'
@@ -87,9 +87,23 @@ export function StrategyOveralls() {
           console.error('Error fetching top 40 stats:', error)
         }
         
+        // Step 5: Fetch V1 Enhanced overall metrics for each run
+        const v1EnhancedMap = new Map()
+        for (const runId of runIds) {
+          try {
+            const v1Enhanced = await fetchOverallMetricsV1Enhanced(runId)
+            if (v1Enhanced) {
+              v1EnhancedMap.set(runId, v1Enhanced)
+            }
+          } catch (error) {
+            console.error(`Error fetching V1 enhanced metrics for ${runId}:`, error)
+          }
+        }
+        
         // Build columns
         const data: RunColumn[] = summaries.map((s: any) => {
           const top40 = top40Map.get(s.run_id)
+          const v1Enhanced = v1EnhancedMap.get(s.run_id)
           return {
             run_id: s.run_id,
             created_at: s.created_at,
@@ -118,7 +132,8 @@ export function StrategyOveralls() {
             top40_positive_count: top40?.top40_positive_count,
             top40_negative_count: top40?.top40_negative_count,
             top40_neutral_count: top40?.top40_neutral_count,
-            symbols: detailsMap.get(s.run_id) || []
+            symbols: detailsMap.get(s.run_id) || [],
+            v1_enhanced: v1Enhanced
           }
         })
         
@@ -188,9 +203,23 @@ export function StrategyOveralls() {
         console.error('Error fetching top 40 stats:', error)
       }
       
+      // Fetch V1 Enhanced overall metrics
+      const v1EnhancedMap = new Map()
+      for (const runId of runIds) {
+        try {
+          const v1Enhanced = await fetchOverallMetricsV1Enhanced(runId)
+          if (v1Enhanced) {
+            v1EnhancedMap.set(runId, v1Enhanced)
+          }
+        } catch (error) {
+          console.error(`Error fetching V1 enhanced metrics for ${runId}:`, error)
+        }
+      }
+      
       // Build new columns
       const newData: RunColumn[] = summaries.map((s: any) => {
         const top40 = top40Map.get(s.run_id)
+        const v1Enhanced = v1EnhancedMap.get(s.run_id)
         return {
           run_id: s.run_id,
           created_at: s.created_at,
@@ -219,7 +248,8 @@ export function StrategyOveralls() {
           top40_positive_count: top40?.top40_positive_count,
           top40_negative_count: top40?.top40_negative_count,
           top40_neutral_count: top40?.top40_neutral_count,
-          symbols: detailsMap.get(s.run_id) || []
+          symbols: detailsMap.get(s.run_id) || [],
+          v1_enhanced: v1Enhanced
         }
       })
       
@@ -711,6 +741,56 @@ export function StrategyOveralls() {
                   {/* Overall Statistics Box */}
                   <div className="run-overall-stats">
                     <div className="stats-title">📊 Overall ({col.total_symbols} symbols)</div>
+                    
+                    {/* V1 Enhanced Metrics */}
+                    {col.v1_enhanced && (
+                      <div className="v1-enhanced-metrics">
+                        <div className="stat-group enhanced">
+                          <div className="stat-label">💰 Equity & Returns</div>
+                          <div className="stat-line">
+                            <span>Avg Equity: {col.v1_enhanced.avg_equity.toFixed(4)}</span>
+                          </div>
+                          <div className="stat-line">
+                            <span>Net Return: {(col.v1_enhanced.avg_net_return * 100).toFixed(2)}%</span>
+                          </div>
+                          <div className="stat-line">
+                            <span>Backoff Rate: {col.v1_enhanced.backoff_rate.toFixed(2)}%</span>
+                          </div>
+                          <div className="stat-line">
+                            <span>Winrate: {col.v1_enhanced.avg_winrate_pct.toFixed(2)}%</span>
+                          </div>
+                        </div>
+                        
+                        <div className="stat-group enhanced">
+                          <div className="stat-label">🪙 Coin Distribution</div>
+                          <div className="stat-line">
+                            <span className="positive">✓ Positive: {col.v1_enhanced.coins_pos} ({col.v1_enhanced.pos_pct.toFixed(1)}%)</span>
+                          </div>
+                          <div className="stat-line">
+                            <span className="negative">✗ Negative: {col.v1_enhanced.coins_neg} ({col.v1_enhanced.neg_pct.toFixed(1)}%)</span>
+                          </div>
+                          <div className="stat-line">
+                            <span className="neutral">● Flat: {col.v1_enhanced.coins_flat}</span>
+                          </div>
+                          <div className="stat-line">
+                            <span>Total: {col.v1_enhanced.coins_total}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="stat-group enhanced">
+                          <div className="stat-label">📈 Position Limits</div>
+                          <div className="stat-line">
+                            <span>Max Count: {col.v1_enhanced.max_count}</span>
+                          </div>
+                          <div className="stat-line">
+                            <span>Min Count: {col.v1_enhanced.min_count}</span>
+                          </div>
+                          <div className="stat-line">
+                            <span>Total Trades: {col.v1_enhanced.total_trades.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="stat-group all">
                       <div className="stat-label">All Coins</div>

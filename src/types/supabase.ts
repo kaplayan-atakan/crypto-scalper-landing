@@ -121,8 +121,27 @@ export interface RunOverview {
   top40_neutral_count?: number
 }
 
+export interface OverallMetricsV1Enhanced {
+  run_id: string
+  last_created_at: string
+  total_trades: number
+  avg_equity: number
+  avg_net_return: number
+  backoff_rate: number
+  avg_winrate_pct: number
+  coins_total: number
+  coins_pos: number
+  coins_neg: number
+  coins_flat: number
+  max_count: number
+  min_count: number
+  pos_pct: number
+  neg_pct: number
+}
+
 export interface RunColumn extends RunOverview {
   symbols: SymbolMetrics[] // Sorted by PNL descending
+  v1_enhanced?: OverallMetricsV1Enhanced | null  // V1 Enhanced overall metrics
 }
 
 // Supabase Database Types
