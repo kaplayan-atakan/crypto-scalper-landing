@@ -66,6 +66,24 @@ export interface OverallMetricsV2 {
   winrate_simple_avg: number;
 }
 
+export interface OverallMetricsV1Enhanced {
+  run_id: string;
+  last_created_at: string;
+  total_trades: number;
+  avg_equity: number;
+  avg_net_return: number;
+  backoff_rate: number;
+  avg_winrate_pct: number;
+  coins_total: number;
+  coins_pos: number;
+  coins_neg: number;
+  coins_flat: number;
+  max_count: number;
+  min_count: number;
+  pos_pct: number;
+  neg_pct: number;
+}
+
 export interface RunColumn {
   run_id: string;
   created_at: string;
@@ -162,6 +180,23 @@ export async function fetchOverallMetricsV2(runId: string): Promise<OverallMetri
   
   const metrics = data && data.length > 0 ? data[0] : null;
   console.log(`✅ [V2 Overall] Got overall metrics for run: ${runId.substring(0, 8)}`);
+  return metrics;
+}
+
+// V1 Enhanced: Comprehensive overall metrics for V1 card
+export async function fetchOverallMetricsV1Enhanced(runId: string): Promise<OverallMetricsV1Enhanced | null> {
+  if (!supabase) throw new Error('Supabase not initialized');
+  
+  console.log(`🔄 [V1 Enhanced] Fetching enhanced overall metrics for run: ${runId.substring(0, 8)}...`);
+  
+  const { data, error } = await (supabase as any).rpc('get_backtest_run_summary_v1_enhanced', {
+    p_run_id: runId
+  });
+  
+  if (error) throw error;
+  
+  const metrics = data && data.length > 0 ? data[0] : null;
+  console.log(`✅ [V1 Enhanced] Got enhanced overall metrics for run: ${runId.substring(0, 8)}`);
   return metrics;
 }
 
